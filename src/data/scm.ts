@@ -216,3 +216,60 @@ export const brandLogo =
 
 export const userAvatar =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBMhfWnVew7lLmHcID3MKUn1H8hGbTrRcJQiekw0X3ShLjGMja38esWzhJT9eEZlbfvafVw3o_qJhO75AhiyLY5x5iBXnWi8LKqX9Pwu3Ifk_7pcxkrqoUinMg7lZfTemydDtU7SRX-Bfv6sY3N4DrBpB-mSE1Z7a--r-IRzrbJGwcCk_a2t1Dkov_FIbmx9WJE_AGKS7BDt3U1pWACWFpFVMEtR1Z-rqWnHwRnLyQem-e0yl8C9mgReSnvBl-XONXYw7H4--Krc2s";
+
+/* ===== 권역별 · 제품별 시스템 연동 데이터 (ERP / MES / WMS) ===== */
+
+export type SystemKey = "ERP" | "MES" | "WMS";
+
+export type SystemRecord = {
+  system: SystemKey;
+  docNo: string;
+  status: "동기화 완료" | "처리중" | "지연";
+  qty: string;
+  updatedAt: string;
+  note: string;
+};
+
+const statuses: SystemRecord["status"][] = ["동기화 완료", "처리중", "지연"];
+
+function hash(str: string) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+const systemMeta: Record<SystemKey, { prefix: string; notes: string[] }> = {
+  ERP: {
+    prefix: "PO",
+    notes: ["구매 발주 승인 완료", "판매 오더 마감 대기", "월 마감 전표 반영"],
+  },
+  MES: {
+    prefix: "WO",
+    notes: ["생산 지시 진행중", "품질 검사 합격", "설비 예방 정비 예정"],
+  },
+  WMS: {
+    prefix: "SH",
+    notes: ["출고 피킹 완료", "입고 검수 진행", "재고 실사 반영 필요"],
+  },
+};
+
+export function getIntegrationRecords(regionId: string, productKey: string): SystemRecord[] {
+  return (Object.keys(systemMeta) as SystemKey[]).map((system, idx) => {
+    const seed = hash(`${regionId}-${productKey}-${system}`);
+    const meta = systemMeta[system];
+    return {
+      system,
+      docNo: `${meta.prefix}-2025-${(1000 + (seed % 8999)).toString()}`,
+      status: statuses[(seed >> 3) % statuses.length],
+      qty: (2000 + ((seed >> 5) % 48000)).toLocaleString(),
+      updatedAt: `2025-07-1${(seed % 5) + 1} ${String(8 + ((seed >> 7) % 10)).padStart(2, "0")}:${String((seed >> 2) % 60).padStart(2, "0")}`,
+      note: meta.notes[(seed >> 9) % meta.notes.length],
+    };
+  }).map((r, i) => ({ ...r, system: (["ERP", "MES", "WMS"] as SystemKey[])[i] }));
+}
+
+export const systemColumns: Record<SystemKey, { title: string; desc: string; icon: string }> = {
+  ERP: { title: "ERP", desc: "전사 자원 관리 (발주 · 판매 · 회계)", icon: "account_balance" },
+  MES: { title: "MES", desc: "제조 실행 시스템 (생산 · 품질)", icon: "precision_manufacturing" },
+  WMS: { title: "WMS", desc: "창고 관리 시스템 (입출고 · 재고)", icon: "warehouse" },
+};
