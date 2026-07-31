@@ -80,6 +80,7 @@ export const products: Product[] = [
 export type Region = {
   id: string;
   name: string;
+  shortName?: string;
   title: string;
   stock: string;
   riskText: string;
@@ -106,6 +107,7 @@ export const regions: Record<string, Region> = {
   Seoul: {
     id: "Seoul",
     name: "서울",
+    shortName: "서울",
     title: "서울 권역 SCM 모니터링",
     stock: "186,000",
     riskText: "위험 (Danger)",
@@ -117,6 +119,7 @@ export const regions: Record<string, Region> = {
   Gyeonggi: {
     id: "Gyeonggi",
     name: "수도권",
+    shortName: "수도권",
     title: "수도권 권역 SCM 모니터링",
     stock: "496,000",
     riskText: "주의 (Warning)",
@@ -128,6 +131,7 @@ export const regions: Record<string, Region> = {
   Gangwon: {
     id: "Gangwon",
     name: "강원",
+    shortName: "강원",
     title: "강원 권역 SCM 모니터링",
     stock: "124,000",
     riskText: "안전 (Safe)",
@@ -139,6 +143,7 @@ export const regions: Record<string, Region> = {
   Chungcheong: {
     id: "Chungcheong",
     name: "충청",
+    shortName: "충청",
     title: "충청 권역 SCM 모니터링",
     stock: "168,000",
     riskText: "주의 (Warning)",
@@ -150,6 +155,7 @@ export const regions: Record<string, Region> = {
   Daegu: {
     id: "Daegu",
     name: "대구/경북",
+    shortName: "대구/경북",
     title: "대구/경북 권역 SCM 모니터링",
     stock: "178,000",
     riskText: "안전 (Safe)",
@@ -161,6 +167,7 @@ export const regions: Record<string, Region> = {
   Honam: {
     id: "Honam",
     name: "호남",
+    shortName: "호남",
     title: "호남 권역 SCM 모니터링",
     stock: "156,000",
     riskText: "안전 (Safe)",
@@ -172,6 +179,7 @@ export const regions: Record<string, Region> = {
   Busan: {
     id: "Busan",
     name: "부산/울산/경남권",
+    shortName: "부산/경남",
     title: "부산/울산/경남 권역 SCM 모니터링",
     stock: "209,000",
     riskText: "위험 (Danger)",
@@ -183,6 +191,7 @@ export const regions: Record<string, Region> = {
   Jeju: {
     id: "Jeju",
     name: "제주",
+    shortName: "제주",
     title: "제주 권역 SCM 모니터링",
     stock: "18,000",
     riskText: "안전 (Safe)",
