@@ -133,7 +133,7 @@ function Dashboard() {
 
         <div className="mb-xs px-md">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
-            Main Menu
+            메인 메뉴
           </p>
         </div>
         <nav className="space-y-1">
@@ -145,9 +145,9 @@ function Dashboard() {
             <span className="text-label-caps">모니터링</span>
           </a>
           {[
-            { icon: "location_on", label: "Regional Inventory" },
-            { icon: "warning", label: "Risk Analysis" },
-            { icon: "analytics", label: "Operations" },
+            { icon: "location_on", label: "권역별 재고" },
+            { icon: "warning", label: "위험 분석\n" },
+            { icon: "analytics", label: "운영 현황" },
           ].map((item) => (
             <a
               key={item.label}
@@ -162,7 +162,7 @@ function Dashboard() {
 
         <div className="mb-xs mt-lg px-md">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
-            Products
+            제품
           </p>
         </div>
         <nav className="space-y-1">
@@ -190,8 +190,8 @@ function Dashboard() {
             LG CNS x Chong Kun Dang
           </div>
           {[
-            { icon: "settings", label: "Settings" },
-            { icon: "help", label: "Support" },
+            { icon: "settings", label: "설정\n" },
+            { icon: "help", label: "지원" },
           ].map((item) => (
             <a
               key={item.label}
@@ -217,10 +217,10 @@ function Dashboard() {
             </h2>
             <nav className="hidden items-center gap-lg lg:flex">
               <a className="text-on-surface-variant transition-colors hover:text-scm-primary" href="#">
-                시뮬레이션
+                데이터{"\u00a0"}
               </a>
               <a className="text-on-surface-variant transition-colors hover:text-scm-primary" href="#">
-                ERP Sync
+                데이터 통합
               </a>
               <div className="relative ml-4">
                 <button
