@@ -19,8 +19,8 @@ export type Product = {
 
 export const products: Product[] = [
   {
-    key: "리피로우 (Lipilow)",
-    name: "리피로우 (Lipilow)",
+    key: "리피로우",
+    name: "리피로우",
     icon: "medication",
     subtitle: "이상지질혈증 치료제",
     forecastTitle: "2025 리피로우 Regional Forecast",
@@ -38,8 +38,8 @@ export const products: Product[] = [
     dots: [160, 130, 90, 80],
   },
   {
-    key: "타미비어 (Tamiveer)",
-    name: "타미비어 (Tamiveer)",
+    key: "타미비어",
+    name: "타미비어",
     icon: "vaccines",
     subtitle: "항바이러스제",
     forecastTitle: "2025 타미비어 Regional Forecast",
@@ -57,8 +57,8 @@ export const products: Product[] = [
     dots: [140, 155, 120, 110],
   },
   {
-    key: "세파졸린 (Cefazolin)",
-    name: "세파졸린 (Cefazolin)",
+    key: "세파졸린",
+    name: "세파졸린",
     icon: "science",
     subtitle: "항생제",
     forecastTitle: "2025 세파졸린 Regional Forecast",
