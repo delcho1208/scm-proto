@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Digital Twin SCM Portal — Integrated Monitoring" },
       {
         property: "og:description",
-        content: "권역별 재고·수요 예측·리스크를 통합 모니터링하는 디지털 트윈 SCM 포털.",
+        content: "실시간 공급망 가시성 대시보드: 권역별 재고, 수요 예측, 리스크 지수와 AI 추천 실행안을 한 화면에서 모니터링합니다.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
