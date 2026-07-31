@@ -231,21 +231,24 @@ export function DashboardView({ product }: { product: Product }) {
               src={region.img}
               className="max-h-[90%] max-w-[90%] object-contain transition-opacity duration-300"
             />
-            {markerOrder.map((id) => {
-              const r = regions[id];
-              if (!r.box) return null;
-              return (
-                <button
-                  key={id}
-                  title={r.name}
-                  onClick={() => selectRegion(id)}
-                  className={`region-marker ${regionId === id ? "active" : ""}`}
-                  style={{ ...r.box, zIndex: r.z ?? 20 }}
-                >
-                  <span className="region-marker-label">{r.name}</span>
-                </button>
-              );
-            })}
+            <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[2/5] h-[90%] -translate-x-1/2 -translate-y-1/2">
+              {markerOrder.map((id) => {
+                const r = regions[id];
+                if (!r.box) return null;
+                return (
+                  <button
+                    key={id}
+                    title={r.name}
+                    onClick={() => selectRegion(id)}
+                    className={`region-marker pointer-events-auto ${regionId === id ? "active" : ""}`}
+                    style={{ ...r.box, zIndex: r.z ?? 20 }}
+                  >
+                    <span className="region-marker-label">{r.shortName ?? r.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
 
             <div
               ref={panelRef}
