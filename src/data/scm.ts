@@ -186,7 +186,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "danger",
     desc: "해상 수입 자재 수급 상황 상시 모니터링",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuActC-YMLFDOXtxEVNvPpjSTIHD71_93NwHJoRB1I4hADNavtze1KFZOeSa3Zcscq2AhFa9vRmvxHiNiJcWc2ZxHctvudyJewXPOGpPB-EycW2ZCJxj0M4ICyqyyitDA_9mor9LVtghZ81AoZP4RIdn0fEPE3iX5ZGaaOAJrDsSAqzvN5tlqhIbswO3BkzKg4mp_vuyY3Y_0opQ-0WQnc2_Hrb21boFb4x0Vpu8P3jKvKHJ-7gA4Czae4_DRbALbAmaucgr2GubijU",
-    box: { top: "47%", left: "52%", width: "44%", height: "15%" }, z: 20,
+    box: { top: "50%", left: "52%", width: "44%", height: "15%" }, z: 20,
   },
   Jeju: {
     id: "Jeju",

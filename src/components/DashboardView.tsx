@@ -240,7 +240,7 @@ export function DashboardView({ product }: { product: Product }) {
                     key={id}
                     title={r.name}
                     onClick={() => selectRegion(id)}
-                    className={`region-marker pointer-events-auto ${regionId === id ? "active" : ""}`}
+                    className={`region-marker marker-${id} pointer-events-auto ${regionId === id ? "active" : ""}`}
                     style={{ ...r.box, zIndex: r.z ?? 20 }}
                   >
                     <span className="region-marker-label">{r.shortName ?? r.name}</span>
