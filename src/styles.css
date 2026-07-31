@@ -345,3 +345,33 @@
   border: 1px dashed var(--scm-primary);
   border-radius: 8px;
 }
+
+.region-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.region-marker-label {
+  font-size: 10px;
+  white-space: nowrap;
+  font-weight: 700;
+  color: var(--scm-on-surface-variant);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  padding: 1px 6px;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.region-marker.active .region-marker-label {
+  color: var(--scm-primary);
+  background: rgba(255, 255, 255, 0.95);
+  opacity: 1;
+}
+
+.region-marker.marker-Gyeonggi {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.region-marker.marker-Gyeonggi .region-marker-label {
+  transform: translate(-30%, -60%);
+}

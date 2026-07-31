@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DataIntegrationRouteImport } from './routes/data-integration'
+import { Route as SimulationRouteImport } from './routes/simulation'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DataIntegrationRoute = DataIntegrationRouteImport.update({
+  id: '/data-integration',
+  path: '/data-integration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulationRoute = SimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/data-integration': typeof DataIntegrationRoute
+  '/simulation': typeof SimulationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/data-integration': typeof DataIntegrationRoute
+  '/simulation': typeof SimulationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/data-integration': typeof DataIntegrationRoute
+  '/simulation': typeof SimulationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/data-integration' | '/simulation'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/data-integration' | '/simulation'
+  id: '__root__' | '/' | '/data-integration' | '/simulation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DataIntegrationRoute: typeof DataIntegrationRoute
+  SimulationRoute: typeof SimulationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/data-integration': {
+      id: '/data-integration'
+      path: '/data-integration'
+      fullPath: '/data-integration'
+      preLoaderRoute: typeof DataIntegrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulation': {
+      id: '/simulation'
+      path: '/simulation'
+      fullPath: '/simulation'
+      preLoaderRoute: typeof SimulationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DataIntegrationRoute: DataIntegrationRoute,
+  SimulationRoute: SimulationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
