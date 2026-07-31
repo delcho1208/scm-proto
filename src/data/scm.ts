@@ -88,6 +88,8 @@ export type Region = {
   img: string;
   /** marker box on the map, in percent */
   box?: { top: string; left: string; width: string; height: string };
+  /** stacking order for overlapping markers */
+  z?: number;
 };
 
 export const regions: Record<string, Region> = {
