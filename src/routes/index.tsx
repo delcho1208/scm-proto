@@ -217,7 +217,7 @@ function Dashboard() {
             </h2>
             <nav className="hidden items-center gap-lg lg:flex">
               <a className="text-on-surface-variant transition-colors hover:text-scm-primary" href="#">
-                데이터{"\u00a0"}
+                시뮬레이션
               </a>
               <a className="text-on-surface-variant transition-colors hover:text-scm-primary" href="#">
                 데이터 통합
