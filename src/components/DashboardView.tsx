@@ -80,36 +80,6 @@ export function DashboardView({ product }: { product: Product }) {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {[
-            { n: "01", label: "데이터 수집", active: false },
-            { n: "02", label: "수요 예측 &\n리스크 분석", active: false },
-            { n: "04", label: "디지털 트윈", active: true },
-            { n: "06", label: "실행 및\nERP 연동", active: false },
-          ].map((step, i) => (
-            <div key={step.n} className="flex items-center gap-2">
-              {i > 0 && <div className="mb-4 h-[1px] w-6 bg-outline-variant" />}
-              <div className={`flex flex-col items-center gap-1 ${step.active ? "" : "opacity-40"}`}>
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full font-data text-data-sm ${
-                    step.active
-                      ? "bg-scm-primary text-white"
-                      : "border border-outline bg-surface-container-highest"
-                  }`}
-                >
-                  {step.n}
-                </span>
-                <span
-                  className={`whitespace-pre-line text-center text-[10px] font-bold ${
-                    step.active ? "text-scm-primary" : ""
-                  }`}
-                >
-                  {step.label}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Bento grid */}
