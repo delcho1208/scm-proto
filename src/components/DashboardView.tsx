@@ -201,7 +201,7 @@ export function DashboardView({ product }: { product: Product }) {
               src={region.img}
               className="max-h-[90%] max-w-[90%] object-contain transition-opacity duration-300"
             />
-            <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[2/5] h-[90%] -translate-x-1/2 -translate-y-1/2">
+            <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[1456/1941] h-[90%] -translate-x-1/2 -translate-y-1/2">
               {markerOrder.map((id) => {
                 const r = regions[id];
                 if (!r.box) return null;
