@@ -61,9 +61,9 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
         </div>
         <nav className="space-y-1">
           <Link
-            to="/"
+            to="/simulation"
             className={`mx-2 flex items-center gap-md rounded-lg px-md py-sm transition-transform active:scale-[0.98] ${
-              pathname === "/"
+              pathname === "/simulation" || pathname === "/"
                 ? "bg-primary-container font-bold text-on-primary-container"
                 : "text-on-surface-variant hover:bg-surface-variant"
             }`}
@@ -71,19 +71,24 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
             <Icon name="dashboard" filled />
             <span className="text-label-caps">모니터링</span>
           </Link>
-          {[
-            { icon: "location_on", label: "권역별 재고" },
-            { icon: "analytics", label: "운영 현황" },
-          ].map((item) => (
-            <a
-              key={item.label}
-              className="mx-2 flex items-center gap-md rounded-lg px-md py-sm text-on-surface-variant transition-colors hover:bg-surface-variant"
-              href="#"
-            >
-              <Icon name={item.icon} />
-              <span className="text-label-caps">{item.label}</span>
-            </a>
-          ))}
+          <Link
+            to="/data-integration"
+            className={`mx-2 flex items-center gap-md rounded-lg px-md py-sm transition-transform active:scale-[0.98] ${
+              pathname === "/data-integration"
+                ? "bg-primary-container font-bold text-on-primary-container"
+                : "text-on-surface-variant hover:bg-surface-variant"
+            }`}
+          >
+            <Icon name="location_on" />
+            <span className="text-label-caps">권역별 재고</span>
+          </Link>
+          <a
+            className="mx-2 flex items-center gap-md rounded-lg px-md py-sm text-on-surface-variant transition-colors hover:bg-surface-variant"
+            href="#"
+          >
+            <Icon name="analytics" />
+            <span className="text-label-caps">운영 현황</span>
+          </a>
         </nav>
 
         <div className="mt-auto space-y-1 border-t border-outline-variant px-md pt-md">
