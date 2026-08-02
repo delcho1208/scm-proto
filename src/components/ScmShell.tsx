@@ -86,31 +86,6 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
           ))}
         </nav>
 
-        <div className="mb-xs mt-lg px-md">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
-            제품
-          </p>
-        </div>
-        <nav className="space-y-1">
-          {products.map((p) => {
-            const active = p.key === productKey;
-            return (
-              <button
-                key={p.key}
-                onClick={() => setProductKey(p.key)}
-                className={`mx-2 flex w-[calc(100%-1rem)] items-center gap-md rounded-lg px-md py-sm text-left transition-colors ${
-                  active
-                    ? "bg-primary-container/10 font-bold text-scm-primary"
-                    : "text-on-surface-variant hover:bg-surface-variant"
-                }`}
-              >
-                <Icon name={p.icon} />
-                <span className="text-label-caps">{p.name}</span>
-              </button>
-            );
-          })}
-        </nav>
-
         <div className="mt-auto space-y-1 border-t border-outline-variant px-md pt-md">
           <div className="px-md py-sm text-[10px] font-bold text-on-surface-variant">
             LG CNS x Chong Kun Dang
