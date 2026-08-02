@@ -114,7 +114,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "danger",
     desc: "약국 채널 수요 급증, 긴급 보충 필요",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAvsjrtDFtei5WC28QqT6I-N2RowTU0Rw_NQcXW73HHNv42f8GqHDo98Lxj7KiwPU8ZofphhNE_wEn8nlALQPVFCkp9BjOlJ3yZkyZwyA3yF3kozGGTr-0yDv-ianOqL6507w0I1g6YeP2SxbJsKvBOVB05sefTcOw--OnYz96XRVGVmXlr6LQHRz8mIbK38hVXHpYAogIKInwcZoonnuNHGG7pJpfmteZ8eyk2UtzZRQoirVkUqHrryc1fDxxXzJw9WPON_l4GLaw",
-    box: { top: "13%", left: "26%", width: "20%", height: "6%" }, z: 40,
+    box: { top: "20.0%", left: "26.5%", width: "14%", height: "5%" }, z: 40,
   },
   Gyeonggi: {
     id: "Gyeonggi",
@@ -126,7 +126,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "warning",
     desc: "물류 허브 포화 상태, 증설 검토 대상",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCpAzmF-SOd1URighgtK48VR_2hbOOyIYjVdscTKhUi57qjFZmAkAWB-ALr3NYy9QmE25pH6E0DT5U8XNIXwzX1YGjdneTrQZhWhIqUkfDtm2iPgGzzE-0ciagW48IUqRf84QDkSiZisA1tRdj52jZT3dbDOJ6-jTu8BTk-2dfgzFtuvHhKOEOBysn-M7kc-_3y6TZ6uxnsjMJU9LHsYf12Id_dTfOxs0gnPjld9OsbjSm3Vep-Aw_4XRZdY1U8I8g3w5nHNx-KkEA",
-    box: { top: "11%", left: "18%", width: "42%", height: "13%" }, z: 20,
+    box: { top: "27.5%", left: "34.0%", width: "16%", height: "5%" }, z: 20,
   },
   Gangwon: {
     id: "Gangwon",
@@ -138,7 +138,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "safe",
     desc: "안정적인 수급 및 재고 수준 유지 중",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDB33fn5oVHaumb3CNYPjdPIkvb3HVUlML1bniG6_E9_6qBR25IGSysypwj7to7Dc7Use3sDF644Z1ObFK4zA0Qhb0Kh30NIO3CfmpqyH7qyWz8TbvSgu_e9kzp4IlHMQBS2AVvc8541nsIJb-Stkp4JmwgMtQLRn6x3KJtgwbh9-BysCwJj4axquNeKAnxD00P09QTiwjImfcrOh1z7h7E8WddlEvRXRP1ZitIBNlHRKIah6KXM7fiJkwa_JebjYPYOW7gt4IryXs",
-    box: { top: "7%", left: "58%", width: "38%", height: "15%" }, z: 20,
+    box: { top: "17.5%", left: "59.0%", width: "14%", height: "5%" }, z: 20,
   },
   Chungcheong: {
     id: "Chungcheong",
@@ -150,7 +150,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "warning",
     desc: "천안 물류 거점 입고 지연 발생 우려",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDp7ZMKQSg_hc58_kgkd9CPg-RLlbiQlzKPgTPPAAzWbnFXM6249IOSC5uimTqy7PRZAQS6jI9GV_PRzMSQLPyzDe8IOb9b5__w1BfdwJ9OkTUA77a7bsGJMy45VjMMwKP8YcG9vIxj0zGaAb3i9fw204Jhm5UkBg8LYBjoIU--OBvjWv2CrUpjMyXLwzWr7-C3w9oSNGsVikGK9oNe8cZsrld4EDGtkehaF9zUrXSTcYZWKytFciUoQm7KphWlBARRK8ensLFHku4",
-    box: { top: "26%", left: "14%", width: "46%", height: "13%" }, z: 20,
+    box: { top: "38.5%", left: "34.0%", width: "14%", height: "5%" }, z: 20,
   },
   Daegu: {
     id: "Daegu",
@@ -162,7 +162,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "safe",
     desc: "안정적 운영, 경북 외곽 배송 경로 최적화 필요",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBs9CdZfGJ3yM5WkkQWjP-gDfZ3UMCuJM8OjGUL8LmxUHVWLLQJ99XyTMODRCNW7kzuAf_BSMG6rhSQ-qN5Rw65Q_hJ926nfE5_Aur-MvNLF0q_QLOZ3iogKoHJmBSHxYBOWJ0j5Q870Aja52VdqekoiiFCYDD0HI0b4gqGBBJqTGCzCZaevldN5ahZCjc_VYAsaxPyyKqJ__qSuIR4iu9WuQXx9bUT9DGbbpKL9tnidfzx2SDOCnb9aQ0NiIxJXxNGFr1ALD4260Q",
-    box: { top: "24%", left: "58%", width: "38%", height: "20%" }, z: 20,
+    box: { top: "41.5%", left: "61.0%", width: "18%", height: "5%" }, z: 20,
   },
   Honam: {
     id: "Honam",
@@ -174,7 +174,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "safe",
     desc: "광주 센터 배송 리드타임 개선 완료",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBOSHTY0eBrvZVBcBlO8mv1r8hPeYfSw7E5-ZRwKiy2xc_FEtzqcx45ybdazMca-nB7oq6ZmZ-tU4C4lkykSp813ZyKZa74rkl-6vpF2IRhcfmNVLgUxMVvR7YgumMCPyozg3Ld9gR3AJWXpkgrcBnDtpsfuG9OGCh_S4QIKIwrzWIQLqC_X0aepanE2iIjb_aRnfJfIvkpGWe8ZMa_3YcV3mUgpsLoxzrSSAnmQYM-kF59VjbSWSMBakPUM8beI6KfzIWnhUrkgak",
-    box: { top: "42%", left: "8%", width: "44%", height: "20%" }, z: 20,
+    box: { top: "57.5%", left: "30.0%", width: "14%", height: "5%" }, z: 20,
   },
   Busan: {
     id: "Busan",
@@ -186,7 +186,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "danger",
     desc: "해상 수입 자재 수급 상황 상시 모니터링",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuActC-YMLFDOXtxEVNvPpjSTIHD71_93NwHJoRB1I4hADNavtze1KFZOeSa3Zcscq2AhFa9vRmvxHiNiJcWc2ZxHctvudyJewXPOGpPB-EycW2ZCJxj0M4ICyqyyitDA_9mor9LVtghZ81AoZP4RIdn0fEPE3iX5ZGaaOAJrDsSAqzvN5tlqhIbswO3BkzKg4mp_vuyY3Y_0opQ-0WQnc2_Hrb21boFb4x0Vpu8P3jKvKHJ-7gA4Czae4_DRbALbAmaucgr2GubijU",
-    box: { top: "50%", left: "52%", width: "44%", height: "15%" }, z: 20,
+    box: { top: "61.5%", left: "57.0%", width: "18%", height: "5%" }, z: 20,
   },
   Jeju: {
     id: "Jeju",
@@ -198,7 +198,7 @@ export const regions: Record<string, Region> = {
     riskLevel: "safe",
     desc: "기상 악화 대비 선제적 재고 확보 권고",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBCP0B7kojFpz0zABxgp4pHYJHRoojB9pQy2DvOvF6j1_PJ609O553_ypw-tEQI1-zsdDLImmejL4RA2XRfZ_5-5fSlK_kdoW_vlRs2Ar9mJNA4nHcSC7uyV44KVm6NIsFkAKpXA2cFThOJrmMlMVopqWuJ0_06vPQB8s1IVqcJ_1m7KsHX30tgCD3cm7A2qgAxHBHZkPiquTjrqfEp1t4H_FVeUv__WKAnIzf6qbgCeT8lnKmMzcbMVknkAMrvLLNICxdnTJ_0isk",
-    box: { top: "87%", left: "6%", width: "32%", height: "8%" }, z: 20,
+    box: { top: "89.5%", left: "22.0%", width: "14%", height: "5%" }, z: 20,
   },
 };
 

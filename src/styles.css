@@ -368,10 +368,3 @@
   opacity: 1;
 }
 
-.region-marker.marker-Gyeonggi {
-  align-items: flex-start;
-  justify-content: flex-start;
-}
-.region-marker.marker-Gyeonggi .region-marker-label {
-  transform: translate(-30%, -60%);
-}
