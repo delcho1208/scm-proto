@@ -269,10 +269,10 @@ export function getIntegrationRecords(regionId: string, productKey: string): Sys
     return {
       system,
       docNo: `${meta.prefix}-2025-${(1000 + (seed % 8999)).toString()}`,
-      status: statuses[(seed >> 3) % statuses.length],
-      qty: (2000 + ((seed >> 5) % 48000)).toLocaleString(),
-      updatedAt: `2025-07-1${(seed % 5) + 1} ${String(8 + ((seed >> 7) % 10)).padStart(2, "0")}:${String((seed >> 2) % 60).padStart(2, "0")}`,
-      note: meta.notes[(seed >> 9) % meta.notes.length],
+      status: statuses[(seed >>> 3) % statuses.length],
+      qty: (2000 + ((seed >>> 5) % 48000)).toLocaleString(),
+      updatedAt: `2025-07-1${(seed % 5) + 1} ${String(8 + ((seed >>> 7) % 10)).padStart(2, "0")}:${String((seed >>> 2) % 60).padStart(2, "0")}`,
+      note: meta.notes[(seed >>> 9) % meta.notes.length],
     };
   }).map((r, i) => ({ ...r, system: (["ERP", "MES", "WMS"] as SystemKey[])[i] }));
 }
