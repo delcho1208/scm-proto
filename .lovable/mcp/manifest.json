@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "scm",
+      "version": "0.1.0",
+      "title": "scm"
+    },
+    "tools": [
+      {
+        "name": "list_products",
+        "title": "List products",
+        "description": "List every tracked pharmaceutical product with its annual demand, YoY growth, stock, stockout rate, production CAPA, utilization and ROI.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_regions",
+        "title": "List regions",
+        "description": "List the eight Korean SCM regions with their current stock level, risk level and status note.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_region",
+        "title": "Get region detail",
+        "description": "Get the stock level, risk level and monitoring note for one SCM region (including the National rollup).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "region_id": {
+              "type": "string",
+              "description": "Region id: National, Seoul, Gyeonggi, Gangwon, Chungcheong, Daegu, Honam, Busan or Jeju."
+            }
+          },
+          "required": [
+            "region_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_integration_records",
+        "title": "Get ERP/MES/WMS records",
+        "description": "Get the ERP, MES and WMS integration records (document number, sync status, quantity, last sync time, note) for one region and product.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "region_id": {
+              "type": "string",
+              "description": "Region id, e.g. Seoul, Gyeonggi, Gangwon, Chungcheong, Daegu, Honam, Busan, Jeju."
+            },
+            "product": {
+              "type": "string",
+              "description": "Product name or key, e.g. 리피로우, 타미비어, 세파졸린."
+            }
+          },
+          "required": [
+            "region_id",
+            "product"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
