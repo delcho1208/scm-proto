@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { markerOrder, regions, riskFactors, type Product, type RiskLevel } from "@/data/scm";
+import { lipilouDashboard } from "@/data/dashboard-scenario";
 import { Icon } from "@/components/ScmShell";
 
 const riskStyles: Record<RiskLevel, { dot: string; badge: string; text: string; bullet: string }> =
@@ -30,13 +31,24 @@ export function DashboardView({ product }: { product: Product }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  const scenario = product.key === "리피로우" ? lipilouDashboard : null;
+  const scenarioRegion = scenario?.regions[regionId];
+  const nationalStock = scenario
+    ? Object.values(scenario.regions).reduce((sum, item) => sum + item.current_stock, 0)
+    : null;
   const region = regions[regionId];
-  const risk = riskStyles[region.riskLevel];
+  const regionRiskLevel = scenarioRegion?.riskLevel ?? region.riskLevel;
+  const risk = riskStyles[regionRiskLevel];
 
   const baseStock = Number(product.stock.replace(/,/g, ""));
   const panelStock = (
-    regionId === "National" ? baseStock : Math.floor(baseStock * 0.12)
+    scenarioRegion?.current_stock ??
+    (regionId === "National" ? nationalStock ?? baseStock : Math.floor(baseStock * 0.12))
   ).toLocaleString();
+  const riskText = scenarioRegion?.riskText ?? region.riskText;
+  const regionDescription = scenarioRegion
+    ? `목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고율 ${scenarioRegion.stock_ratio}% · ${scenario.date} 기준`
+    : region.desc;
 
   const selectRegion = (id: string) => {
     setRegionId(id);
@@ -204,13 +216,14 @@ export function DashboardView({ product }: { product: Product }) {
             <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[1456/1941] h-[90%] -translate-x-1/2 -translate-y-1/2">
               {markerOrder.map((id) => {
                 const r = regions[id];
+                const markerRisk = scenario?.regions[id]?.riskLevel;
                 if (!r.box) return null;
                 return (
                   <button
                     key={id}
                     title={r.name}
                     onClick={() => selectRegion(id)}
-                    className={`region-marker marker-${id} pointer-events-auto ${regionId === id ? "active" : ""}`}
+                    className={`region-marker marker-${id} pointer-events-auto ${markerRisk ? `risk-${markerRisk}` : ""} ${regionId === id ? "active" : ""}`}
                     style={{ ...r.box, zIndex: r.z ?? 20 }}
                   >
                     <span className="region-marker-label">{r.shortName ?? r.name}</span>
@@ -259,13 +272,15 @@ export function DashboardView({ product }: { product: Product }) {
                     >
                       <span className={`h-2 w-2 rounded-full ${risk.bullet}`} />
                       <span className={`text-xs font-bold uppercase ${risk.text}`}>
-                        {region.riskText}
+                        {riskText}
                       </span>
                     </div>
                   </div>
                 </div>
                 <div className="border-t border-outline-variant/30 pt-2">
-                  <p className="text-[11px] leading-tight text-on-surface-variant">{region.desc}</p>
+                  <p className="text-[11px] leading-tight text-on-surface-variant">
+                    {regionDescription}
+                  </p>
                 </div>
               </div>
             </div>
@@ -342,10 +357,18 @@ export function DashboardView({ product }: { product: Product }) {
               <h4 className="font-display text-headline-sm">AI 추천 실행안</h4>
             </div>
             <div className="flex-1 space-y-sm overflow-y-auto">
-              {[
-                { t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
-                { t: "재고 권역 재배치 최적화", d: "강원/충청 → 수도권 물량 조정" },
-              ].map((rec) => (
+              {(scenario?.recommendation
+                ? [
+                    {
+                      t: scenario.recommendation.title.replaceAll("**", ""),
+                      d: scenario.recommendation.xai_explanation,
+                    },
+                  ]
+                : [
+                    { t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
+                    { t: "재고 권역 재배치 최적화", d: "강원/충청 → 수도권 물량 조정" },
+                  ]
+              ).map((rec) => (
                 <label
                   key={rec.t}
                   className="flex cursor-pointer items-start gap-md rounded p-xs transition-colors hover:bg-white/50"
@@ -365,7 +388,7 @@ export function DashboardView({ product }: { product: Product }) {
               ))}
             </div>
             <button className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]">
-              실행 계획 적용
+              {scenario?.recommendation?.approval_action.initial_button_text ?? "실행 계획 적용"}
             </button>
           </div>
         </div>
@@ -375,7 +398,9 @@ export function DashboardView({ product }: { product: Product }) {
       <div className="mt-xl grid grid-cols-2 gap-md md:grid-cols-4">
         <div className="bento-card flex flex-col justify-center p-sm text-center">
           <p className="mb-xs text-[10px] font-bold text-on-surface-variant">현재 재고 (BOX)</p>
-          <span className="font-display text-headline-sm">{product.stock}</span>
+          <span className="font-display text-headline-sm">
+            {nationalStock?.toLocaleString() ?? product.stock}
+          </span>
         </div>
         <div className="bento-card flex flex-col justify-center p-sm text-center">
           <p className="mb-xs text-[10px] font-bold text-on-surface-variant">

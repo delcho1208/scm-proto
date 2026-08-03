@@ -1,0 +1,202 @@
+{
+  "project": "종근당 리피로우 SCM 모니터링 대시보드",
+  "scenarios": [
+    {
+      "date": "2026-03-07",
+      "scene_name": "MES 품질 재검사 알림 발생",
+      "mes_card": {
+        "factory_id": "천안공장",
+        "line": "A",
+        "product_name": "리피로우",
+        "lot_number": "260307-A01",
+        "quality_result": "재검사",
+        "note": "품질 재검사 발생 (LOT 260307-A01)",
+        "sub_text": "⚠️ 출하지연 예상 (정상 대비 +5일, 3/14 출하 예정)",
+        "is_alert": true
+      },
+      "regions_stock": [
+        {
+          "region": "Zone1_서울권",
+          "current_stock": 7304,
+          "target_stock": 4000,
+          "stock_ratio": 182.6,
+          "status": "정상",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone2_경기인천수도권",
+          "current_stock": 4115,
+          "target_stock": 3000,
+          "stock_ratio": 137.2,
+          "status": "정상",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone3_강원권",
+          "current_stock": 1397,
+          "target_stock": 1200,
+          "stock_ratio": 116.4,
+          "status": "주의",
+          "color_status": "yellow"
+        },
+        {
+          "region": "Zone4_대전세종충청권",
+          "current_stock": 2247,
+          "target_stock": 1800,
+          "stock_ratio": 124.8,
+          "status": "정상",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone5_광주전북전남권",
+          "current_stock": 1872,
+          "target_stock": 1500,
+          "stock_ratio": 124.8,
+          "status": "정상",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone6_대구경북권",
+          "current_stock": 2247,
+          "target_stock": 1800,
+          "stock_ratio": 124.8,
+          "status": "정상",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone7_부산울산경남권",
+          "current_stock": 3746,
+          "target_stock": 2500,
+          "stock_ratio": 149.8,
+          "status": "정상",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone8_제주권",
+          "current_stock": 1133,
+          "target_stock": 1000,
+          "stock_ratio": 113.3,
+          "status": "주의",
+          "color_status": "yellow"
+        }
+      ]
+    },
+    {
+      "date": "2026-03-10",
+      "scene_name": "AI 재고 이관 추천 및 XAI 근거 제시",
+      "map_monitoring": [
+        {
+          "region": "Zone1_서울권",
+          "current_stock": 4024,
+          "target_stock": 4000,
+          "stock_ratio": 100.6,
+          "status": "DANGER",
+          "map_color": "red",
+          "animate_transition": true
+        },
+        {
+          "region": "Zone2_경기인천수도권",
+          "current_stock": 3696,
+          "target_stock": 3000,
+          "stock_ratio": 123.2,
+          "status": "NORMAL",
+          "map_color": "green",
+          "animate_transition": false
+        },
+        {
+          "region": "Zone3_강원권",
+          "current_stock": 1274,
+          "target_stock": 1200,
+          "stock_ratio": 106.2,
+          "status": "NORMAL",
+          "map_color": "green",
+          "animate_transition": false
+        },
+        {
+          "region": "Zone4_대전세종충청권",
+          "current_stock": 2049,
+          "target_stock": 1800,
+          "stock_ratio": 113.8,
+          "status": "NORMAL",
+          "map_color": "green",
+          "animate_transition": false
+        },
+        {
+          "region": "Zone5_광주전북전남권",
+          "current_stock": 1707,
+          "target_stock": 1500,
+          "stock_ratio": 113.8,
+          "status": "NORMAL",
+          "map_color": "green",
+          "animate_transition": false
+        },
+        {
+          "region": "Zone6_대구경북권",
+          "current_stock": 2049,
+          "target_stock": 1800,
+          "stock_ratio": 113.8,
+          "status": "NORMAL",
+          "map_color": "green",
+          "animate_transition": false
+        },
+        {
+          "region": "Zone7_부산울산경남권",
+          "current_stock": 3418,
+          "target_stock": 2500,
+          "stock_ratio": 136.7,
+          "status": "NORMAL",
+          "map_color": "green",
+          "animate_transition": false
+        },
+        {
+          "region": "Zone8_제주권",
+          "current_stock": 1820,
+          "target_stock": 1000,
+          "stock_ratio": 182.0,
+          "status": "NORMAL",
+          "map_color": "green",
+          "animate_transition": false
+        }
+      ],
+      "ai_recommendation_card": {
+        "title": "**Zone7_부산울산경남권(여유 137%) → Zone1_서울권(101%) 재고 이관 추천 1,000EA",
+        "transfer_amount": 1000,
+        "from_region": "Zone7_부산울산경남권",
+        "to_region": "Zone1_서울권",
+        "xai_explanation": "8개 권역 중 이관 후에도 자기 안전재고를 지킬 수 있는 권역이 Zone7_부산울산경남권뿐이라 선택됨",
+        "approval_action": {
+          "initial_button_text": "실행 계획 적용",
+          "approved_button_text": "승인완료 ✓ (공급관리책임자, 2026-03-10)",
+          "approval_user": "공급관리책임자",
+          "approval_date": "2026-03-10"
+        }
+      },
+      "timeline_logs": [
+        {
+          "id": 1,
+          "timestamp": "2026-03-07 09:00",
+          "type": "ALERT",
+          "message": "MES 천안공장 A라인 품질 재검사 발생 (LOT 260307-A01)"
+        },
+        {
+          "id": 2,
+          "timestamp": "2026-03-10 08:30",
+          "type": "WARNING",
+          "message": "수도권(Zone1_서울권) 재고율 기준치 이하 감소 감지 (101%)"
+        },
+        {
+          "id": 3,
+          "timestamp": "2026-03-10 09:00",
+          "type": "AI_RECOMMEND",
+          "message": "AI 분석 완료: Zone7_부산울산경남권 → Zone1_서울권 1,000EA 이관 제안"
+        },
+        {
+          "id": 4,
+          "timestamp": "2026-03-10 09:15",
+          "type": "APPROVAL",
+          "message": "공급관리책임자 이관 실행 계획 승인 완료"
+        }
+      ]
+    }
+  ]
+}
