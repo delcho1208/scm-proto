@@ -20,7 +20,7 @@ export function Icon({
 }
 
 export function ScmShell({ children }: { children: (product: Product) => ReactNode }) {
-  const [productKey, setProductKey] = useState(products[0].key);
+  const productKey = useSelectedProductKey();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState("");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
