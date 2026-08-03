@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { brandLogo, products, userAvatar, type Product } from "@/data/scm";
+import { useSelectedProductKey, setSelectedProductKey } from "@/data/product-store";
 
 export function Icon({
   name,
@@ -19,7 +20,7 @@ export function Icon({
 }
 
 export function ScmShell({ children }: { children: (product: Product) => ReactNode }) {
-  const [productKey, setProductKey] = useState(products[0].key);
+  const productKey = useSelectedProductKey();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState("");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -171,7 +172,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
                         <button
                           key={p.key}
                           onClick={() => {
-                            setProductKey(p.key);
+                            setSelectedProductKey(p.key);
                             setDropdownOpen(false);
                           }}
                           className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-primary-container/10 ${
