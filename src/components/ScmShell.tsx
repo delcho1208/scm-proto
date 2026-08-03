@@ -172,7 +172,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
                         <button
                           key={p.key}
                           onClick={() => {
-                            setProductKey(p.key);
+                            setSelectedProductKey(p.key);
                             setDropdownOpen(false);
                           }}
                           className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-primary-container/10 ${
