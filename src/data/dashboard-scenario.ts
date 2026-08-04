@@ -158,15 +158,25 @@ export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
 
 type TamivirRaw = {
   scenario: string;
-  f2a_target: number;
-  ai_target: number;
-  current_stock: number;
-  ratio: number;
-  dead_stock_quantity: number;
-  dead_stock_cost_billion_str: string;
-  status: string;
-  risk_score: number;
-  recommendation: string;
+  summary: {
+    f2a_target: number;
+    ai_target: number;
+    current_stock: number;
+    ratio: number;
+    dead_stock_quantity: number;
+    dead_stock_cost_billion_str: string;
+    status: string;
+    risk_score: number;
+  };
+  recommendations: Array<{
+    id: number;
+    title: string;
+    name: string;
+    priority: string;
+    recommendation: string;
+    expected_effect: string[];
+    xai_reason: { title: string; description: string };
+  }>;
   trace_log: string[];
   xai_cards: Array<{ title: string; value: string; description: string }>;
   zone_details: Array<{
@@ -201,21 +211,19 @@ export const tamivirDashboard: ProductDashboardScenario = {
   date: "현재",
   sceneName: tamivirRaw.scenario,
   regions: tamivirRegions,
-  totalInventory: tamivirRaw.current_stock,
+  totalInventory: tamivirRaw.summary.current_stock,
   utilization: operationRate,
-  riskScore: tamivirRaw.risk_score,
-  inventoryLevel: tamivirRaw.status === "과잉" ? "warning" : tamivirRaw.status === "부족" ? "danger" : "safe",
+  riskScore: tamivirRaw.summary.risk_score,
+  inventoryLevel: tamivirRaw.summary.status === "과잉" ? "warning" : tamivirRaw.summary.status === "부족" ? "danger" : "safe",
   externalSignal: {
     title: "인플루엔자 시장 충격 감지",
-    value: `현재 ${tamivirRaw.current_stock.toLocaleString()}EA · AI 목표 ${tamivirRaw.ai_target.toLocaleString()}EA`,
+    value: `현재 ${tamivirRaw.summary.current_stock.toLocaleString()}EA · AI 목표 ${tamivirRaw.summary.ai_target.toLocaleString()}EA`,
     detail: externalShock?.description ?? tamivirRaw.trace_log[0],
   },
-  recommendations: [
-    {
-      id: "TAMIVIR-PRODUCTION-REDUCTION",
-      title: "전국 타미비어 생산 즉시 감축",
-      description: `${tamivirRaw.recommendation} · Dead Stock ${tamivirRaw.dead_stock_quantity.toLocaleString()}정 · 예상 손실 ${tamivirRaw.dead_stock_cost_billion_str} · ${inventoryXai?.description ?? ""}`,
-      approvalButtonText: "생산 감축 승인",
-    },
-  ],
+  recommendations: tamivirRaw.recommendations.map((recommendation) => ({
+    id: `TAMIVIR-${recommendation.id}`,
+    title: recommendation.name,
+    description: `${recommendation.recommendation} · 기대효과: ${recommendation.expected_effect.join(", ")} · ${recommendation.xai_reason.description}${recommendation.id === 1 ? ` · Dead Stock ${tamivirRaw.summary.dead_stock_quantity.toLocaleString()}정 · 예상 손실 ${tamivirRaw.summary.dead_stock_cost_billion_str} · ${inventoryXai?.description ?? ""}` : ""}`,
+    approvalButtonText: recommendation.id === 1 ? "생산 감축 승인" : "CDC 비축 전환 검토",
+  })),
 };
