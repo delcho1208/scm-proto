@@ -39,7 +39,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
     <div className="scm-root text-body-md">
       {/* Main */}
       <main className="flex min-h-screen flex-1 flex-col">
-        <header className="fixed left-0 right-0 top-0 z-40 flex h-16 w-full min-w-[1440px] items-center justify-between border-b border-outline-variant bg-surface-container px-xl">
+        <header className="fixed left-0 right-0 top-0 z-[200] flex h-16 w-full min-w-[1440px] items-center justify-between border-b border-outline-variant bg-surface-container px-xl">
           <div className="flex min-w-0 items-center gap-lg">
             <Link to="/simulation" className="flex shrink-0 items-center gap-xs">
               <img
@@ -89,7 +89,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
                   <Icon name="expand_more" className="ml-auto text-[20px] text-outline" />
                 </button>
                 {dropdownOpen && (
-                  <div className="absolute left-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl">
+                  <div className="absolute left-0 top-full z-[210] mt-2 w-72 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl">
                     <div className="border-b border-outline-variant bg-surface-container-lowest p-3">
                       <div className="relative">
                         <Icon

@@ -204,7 +204,6 @@ export function DashboardView({ product }: { product: Product }) {
 
   const selectRegion = (id: string) => {
     setRegionId(id);
-    setPanelPos(null);
   };
 
   const startDrag = (e: React.MouseEvent) => {
