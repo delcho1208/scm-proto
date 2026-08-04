@@ -25,9 +25,46 @@ const riskStyles: Record<RiskLevel, { dot: string; badge: string; text: string; 
     },
   };
 
+type TransferRoute = {
+  from: string;
+  to: string;
+  label?: string;
+};
+
+type AiRecommendation = {
+  t: string;
+  d: string;
+  routes?: TransferRoute[];
+};
+
+const scenarioRegionIds: Record<string, string> = {
+  Zone1: "Seoul",
+  Zone2: "Gyeonggi",
+  Zone3: "Gangwon",
+  Zone4: "Chungcheong",
+  Zone5: "Honam",
+  Zone6: "Daegu",
+  Zone7: "Busan",
+  Zone8: "Jeju",
+};
+
+function getScenarioRegionId(regionName: string) {
+  return scenarioRegionIds[regionName.split("_")[0]];
+}
+
+function getMarkerCenter(regionId: string) {
+  const box = regions[regionId]?.box;
+  if (!box) return null;
+  return {
+    x: Number.parseFloat(box.left) + Number.parseFloat(box.width) / 2,
+    y: Number.parseFloat(box.top) + Number.parseFloat(box.height) / 2,
+  };
+}
+
 export function DashboardView({ product }: { product: Product }) {
   const [regionId, setRegionId] = useState("National");
   const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
+  const [recommendationChecks, setRecommendationChecks] = useState<Record<string, boolean>>({});
   const mapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +86,37 @@ export function DashboardView({ product }: { product: Product }) {
   const regionDescription = scenarioRegion
     ? `목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고율 ${scenarioRegion.stock_ratio}% · ${scenario.date} 기준`
     : region.desc;
+
+  const recommendations: AiRecommendation[] = scenario?.recommendation
+    ? [
+        {
+          t: scenario.recommendation.title.replaceAll("**", ""),
+          d: scenario.recommendation.xai_explanation,
+          routes: [
+            {
+              from: getScenarioRegionId(scenario.recommendation.from_region),
+              to: getScenarioRegionId(scenario.recommendation.to_region),
+              label: `${scenario.recommendation.transfer_amount.toLocaleString()}EA`,
+            },
+          ],
+        },
+      ]
+    : [
+        { t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
+        {
+          t: "재고 권역 재배치 최적화",
+          d: "강원/충청 → 수도권 물량 조정",
+          routes: [
+            { from: "Gangwon", to: "Gyeonggi" },
+            { from: "Chungcheong", to: "Gyeonggi" },
+          ],
+        },
+      ];
+
+  const activeTransferRoutes = recommendations.flatMap((recommendation, index) => {
+    const checkKey = `${product.key}-${index}`;
+    return (recommendationChecks[checkKey] ?? true) ? recommendation.routes ?? [] : [];
+  });
 
   const selectRegion = (id: string) => {
     setRegionId(id);
@@ -216,6 +284,56 @@ export function DashboardView({ product }: { product: Product }) {
               className="max-h-[90%] max-w-[90%] object-contain transition-opacity duration-300"
             />
             <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[1456/1941] h-[90%] -translate-x-1/2 -translate-y-1/2">
+              {activeTransferRoutes.length > 0 && (
+                <svg
+                  aria-label="AI 추천 물류 이동 경로"
+                  className="transfer-route-layer"
+                  preserveAspectRatio="none"
+                  role="img"
+                  viewBox="0 0 100 100"
+                >
+                  <defs>
+                    <marker
+                      id="transfer-arrowhead"
+                      markerHeight="7"
+                      markerWidth="7"
+                      orient="auto"
+                      refX="6"
+                      refY="3.5"
+                    >
+                      <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--scm-primary)" />
+                    </marker>
+                  </defs>
+                  {activeTransferRoutes.map((route, index) => {
+                    const from = getMarkerCenter(route.from);
+                    const to = getMarkerCenter(route.to);
+                    if (!from || !to) return null;
+                    const midX = (from.x + to.x) / 2;
+                    const midY = (from.y + to.y) / 2;
+                    const curveX = midX + (index % 2 === 0 ? -7 : 7);
+                    const labelX = (from.x + 2 * curveX + to.x) / 4;
+                    const labelY = (from.y + 2 * midY + to.y) / 4;
+                    return (
+                      <g key={`${route.from}-${route.to}-${index}`}>
+                        <path
+                          className="transfer-route-path"
+                          d={`M ${from.x} ${from.y} Q ${curveX} ${midY} ${to.x} ${to.y}`}
+                          markerEnd="url(#transfer-arrowhead)"
+                        />
+                        <circle className="transfer-route-origin" cx={from.x} cy={from.y} r="1.5" />
+                        {route.label && (
+                          <g transform={`translate(${labelX} ${labelY})`}>
+                            <rect className="transfer-route-label-bg" x="-8" y="-3.2" width="16" height="6.4" rx="3.2" />
+                            <text className="transfer-route-label" textAnchor="middle" y="1.2">
+                              {route.label}
+                            </text>
+                          </g>
+                        )}
+                      </g>
+                    );
+                  })}
+                </svg>
+              )}
               {markerOrder.map((id) => {
                 const r = regions[id];
                 const markerRisk = scenario?.regions[id]?.riskLevel;
@@ -359,24 +477,22 @@ export function DashboardView({ product }: { product: Product }) {
               <h4 className="font-display text-headline-sm">AI 추천 실행안</h4>
             </div>
             <div className="min-h-0 flex-1 space-y-sm overflow-y-auto">
-              {(scenario?.recommendation
-                ? [
-                    {
-                      t: scenario.recommendation.title.replaceAll("**", ""),
-                      d: scenario.recommendation.xai_explanation,
-                    },
-                  ]
-                : [
-                    { t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
-                    { t: "재고 권역 재배치 최적화", d: "강원/충청 → 수도권 물량 조정" },
-                  ]
-              ).map((rec) => (
+              {recommendations.map((rec, index) => {
+                const checkKey = `${product.key}-${index}`;
+                const checked = recommendationChecks[checkKey] ?? true;
+                return (
                 <label
                   key={rec.t}
                   className="flex cursor-pointer items-start gap-md rounded p-xs transition-colors hover:bg-white/50"
                 >
                   <input
-                    defaultChecked
+                    checked={checked}
+                    onChange={(event) =>
+                      setRecommendationChecks((current) => ({
+                        ...current,
+                        [checkKey]: event.target.checked,
+                      }))
+                    }
                     className="mt-1 h-4 w-4 rounded accent-[#004ccd]"
                     type="checkbox"
                   />
@@ -387,7 +503,8 @@ export function DashboardView({ product }: { product: Product }) {
                     </p>
                   </div>
                 </label>
-              ))}
+                );
+              })}
             </div>
             <button className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]">
               {scenario?.recommendation?.approval_action.initial_button_text ?? "실행 계획 적용"}
