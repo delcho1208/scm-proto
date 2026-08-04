@@ -272,7 +272,8 @@
 
 .chart-svg {
   width: 100%;
-  height: 200px;
+  height: 110px;
+  min-height: 0;
 }
 .path-actual {
   fill: none;
@@ -295,6 +296,232 @@
 }
 .chart-dot-prediction {
   fill: #ef4444;
+}
+.timeline-chart-marker {
+  stroke: var(--scm-primary);
+  stroke-dasharray: 4 3;
+  filter: drop-shadow(0 0 2px rgba(0, 76, 205, 0.45));
+  transition: x1 0.35s ease, x2 0.35s ease, stroke 0.35s ease;
+}
+
+.forecast-kpi-row {
+  display: flex;
+  min-height: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid rgba(115, 118, 135, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 6px 10px;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.forecast-kpi-row:hover {
+  border-color: rgba(0, 76, 205, 0.35);
+  background: rgba(0, 76, 205, 0.025);
+}
+.forecast-kpi-row p {
+  color: var(--scm-on-surface-variant);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.forecast-kpi-row strong {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-data);
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.api-placeholder-icon {
+  display: flex;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: var(--scm-primary);
+  background: rgba(0, 76, 205, 0.1);
+}
+.api-placeholder-icon.news {
+  color: #ad6800;
+  background: rgba(250, 173, 20, 0.16);
+}
+.api-ready-badge {
+  flex: 0 0 auto;
+  border: 1px dashed rgba(115, 118, 135, 0.45);
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: var(--scm-on-surface-variant);
+  background: var(--scm-surface-container-low);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.time-scrubber {
+  pointer-events: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(115, 118, 135, 0.18);
+  background: rgba(247, 247, 252, 0.92);
+  padding: 3px 8px 1px;
+}
+.timeline-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: 9px;
+  font-weight: 800;
+}
+.timeline-badge.actual {
+  color: var(--scm-primary);
+  background: rgba(0, 76, 205, 0.1);
+}
+.timeline-badge.prediction {
+  color: #ad6800;
+  background: rgba(250, 173, 20, 0.18);
+}
+.timeline-play-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid var(--scm-outline-variant);
+  border-radius: 8px;
+  background: #fff;
+  padding: 1px 6px;
+  color: var(--scm-primary);
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.timeline-play-button:hover {
+  background: var(--scm-primary-container);
+}
+.timeline-play-button:active {
+  transform: scale(0.96);
+}
+.timeline-range {
+  width: 100%;
+  height: 10px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: grab;
+}
+.timeline-range:active {
+  cursor: grabbing;
+}
+.timeline-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, var(--scm-primary) 0 40%, transparent 40%),
+    repeating-linear-gradient(90deg, transparent 0 5px, #faad14 5px 9px) 40% 0 / 60% 100% no-repeat,
+    #dfe1eb;
+}
+.timeline-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--scm-primary) 0 40%, #faad14 40% 100%);
+}
+.timeline-range::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  appearance: none;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--scm-primary);
+  box-shadow: 0 0 0 2px rgba(0, 76, 205, 0.28), 0 2px 5px rgba(0, 0, 0, 0.18);
+}
+.timeline-range::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--scm-primary);
+}
+.timeline-ticks {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-top: -1px;
+}
+.timeline-ticks button {
+  border: 0;
+  background: transparent;
+  color: var(--scm-on-surface-variant);
+  font-size: 7px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+.timeline-ticks button.active {
+  color: var(--scm-primary);
+  transform: translateY(-1px);
+}
+.timeline-map {
+  transition: background-color 0.35s ease, box-shadow 0.35s ease;
+}
+.timeline-map.prediction {
+  background: rgba(255, 251, 230, 0.56);
+  box-shadow: inset 0 0 0 2px rgba(250, 173, 20, 0.55);
+}
+.timeline-map.prediction::after {
+  content: "예측 데이터";
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  z-index: 90;
+  border: 1px dashed rgba(173, 104, 0, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 251, 230, 0.9);
+  padding: 3px 9px;
+  color: #ad6800;
+  font-size: 9px;
+  font-weight: 800;
+  pointer-events: none;
+}
+.timeline-data-fade {
+  animation: timeline-data-fade 0.35s ease both;
+}
+@keyframes timeline-data-fade {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.risk-gauge-arc,
+.risk-gauge-needle {
+  transition: transform 0.35s ease, border-color 0.35s ease;
+}
+.risk-gauge-needle {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: 5;
+  width: 3px;
+  height: 70px;
+  border-radius: 999px;
+  background: var(--scm-on-surface);
+  transform-origin: 50% 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.risk-gauge-needle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 12px;
+  height: 12px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--scm-on-surface);
+  transform: translateX(-50%);
 }
 
 .status-dot-safe {
@@ -330,7 +557,7 @@
 .transfer-route-layer {
   position: absolute;
   inset: 0;
-  z-index: 30;
+  z-index: 60;
   width: 100%;
   height: 100%;
   overflow: visible;
@@ -442,15 +669,22 @@
 .region-marker.risk-safe .region-marker-label {
   color: #237804;
   border: 1px solid rgba(82, 196, 26, 0.45);
+  background: rgba(246, 255, 237, 0.95);
 }
 .region-marker.risk-warning .region-marker-label {
   color: #ad6800;
   border: 1px solid rgba(250, 173, 20, 0.55);
+  background: rgba(255, 251, 230, 0.96);
 }
 .region-marker.risk-danger .region-marker-label {
   color: #cf1322;
   border: 1px solid rgba(255, 77, 79, 0.65);
   background: rgba(255, 241, 240, 0.95);
+}
+
+.region-marker-label,
+.floating-info-panel {
+  transition: color 0.35s ease, background-color 0.35s ease, border-color 0.35s ease, opacity 0.35s ease;
 }
 
 @media (max-width: 640px) {

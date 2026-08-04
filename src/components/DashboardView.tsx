@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
-import { markerOrder, regions, riskFactors, type Product, type RiskLevel } from "@/data/scm";
-import { lipilouDashboard } from "@/data/dashboard-scenario";
+import { useEffect, useRef, useState } from "react";
+import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
+import { lipilouDashboard, tamivirDashboard } from "@/data/dashboard-scenario";
+import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
 
 const riskStyles: Record<RiskLevel, { dot: string; badge: string; text: string; bullet: string }> =
@@ -37,20 +38,26 @@ type AiRecommendation = {
   routes?: TransferRoute[];
 };
 
-const scenarioRegionIds: Record<string, string> = {
-  Zone1: "Seoul",
-  Zone2: "Gyeonggi",
-  Zone3: "Gangwon",
-  Zone4: "Chungcheong",
-  Zone5: "Honam",
-  Zone6: "Daegu",
-  Zone7: "Busan",
-  Zone8: "Jeju",
+const productApiMeta: Record<string, { title: string; description: string; endpoint: string; icon: string }> = {
+  리피로우: {
+    title: "건강검진 데이터 API",
+    description: "이상지질혈증 검사·처방 수요 신호 연동 영역",
+    endpoint: "/api/health-screening",
+    icon: "health_metrics",
+  },
+  타미비어: {
+    title: "감염병 환자 API",
+    description: "지역별 독감·호흡기 감염 환자 추이 연동 영역",
+    endpoint: "/api/infectious-disease",
+    icon: "coronavirus",
+  },
+  세파졸린: {
+    title: "원료 중단 API",
+    description: "원료 공급 중단·납기 지연 신호 연동 영역",
+    endpoint: "/api/raw-material-disruption",
+    icon: "factory",
+  },
 };
-
-function getScenarioRegionId(regionName: string) {
-  return scenarioRegionIds[regionName.split("_")[0]];
-}
 
 function getMarkerCenter(regionId: string) {
   const box = regions[regionId]?.box;
@@ -61,46 +68,120 @@ function getMarkerCenter(regionId: string) {
   };
 }
 
+function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: number }) {
+  const [displayValue, setDisplayValue] = useState(value);
+  const previousValue = useRef(value);
+
+  useEffect(() => {
+    const from = previousValue.current;
+    const startedAt = performance.now();
+    let frame = 0;
+    const animate = (now: number) => {
+      const progress = Math.min((now - startedAt) / 350, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(from + (value - from) * eased);
+      if (progress < 1) frame = requestAnimationFrame(animate);
+      else previousValue.current = value;
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
+
+  return <>{displayValue.toLocaleString("ko-KR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
+}
+
 export function DashboardView({ product }: { product: Product }) {
   const [regionId, setRegionId] = useState("National");
   const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
   const [recommendationChecks, setRecommendationChecks] = useState<Record<string, boolean>>({});
+  const [timelineIndex, setTimelineIndex] = useState(2);
+  const [isPlaying, setIsPlaying] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const timelineFrameRef = useRef<number | null>(null);
+  const pendingTimelineIndex = useRef(2);
 
-  const scenario = product.key === "리피로우" ? lipilouDashboard : null;
-  const scenarioRegion = scenario?.regions[regionId];
-  const nationalStock = scenario
-    ? Object.values(scenario.regions).reduce((sum, item) => sum + item.current_stock, 0)
-    : null;
+  const timelineKey: TimelineKey = timelineKeys[timelineIndex];
+  const timeline = timelineData[timelineKey];
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const interval = window.setInterval(() => {
+      setTimelineIndex((current) => {
+        if (current >= timelineKeys.length - 1) {
+          setIsPlaying(false);
+          return current;
+        }
+        return current + 1;
+      });
+    }, 1500);
+    return () => window.clearInterval(interval);
+  }, [isPlaying]);
+
+  useEffect(
+    () => () => {
+      if (timelineFrameRef.current !== null) cancelAnimationFrame(timelineFrameRef.current);
+    },
+    [],
+  );
+
+  const changeTimeline = (nextIndex: number) => {
+    pendingTimelineIndex.current = nextIndex;
+    if (timelineFrameRef.current !== null) return;
+    timelineFrameRef.current = requestAnimationFrame(() => {
+      setTimelineIndex(pendingTimelineIndex.current);
+      timelineFrameRef.current = null;
+    });
+  };
+
+  const togglePlayback = () => {
+    if (!isPlaying) setTimelineIndex(0);
+    setIsPlaying((playing) => !playing);
+  };
+
+  const scenario =
+    product.key === "리피로우"
+      ? lipilouDashboard
+      : product.key === "타미비어"
+        ? tamivirDashboard
+        : null;
+  const isCurrentTimeline = timelineKey === "PRES";
+  const scenarioRegion = isCurrentTimeline ? scenario?.regions[regionId] : undefined;
+  const timelineRegion = timeline.regions[regionId];
   const region = regions[regionId];
-  const regionRiskLevel = scenarioRegion?.riskLevel ?? region.riskLevel;
+  const nationalRiskLevel: RiskLevel = timeline.riskIndex >= 85 ? "danger" : timeline.riskIndex >= 65 ? "warning" : "safe";
+  const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
+  const nationalRisk = riskStyles[nationalRiskLevel];
 
-  const baseStock = Number(product.stock.replace(/,/g, ""));
-  const panelStock = (
-    scenarioRegion?.current_stock ??
-    (regionId === "National" ? nationalStock ?? baseStock : Math.floor(baseStock * 0.12))
-  ).toLocaleString();
-  const riskText = scenarioRegion?.riskText ?? region.riskText;
+  const displayedTotalInventory =
+    (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
+  const displayedUtilization =
+    (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
+  const panelInventory = scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
+  const riskText = regionRiskLevel === "danger" ? "위험 (Danger)" : regionRiskLevel === "warning" ? "주의 (Warning)" : "안전 (Safe)";
+  const nationalRiskText = nationalRiskLevel === "danger" ? "위험 (Danger)" : nationalRiskLevel === "warning" ? "주의 (Warning)" : "안전 (Safe)";
   const regionDescription = scenarioRegion
-    ? `목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고율 ${scenarioRegion.stock_ratio}% · ${scenario.date} 기준`
-    : region.desc;
+    ? `${scenario?.date} 실데이터 · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고율 ${scenarioRegion.stock_ratio}%`
+    : `${timeline.label} ${timeline.isPrediction ? "예측" : "실측"} · 리스크 ${timelineRegion?.risk ?? timeline.riskIndex}/100`;
 
-  const recommendations: AiRecommendation[] = scenario?.recommendation
-    ? [
-        {
-          t: scenario.recommendation.title.replaceAll("**", ""),
-          d: scenario.recommendation.xai_explanation,
-          routes: [
-            {
-              from: getScenarioRegionId(scenario.recommendation.from_region),
-              to: getScenarioRegionId(scenario.recommendation.to_region),
-              label: `${scenario.recommendation.transfer_amount.toLocaleString()}EA`,
-            },
-          ],
-        },
-      ]
+  const recommendations: AiRecommendation[] = scenario?.recommendations.length
+    ? scenario.recommendations.map((recommendation) => ({
+        t: recommendation.title,
+        d: recommendation.description,
+        routes:
+          recommendation.fromRegion && recommendation.toRegion
+            ? [
+                {
+                  from: recommendation.fromRegion,
+                  to: recommendation.toRegion,
+                  label: recommendation.transferAmount
+                    ? `${recommendation.transferAmount.toLocaleString()}EA`
+                    : undefined,
+                },
+              ]
+            : undefined,
+      }))
     : [
         { t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
         {
@@ -117,6 +198,7 @@ export function DashboardView({ product }: { product: Product }) {
     const checkKey = `${product.key}-${index}`;
     return (recommendationChecks[checkKey] ?? true) ? recommendation.routes ?? [] : [];
   });
+  const productApi = productApiMeta[product.key] ?? productApiMeta.리피로우;
 
   const selectRegion = (id: string) => {
     setRegionId(id);
@@ -163,7 +245,7 @@ export function DashboardView({ product }: { product: Product }) {
       </div>
 
       {/* Bento grid */}
-      <div className="grid grid-cols-12 gap-lg lg:h-[520px] lg:min-h-0 lg:grid-rows-[minmax(0,520px)]">
+      <div className="grid grid-cols-12 gap-lg lg:h-[650px] lg:min-h-0 lg:grid-rows-[minmax(0,650px)]">
         {/* Forecast */}
         <div className="col-span-12 h-full min-h-0 min-w-0 lg:col-span-3">
           <div className="bento-card flex h-full min-h-0 flex-col overflow-hidden p-md">
@@ -190,8 +272,8 @@ export function DashboardView({ product }: { product: Product }) {
                 <span className="text-sm">{product.yoyGrowth}</span>
               </div>
             </div>
-            <div className="mt-md flex flex-1 flex-col justify-between rounded-xl border border-outline-variant/30 bg-surface-container-low p-sm">
-              <div className="mb-4 flex items-center justify-between">
+            <div className="mt-sm flex h-[170px] shrink-0 flex-col justify-between rounded-xl border border-outline-variant/30 bg-surface-container-low p-sm">
+              <div className="mb-1 flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-tight text-on-surface-variant">
                   Monthly Trends
                 </span>
@@ -222,11 +304,10 @@ export function DashboardView({ product }: { product: Product }) {
                     />
                   ))}
                   <line
-                    stroke="#737687"
-                    strokeDasharray="4 4"
-                    strokeWidth="1"
-                    x1="300"
-                    x2="300"
+                    className="timeline-chart-marker"
+                    strokeWidth="2"
+                    x1={timelineIndex * 80}
+                    x2={timelineIndex * 80}
                     y1="20"
                     y2="180"
                   />
@@ -242,12 +323,42 @@ export function DashboardView({ product }: { product: Product }) {
                     r="3"
                   />
                 </svg>
-                <div className="mt-2 flex justify-between px-1 text-[10px] font-bold text-on-surface-variant/60">
-                  <span>24 Q3</span>
-                  <span>24 Q4</span>
-                  <span className="text-scm-primary">PRES</span>
-                  <span className="text-error">26 Q1</span>
+                <div className="mt-2 grid grid-cols-6 text-center text-[9px] font-bold text-on-surface-variant/60">
+                  {timelineKeys.map((key, index) => (
+                    <span
+                      key={key}
+                      className={index === timelineIndex ? (timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary") : ""}
+                    >
+                      {timelineData[key].tick}
+                    </span>
+                  ))}
                 </div>
+              </div>
+            </div>
+            <div className="mt-sm grid min-h-0 flex-1 grid-rows-3 gap-xs">
+              <div className="forecast-kpi-row">
+                <div>
+                  <p>현재 재고 (BOX)</p>
+                  <strong><AnimatedNumber value={displayedTotalInventory} /></strong>
+                </div>
+                <Icon name="inventory_2" className="text-[18px] text-scm-primary" />
+              </div>
+              <div className="forecast-kpi-row">
+                <div>
+                  <p>가동률 (Operating Rate)</p>
+                  <strong className="text-scm-primary"><AnimatedNumber value={displayedUtilization} decimals={1} />%</strong>
+                </div>
+                <Icon name="precision_manufacturing" className="text-[18px] text-scm-primary" />
+              </div>
+              <div className="forecast-kpi-row">
+                <div>
+                  <p>품절 위험</p>
+                  <div className={`mt-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 ${nationalRisk.badge}`}>
+                    <span className={`h-2 w-2 rounded-full ${nationalRisk.bullet}`} />
+                    <span className={`text-[10px] font-bold uppercase ${nationalRisk.text}`}>{nationalRiskText}</span>
+                  </div>
+                </div>
+                <Icon name="warning" className={`text-[18px] ${nationalRisk.text}`} />
               </div>
             </div>
           </div>
@@ -255,35 +366,61 @@ export function DashboardView({ product }: { product: Product }) {
 
         {/* Map */}
         <div className="bento-card relative col-span-12 flex min-h-[420px] min-w-0 flex-col overflow-hidden bg-white lg:col-span-6 lg:min-h-0">
-          <div className="pointer-events-none relative z-10 flex items-start justify-between p-lg">
-            <div className="pointer-events-auto">
-              <h4 className="mb-1 font-display text-headline-sm text-on-surface">
-                지능형 권역 모니터링
-              </h4>
-              <p className="text-on-surface-variant/80">
-                공급망 거점을 선택하여 실시간 데이터를 확인하세요.
-              </p>
-            </div>
-            <div className="pointer-events-auto flex items-center gap-xs">
-              <button
-                onClick={() => selectRegion("National")}
-                className="cursor-pointer rounded-lg border border-outline-variant bg-white p-2 shadow-sm transition-colors hover:bg-surface-variant active:scale-95"
-              >
-                <Icon name="refresh" className="text-[18px]" />
-              </button>
+          <div className="relative z-10 flex flex-col items-stretch gap-sm border-b border-outline-variant/70 px-md py-xs md:flex-row md:items-center md:gap-md">
+            <h4 className="shrink-0 font-display text-headline-sm text-on-surface">
+              지능형 권역 모니터링
+            </h4>
+            <div className="time-scrubber min-w-0 flex-1">
+              <div className="mb-1 flex items-center justify-between gap-sm">
+                <div className="flex items-center gap-xs">
+                  <span className="font-data text-xs font-bold text-on-surface">{timeline.label}</span>
+                  <span className={`timeline-badge ${timeline.isPrediction ? "prediction" : "actual"}`}>
+                    {timeline.isPrediction ? "예측치" : "실측치"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={togglePlayback}
+                  className="timeline-play-button"
+                  aria-label={isPlaying ? "타임랩스 일시정지" : "타임랩스 재생"}
+                >
+                  <Icon name={isPlaying ? "pause" : "play_arrow"} className="text-[16px]" filled />
+                  <span>{isPlaying ? "일시정지" : "재생"}</span>
+                </button>
+              </div>
+              <input
+                aria-label="공급망 데이터 시점"
+                className="timeline-range"
+                max={timelineKeys.length - 1}
+                min="0"
+                onChange={(event) => {
+                  setIsPlaying(false);
+                  changeTimeline(Number(event.target.value));
+                }}
+                step="1"
+                type="range"
+                value={timelineIndex}
+              />
+              <div className="timeline-ticks">
+                {timelineKeys.map((key, index) => (
+                  <button key={key} type="button" onClick={() => { setIsPlaying(false); changeTimeline(index); }} className={index === timelineIndex ? "active" : ""}>
+                    {timelineData[key].tick}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           <div
             ref={mapRef}
-            className="relative flex flex-1 items-center justify-center overflow-hidden bg-white"
+            className={`timeline-map relative flex flex-1 items-center justify-center overflow-hidden bg-white ${timeline.isPrediction ? "prediction" : ""}`}
           >
             <img
               alt="South Korea Map"
               src={region.img}
               className="max-h-[90%] max-w-[90%] object-contain transition-opacity duration-300"
             />
-            <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[1456/1941] h-[90%] -translate-x-1/2 -translate-y-1/2">
+            <div key={timelineKey} className="timeline-data-fade pointer-events-none absolute left-1/2 top-1/2 aspect-[1456/1941] h-[90%] -translate-x-1/2 -translate-y-1/2">
               {activeTransferRoutes.length > 0 && (
                 <svg
                   aria-label="AI 추천 물류 이동 경로"
@@ -295,13 +432,13 @@ export function DashboardView({ product }: { product: Product }) {
                   <defs>
                     <marker
                       id="transfer-arrowhead"
-                      markerHeight="7"
-                      markerWidth="7"
+                      markerHeight="4"
+                      markerWidth="4"
                       orient="auto"
-                      refX="6"
-                      refY="3.5"
+                      refX="3.5"
+                      refY="2"
                     >
-                      <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--scm-primary)" />
+                      <path d="M0,0 L4,2 L0,4 Z" fill="var(--scm-primary)" />
                     </marker>
                   </defs>
                   {activeTransferRoutes.map((route, index) => {
@@ -336,7 +473,9 @@ export function DashboardView({ product }: { product: Product }) {
               )}
               {markerOrder.map((id) => {
                 const r = regions[id];
-                const markerRisk = scenario?.regions[id]?.riskLevel;
+                const markerRisk =
+                  (isCurrentTimeline ? scenario?.regions[id]?.riskLevel : undefined) ??
+                  timeline.regions[id]?.status;
                 if (!r.box) return null;
                 return (
                   <button
@@ -354,9 +493,10 @@ export function DashboardView({ product }: { product: Product }) {
 
 
             <div
+              key={`${timelineKey}-${regionId}`}
               ref={panelRef}
               onMouseDown={startDrag}
-              className="floating-info-panel"
+              className="floating-info-panel timeline-data-fade"
               style={
                 panelPos
                   ? { top: panelPos.top, left: panelPos.left, right: "auto" }
@@ -377,7 +517,7 @@ export function DashboardView({ product }: { product: Product }) {
                   </span>
                   <div className="flex items-baseline gap-1">
                     <span className="font-data text-[18px] font-semibold text-scm-primary">
-                      {panelStock}
+                      <AnimatedNumber value={panelInventory} />
                     </span>
                     <span className="text-[10px] font-bold">BOX</span>
                   </div>
@@ -429,53 +569,17 @@ export function DashboardView({ product }: { product: Product }) {
         </div>
 
         {/* Right column */}
-        <div className="col-span-12 flex h-full min-h-0 min-w-0 flex-col gap-lg lg:col-span-3">
-          <div className="bento-card flex shrink-0 flex-col items-center p-md">
-            <div className="mb-md flex w-full items-center justify-between">
-              <h4 className="font-display text-headline-sm">리스크 지수 (Risk Index)</h4>
-              <Icon name="warning" className="text-error" />
-            </div>
-            <div className="relative mb-md flex flex-col items-center">
-              <div className="relative h-24 w-48 overflow-hidden">
-                <div className="absolute left-0 top-0 h-48 w-48 rounded-full border-[16px] border-surface-container-highest" />
-                <div
-                  className="absolute left-0 top-0 h-48 w-48 rounded-full border-[16px] border-error"
-                  style={{
-                    clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
-                    transform: "rotate(140deg)",
-                  }}
-                />
-                <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2 flex-col items-center">
-                  <span className="text-display-lg font-bold text-on-surface">78</span>
-                  <span className="text-[10px] font-bold uppercase text-error">
-                    높음 (High Risk)
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="w-full space-y-2">
-              <p className="mb-1 text-[10px] font-bold uppercase text-on-surface-variant">
-                리스크 요인
-              </p>
-              {riskFactors.map((f) => (
-                <div key={f.label} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: f.color }} />
-                    <span className="text-on-surface">{f.label}</span>
-                  </div>
-                  <span className="font-data text-data-sm">{f.score}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bento-card flex min-h-0 flex-1 flex-col overflow-hidden bg-on-surface-variant/5 p-md">
-            <div className="mb-md flex items-center gap-sm">
+        <div className="col-span-12 flex h-full min-h-0 min-w-0 flex-col gap-sm lg:col-span-3">
+          <div className="bento-card flex min-h-0 flex-[2] flex-col overflow-hidden bg-on-surface-variant/5 p-md">
+            <div className="mb-sm flex items-center gap-sm">
               <div className="flex h-6 w-6 items-center justify-center rounded bg-scm-primary text-white">
                 <Icon name="auto_awesome" className="text-[16px]" filled />
               </div>
               <h4 className="font-display text-headline-sm">AI 추천 실행안</h4>
             </div>
+            <p className={`mb-xs text-[10px] font-bold ${timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary"}`}>
+              {timeline.label} 시점 기준 추천 · {timeline.isPrediction ? "예측 데이터 기반" : "실측 데이터 기반"}
+            </p>
             <div className="min-h-0 flex-1 space-y-sm overflow-y-auto">
               {recommendations.map((rec, index) => {
                 const checkKey = `${product.key}-${index}`;
@@ -507,35 +611,51 @@ export function DashboardView({ product }: { product: Product }) {
               })}
             </div>
             <button className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]">
-              {scenario?.recommendation?.approval_action.initial_button_text ?? "실행 계획 적용"}
+              {scenario?.recommendations[0]?.approvalButtonText ?? "실행 계획 적용"}
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* KPI bar */}
-      <div className="mt-xl grid grid-cols-2 gap-md md:grid-cols-4">
-        <div className="bento-card flex flex-col justify-center p-sm text-center">
-          <p className="mb-xs text-[10px] font-bold text-on-surface-variant">현재 재고 (BOX)</p>
-          <span className="font-display text-headline-sm">
-            {nationalStock?.toLocaleString() ?? product.stock}
-          </span>
-        </div>
-        <div className="bento-card flex flex-col justify-center p-sm text-center">
-          <p className="mb-xs text-[10px] font-bold text-on-surface-variant">
-            가동률 (Operating Rate)
-          </p>
-          <span className="font-display text-headline-sm text-scm-primary">
-            {product.utilization}
-          </span>
-        </div>
-        <div className="bento-card flex flex-col justify-center border-b-2 border-error/20 p-sm text-center">
-          <p className="mb-xs text-[10px] font-bold text-on-surface-variant">품절 위험</p>
-          <span className="font-display text-headline-sm text-error">{product.stockout}</span>
-        </div>
-        <div className="bento-card flex flex-col justify-center p-sm text-center">
-          <p className="mb-xs text-[10px] font-bold text-on-surface-variant">ROI (YTD)</p>
-          <span className="font-display text-headline-sm text-[#52c41a]">{product.roi}</span>
+          <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
+            <div className="flex items-start gap-sm">
+              <div className="api-placeholder-icon">
+                <Icon name={productApi.icon} className="text-[18px]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-xs">
+                  <h4 className="truncate text-sm font-bold text-on-surface">{productApi.title}</h4>
+                  <span className="api-ready-badge">{scenario?.externalSignal ? "데이터 연결" : "연결 대기"}</span>
+                </div>
+                <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
+                  {scenario?.externalSignal
+                    ? `${scenario.externalSignal.title} · ${scenario.externalSignal.value} · ${scenario.externalSignal.detail}`
+                    : productApi.description}
+                </p>
+                <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
+                  {productApi.endpoint}
+                </code>
+              </div>
+            </div>
+          </div>
+
+          <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
+            <div className="flex items-start gap-sm">
+              <div className="api-placeholder-icon news">
+                <Icon name="newspaper" className="text-[18px]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-xs">
+                  <h4 className="truncate text-sm font-bold text-on-surface">뉴스 크롤링 API</h4>
+                  <span className="api-ready-badge">연결 대기</span>
+                </div>
+                <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
+                  공급망·의약품 이슈와 실시간 뉴스 신호 연동 영역
+                </p>
+                <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
+                  /api/news-crawling
+                </code>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
