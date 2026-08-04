@@ -149,7 +149,9 @@ export function DashboardView({ product }: { product: Product }) {
   const scenarioRegion = isCurrentTimeline ? scenario?.regions[regionId] : undefined;
   const timelineRegion = timeline.regions[regionId];
   const region = regions[regionId];
-  const nationalRiskLevel: RiskLevel = timeline.riskIndex >= 85 ? "danger" : timeline.riskIndex >= 65 ? "warning" : "safe";
+  const nationalRiskLevel: RiskLevel =
+    (isCurrentTimeline ? scenario?.inventoryLevel : undefined) ??
+    (timeline.riskIndex >= 85 ? "danger" : timeline.riskIndex >= 65 ? "warning" : "safe");
   const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
   const nationalRisk = riskStyles[nationalRiskLevel];
@@ -159,10 +161,10 @@ export function DashboardView({ product }: { product: Product }) {
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
   const panelInventory = scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
-  const riskText = regionRiskLevel === "danger" ? "위험 (Danger)" : regionRiskLevel === "warning" ? "주의 (Warning)" : "안전 (Safe)";
-  const nationalRiskText = nationalRiskLevel === "danger" ? "위험 (Danger)" : nationalRiskLevel === "warning" ? "주의 (Warning)" : "안전 (Safe)";
+  const riskText = regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
+  const nationalRiskText = nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
   const regionDescription = scenarioRegion
-    ? `${scenario?.date} 실데이터 · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고율 ${scenarioRegion.stock_ratio}%`
+    ? `${scenario?.date} 실데이터 · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
     : `${timeline.label} ${timeline.isPrediction ? "예측" : "실측"} · 리스크 ${timelineRegion?.risk ?? timeline.riskIndex}/100`;
 
   const recommendations: AiRecommendation[] = scenario?.recommendations.length
@@ -231,8 +233,8 @@ export function DashboardView({ product }: { product: Product }) {
   };
 
   return (
-    <div className="max-monitor-width flex-1 bg-surface px-lg pb-12 pt-16">
-      <div className="flex flex-col items-start justify-between gap-md py-lg md:flex-row md:items-end">
+    <div className="dashboard-fixed-layout flex-1 bg-surface px-lg pb-12 pt-16">
+      <div className="flex flex-row items-end justify-between gap-md py-lg">
         <div>
           <h3 className="mb-xs font-display text-headline-md text-on-surface">{region.title}</h3>
           <div className="flex items-center gap-sm text-on-surface-variant">
@@ -245,9 +247,9 @@ export function DashboardView({ product }: { product: Product }) {
       </div>
 
       {/* Bento grid */}
-      <div className="grid grid-cols-12 gap-lg lg:h-[650px] lg:min-h-0 lg:grid-rows-[minmax(0,650px)]">
+      <div className="grid h-[650px] min-h-0 grid-cols-12 grid-rows-[minmax(0,650px)] gap-lg">
         {/* Forecast */}
-        <div className="col-span-12 h-full min-h-0 min-w-0 lg:col-span-3">
+        <div className="col-span-3 h-full min-h-0 min-w-0">
           <div className="bento-card flex h-full min-h-0 flex-col overflow-hidden p-md">
             <div className="mb-md flex min-w-0 items-start justify-between gap-sm">
               <h4 className="min-w-0 break-words font-display text-headline-sm">
@@ -365,8 +367,8 @@ export function DashboardView({ product }: { product: Product }) {
         </div>
 
         {/* Map */}
-        <div className="bento-card relative col-span-12 flex min-h-[420px] min-w-0 flex-col overflow-hidden bg-white lg:col-span-6 lg:min-h-0">
-          <div className="relative z-10 flex flex-col items-stretch gap-sm border-b border-outline-variant/70 px-md py-xs md:flex-row md:items-center md:gap-md">
+        <div className="bento-card relative col-span-6 flex min-h-0 min-w-0 flex-col overflow-hidden bg-white">
+          <div className="relative z-10 flex flex-row items-center gap-md border-b border-outline-variant/70 px-md py-xs">
             <h4 className="shrink-0 font-display text-headline-sm text-on-surface">
               지능형 권역 모니터링
             </h4>
@@ -549,9 +551,9 @@ export function DashboardView({ product }: { product: Product }) {
           <div className="z-10 flex items-center justify-between border-t border-outline-variant bg-white/60 p-md backdrop-blur-sm">
             <div className="flex items-center gap-md">
               {[
-                { c: "status-dot-safe", label: "안전 (Safe)" },
-                { c: "status-dot-warning", label: "주의 (Warning)" },
-                { c: "status-dot-danger", label: "위험 (Danger)" },
+                { c: "status-dot-safe", label: "적정" },
+                { c: "status-dot-warning", label: "과잉" },
+                { c: "status-dot-danger", label: "부족" },
               ].map((l) => (
                 <div key={l.label} className="flex items-center gap-1.5">
                   <span className={`h-2 w-2 rounded-full ${l.c}`} />
@@ -569,7 +571,7 @@ export function DashboardView({ product }: { product: Product }) {
         </div>
 
         {/* Right column */}
-        <div className="col-span-12 flex h-full min-h-0 min-w-0 flex-col gap-sm lg:col-span-3">
+        <div className="col-span-3 flex h-full min-h-0 min-w-0 flex-col gap-sm">
           <div className="bento-card flex min-h-0 flex-[2] flex-col overflow-hidden bg-on-surface-variant/5 p-md">
             <div className="mb-sm flex items-center gap-sm">
               <div className="flex h-6 w-6 items-center justify-center rounded bg-scm-primary text-white">

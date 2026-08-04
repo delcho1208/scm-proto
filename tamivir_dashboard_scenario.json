@@ -1,260 +1,146 @@
 {
-  "project": "종근당 타미비어 AI SCM Decision Intelligence",
-
-  "scenarios": [
-
+  "scenario": "타미비어 Overproduction",
+  "f2a_target": 1515522,
+  "ai_target": 49375,
+  "current_stock": 1188421,
+  "ratio": 24.07,
+  "dead_stock_quantity": 1139046,
+  "dead_stock_cost": 339435708,
+  "dead_stock_cost_billion_str": "약 3.39억원",
+  "status": "과잉",
+  "risk_score": 100,
+  "decision": "Critical (🔴위험)",
+  "recommendation": "전국 타미비어 생산 즉시 감축 (감축 기준 10배 초과), 신규 발주 보류, 기존 재고 우선 출하",
+  "trace_log": [
+    "External Event: Influenza Market Shock & Mandate Lift Detected",
+    "Demand Forecast: AI Model Projected Sharp Volatility Drop",
+    "Inventory Analysis: Status [과잉], Ratio 24.1x (Trigger Standard: >10x)",
+    "Risk Assessment: Critical Severity Triggered (Score: 100/100)",
+    "Prescription: Automated Production Halt & Inventory Optimization Recommended"
+  ],
+  "contributions": [
     {
-      "phase": "Phase1",
-
-      "title": "성수기 대비 생산",
-
-      "dashboard_card": {
-        "product": "타미비어",
-        "factory": "천안공장",
-        "operation_rate": 97.0,
-        "daily_production": 120000,
-        "current_stock": 1454904,
-        "f2a_target_stock": 1515525,
-        "status": "적정"
-      }
+      "factor": "External_Shock",
+      "score": 20,
+      "contribution_pct": 20
     },
-
     {
-      "phase": "Phase2",
-
-      "title": "외부충격 발생",
-
-      "external_event": {
-        "event": "마이코플라스마 폐렴",
-        "policy": "전국 마스크 의무화",
-        "external_shock_flag": 1
-      },
-
-      "prediction": {
-        "f2a_target_stock": 1515525,
-        "ai_target_stock": 49375,
-        "prediction_result": "수요 급감",
-        "trigger": true
-      }
+      "factor": "Inventory_Risk",
+      "score": 40,
+      "contribution_pct": 40
     },
-
     {
-      "phase": "Phase3",
-
-      "title": "AI 의사결정",
-
-      "decision": {
-
-        "current_stock": 1490000,
-
-        "f2a_target_stock": 1515525,
-
-        "ai_target_stock": 49375,
-
-        "inventory_status": "과잉",
-
-        "ratio": 30.18,
-
-        "trigger_standard": 10,
-
-        "trigger": true,
-
-        "dead_stock_quantity": 1440625,
-
-        "dead_stock_cost": 429306250,
-
-        "dead_stock_cost_str": "약 4.29억원",
-
-        "risk_score": 90,
-
-        "risk_level": "Critical (🔴위험)"
-      }
+      "factor": "Production_Inertia",
+      "score": 20,
+      "contribution_pct": 20
     },
-
     {
-      "phase": "Phase4",
-
-      "title": "XAI 및 관리자 승인",
-
-      "business_impact": {
-
-        "expected_dead_stock_reduce": 1440625,
-
-        "expected_cost_saving": "약 4.29억원",
-
-        "purchase_reduction": "신규 원료 발주 중단",
-
-        "warehouse_optimization": "창고 적체 해소",
-
-        "production_optimization": "수요 기반 생산계획 전환"
-
-      },
-
-      "risk_score_breakdown": [
-
-        {
-          "factor": "External_Shock",
-          "score": 20,
-          "weight": 22
-        },
-
-        {
-          "factor": "Inventory_Risk",
-          "score": 40,
-          "weight": 44
-        },
-
-        {
-          "factor": "Production_Inertia",
-          "score": 20,
-          "weight": 22
-        },
-
-        {
-          "factor": "Supply_Stability",
-          "score": 0,
-          "weight": 0
-        },
-
-        {
-          "factor": "Logistics_Avail",
-          "score": 10,
-          "weight": 11
-        }
-
-      ],
-
-      "decision_trace": [
-
-        {
-          "step": 1,
-          "title": "External Event",
-          "description": "Influenza Market Shock & Mandate Lift Detected"
-        },
-
-        {
-          "step": 2,
-          "title": "AI Prediction",
-          "description": "Demand Forecast Reduced to 49,375 EA"
-        },
-
-        {
-          "step": 3,
-          "title": "Inventory Analysis",
-          "description": "Inventory Status = 과잉 (30.18배)"
-        },
-
-        {
-          "step": 4,
-          "title": "Risk Assessment",
-          "description": "Critical Risk Score 90/100"
-        },
-
-        {
-          "step": 5,
-          "title": "Prescriptive Decision",
-          "description": "Production Reduction Triggered"
-        }
-
-      ],
-
-      "xai_cards": [
-
-        {
-
-          "title": "외부 이벤트 감지",
-
-          "value": "Flag : 1",
-
-          "impact": "+20점 (22%)",
-
-          "description": "마스크 의무화 등 외부 충격 발생으로 인플루엔자 시장 수요 급감 감지"
-
-        },
-
-        {
-
-          "title": "재고 과잉",
-
-          "value": "30.18배",
-
-          "impact": "+40점 (44%)",
-
-          "description": "AI 목표재고 대비 약 30배 초과. 생산 감축 Trigger 기준(10배)을 크게 초과하여 생산 감축 권고"
-
-        },
-
-        {
-
-          "title": "생산 관성",
-
-          "value": "가동률 97%",
-
-          "impact": "+20점 (22%)",
-
-          "description": "과잉 재고 상태에서도 생산라인이 지속적으로 가동되고 있음"
-
-        },
-
-        {
-
-          "title": "원료 수급",
-
-          "value": "정상",
-
-          "impact": "+0점",
-
-          "description": "원료 잔여량이 충분하여 생산 감축의 원인은 원료 부족이 아님"
-
-        },
-
-        {
-
-          "title": "물류 출하",
-
-          "value": "20만정",
-
-          "impact": "+10점 (11%)",
-
-          "description": "물류 여력은 충분하므로 적체 원인은 물류가 아니라 시장 수요 감소"
-
-        }
-
-      ],
-
-      "recommendation": {
-
-        "title": "AI 생산 감축 권고",
-
-        "main_action": "타미비어 생산 즉시 감축",
-
-        "sub_actions": [
-
-          "신규 원료 발주 보류",
-
-          "기존 재고 우선 출하",
-
-          "관리자 승인 후 생산계획 재수립"
-
-        ]
-
-      },
-
-      "approval": {
-
-        "button_text": "생산 감축 승인",
-
-        "approved_button_text": "승인 완료 ✓",
-
-        "approved": false,
-
-        "approval_user": "",
-
-        "approval_date": ""
-
-      }
-
+      "factor": "Supply_Stability",
+      "score": 10,
+      "contribution_pct": 10
+    },
+    {
+      "factor": "Logistics_Avail",
+      "score": 10,
+      "contribution_pct": 10
     }
-
+  ],
+  "xai_cards": [
+    {
+      "title": "외부 이벤트 감지",
+      "value": "Flag: 1",
+      "impact": "+20점 (20%)",
+      "description": "마스크 의무화 등 외부 충격 발생으로 인플루엔자 시장 수요 급감 감지"
+    },
+    {
+      "title": "전국 재고 상태 및 과잉 판정",
+      "value": "상태: 과잉 (전국 평균 24.1배)",
+      "impact": "+40점 (40%)",
+      "description": "전국 재고 상태 '과잉' 판정. AI 목표 대비 10배 초과 시 감축 기준인데, 전국 평균 약 24.1배 초과하여 즉시 감축 Trigger 발동 (Dead Stock 1,139,046정, 예상 손실 약 3.39억원)"
+    },
+    {
+      "title": "생산 관성 유지",
+      "value": "가동률 97.0%",
+      "impact": "+20점 (20%)",
+      "description": "심각한 과잉 재고 상태임에도 일일 120,000정 생산 관성이 지속되어 전국 재고 가중 중"
+    },
+    {
+      "title": "원료 수급 안정성",
+      "value": "잔여 50,000kg",
+      "impact": "+10점 (10%)",
+      "description": "원료 조달 리드타임은 2주이나 현재 원료 잔여량이 충분하여 본 감축은 원료 부족 문제가 아님"
+    },
+    {
+      "title": "물류 출하 여력",
+      "value": "운송가능 200,000정",
+      "impact": "+10점 (10%)",
+      "description": "물류 운송 여력은 충분함. 출하 정체는 물류 마비가 아닌 시장 수요 증발에 기인함"
+    }
+  ],
+  "zone_details": [
+    {
+      "zone_name": "Zone1_서울권",
+      "f2a_target": 378881,
+      "ai_target": 12343,
+      "current_stock": 364146,
+      "ratio": 29.5,
+      "status": "과잉"
+    },
+    {
+      "zone_name": "Zone2_경기인천수도권",
+      "f2a_target": 378881,
+      "ai_target": 12343,
+      "current_stock": 348099,
+      "ratio": 28.2,
+      "status": "과잉"
+    },
+    {
+      "zone_name": "Zone3_강원권",
+      "f2a_target": 75776,
+      "ai_target": 2468,
+      "current_stock": 30612,
+      "ratio": 12.4,
+      "status": "과잉"
+    },
+    {
+      "zone_name": "Zone4_대전세종충청권",
+      "f2a_target": 151552,
+      "ai_target": 4937,
+      "current_stock": 92332,
+      "ratio": 18.7,
+      "status": "과잉"
+    },
+    {
+      "zone_name": "Zone5_광주전북전남권",
+      "f2a_target": 151552,
+      "ai_target": 4937,
+      "current_stock": 70607,
+      "ratio": 14.3,
+      "status": "과잉"
+    },
+    {
+      "zone_name": "Zone6_대구경북권",
+      "f2a_target": 151552,
+      "ai_target": 4937,
+      "current_stock": 106651,
+      "ratio": 21.6,
+      "status": "과잉"
+    },
+    {
+      "zone_name": "Zone7_부산울산경남권",
+      "f2a_target": 197018,
+      "ai_target": 6418,
+      "current_stock": 165606,
+      "ratio": 25.8,
+      "status": "과잉"
+    },
+    {
+      "zone_name": "Zone8_제주권",
+      "f2a_target": 30310,
+      "ai_target": 987,
+      "current_stock": 10368,
+      "ratio": 10.5,
+      "status": "과잉"
+    }
   ]
 }

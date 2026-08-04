@@ -37,98 +37,36 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
 
   return (
     <div className="scm-root text-body-md">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-50 flex h-screen w-[240px] flex-col border-r border-outline-variant bg-surface py-md">
-        <div className="mb-xl px-md">
-          <div className="flex items-center gap-xs">
-            <img
-              alt="Chong Kun Dang Logo"
-              className="h-8 w-auto rounded-lg object-contain"
-              src={brandLogo}
-            />
-            <div>
-              <h1 className="font-display text-headline-sm font-bold text-on-surface">
-                SCM Dashboard
-              </h1>
-              <p className="text-label-caps text-on-surface-variant">Logistics Intelligence</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-xs px-md">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
-            메인 메뉴
-          </p>
-        </div>
-        <nav className="space-y-1">
-          <Link
-            to="/simulation"
-            className={`mx-2 flex items-center gap-md rounded-lg px-md py-sm transition-transform active:scale-[0.98] ${
-              pathname === "/simulation" || pathname === "/"
-                ? "bg-primary-container font-bold text-on-primary-container"
-                : "text-on-surface-variant hover:bg-surface-variant"
-            }`}
-          >
-            <Icon name="dashboard" filled />
-            <span className="text-label-caps">모니터링</span>
-          </Link>
-          <Link
-            to="/data-integration"
-            className={`mx-2 flex items-center gap-md rounded-lg px-md py-sm transition-transform active:scale-[0.98] ${
-              pathname === "/data-integration"
-                ? "bg-primary-container font-bold text-on-primary-container"
-                : "text-on-surface-variant hover:bg-surface-variant"
-            }`}
-          >
-            <Icon name="location_on" />
-            <span className="text-label-caps">권역별 재고</span>
-          </Link>
-          <a
-            className="mx-2 flex items-center gap-md rounded-lg px-md py-sm text-on-surface-variant transition-colors hover:bg-surface-variant"
-            href="#"
-          >
-            <Icon name="analytics" />
-            <span className="text-label-caps">운영 현황</span>
-          </a>
-        </nav>
-
-        <div className="mt-auto space-y-1 border-t border-outline-variant px-md pt-md">
-          <div className="px-md py-sm text-[10px] font-bold text-on-surface-variant">
-            LG CNS x Chong Kun Dang
-          </div>
-          {[
-            { icon: "settings", label: "설정" },
-            { icon: "help", label: "지원" },
-          ].map((item) => (
-            <a
-              key={item.label}
-              className="flex items-center gap-md rounded-lg px-md py-sm text-on-surface-variant transition-colors hover:bg-surface-variant"
-              href="#"
-            >
-              <Icon name={item.icon} />
-              <span className="text-label-caps">{item.label}</span>
-            </a>
-          ))}
-          <button className="mt-md w-full cursor-pointer rounded-lg bg-primary-container py-sm font-bold text-on-primary-container transition-opacity hover:opacity-90 active:scale-[0.98]">
-            Export Report
-          </button>
-        </div>
-      </aside>
-
       {/* Main */}
-      <main className="ml-[240px] flex min-h-screen flex-1 flex-col">
-        <header className="fixed right-0 top-0 z-40 flex h-16 w-[calc(100%-240px)] items-center justify-between border-b border-outline-variant bg-surface-container px-lg">
-          <div className="flex items-center gap-xl">
+      <main className="flex min-h-screen flex-1 flex-col">
+        <header className="fixed left-0 right-0 top-0 z-40 flex h-16 w-full min-w-[1440px] items-center justify-between border-b border-outline-variant bg-surface-container px-xl">
+          <div className="flex min-w-0 items-center gap-lg">
+            <Link to="/simulation" className="flex shrink-0 items-center gap-xs">
+              <img
+                alt="Chong Kun Dang Logo"
+                className="h-9 w-auto rounded-lg object-contain"
+                src={brandLogo}
+              />
+              <div className="block">
+                <h1 className="font-display text-sm font-bold leading-tight text-on-surface">
+                  SCM Dashboard
+                </h1>
+                <p className="text-[9px] font-bold uppercase tracking-wide text-on-surface-variant">
+                  Logistics Intelligence
+                </p>
+              </div>
+            </Link>
+            <span className="block h-7 w-px bg-outline-variant" />
             <h2 className="font-display text-headline-sm font-black uppercase tracking-tight text-scm-primary">
               Digital Twin SCM Portal
             </h2>
-            <nav className="hidden items-center gap-lg lg:flex">
+            <nav className="flex items-center gap-lg">
               {topNav.map((item) => (
                 <Link
                   key={item.to}
                   to={item.to}
                   className={`transition-colors hover:text-scm-primary ${
-                    pathname === item.to
+                    pathname === item.to || (item.to === "/simulation" && pathname === "/")
                       ? "font-bold text-scm-primary"
                       : "text-on-surface-variant"
                   }`}
@@ -214,7 +152,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
 
         {children(product)}
 
-        <footer className="fixed bottom-0 right-0 z-40 flex w-[calc(100%-240px)] items-center justify-between border-t border-outline-variant bg-surface-container-lowest px-lg py-xs">
+        <footer className="fixed bottom-0 left-0 right-0 z-40 flex w-full min-w-[1440px] items-center justify-between border-t border-outline-variant bg-surface-container-lowest px-xl py-xs">
           <p className="text-[10px] font-bold text-on-surface-variant">
             © 2025 SCM Logistics Intelligence. LG CNS x Chong Kun Dang Integrated System.
           </p>

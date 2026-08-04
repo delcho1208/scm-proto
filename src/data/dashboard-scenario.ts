@@ -7,6 +7,7 @@ type RawRegion = {
   current_stock: number;
   target_stock: number;
   stock_ratio: number;
+  stockRatioLabel?: string;
   status: string;
 };
 
@@ -34,6 +35,7 @@ export type ProductDashboardScenario = {
   totalInventory?: number;
   utilization?: number;
   riskScore?: number;
+  inventoryLevel?: RiskLevel;
   externalSignal?: {
     title: string;
     value: string;
@@ -56,10 +58,21 @@ function toRegionId(regionName: string) {
   return regionIdByZone[regionName.split("_")[0]];
 }
 
-function toRiskLevel(status: string): RiskLevel {
+function toRiskLevel(status: string, stockRatio: number): RiskLevel {
   const normalized = status.toUpperCase();
-  if (normalized === "DANGER" || status === "위험") return "danger";
-  if (normalized === "WARNING" || status === "주의") return "warning";
+  // Explicit status from the source takes priority. Some feeds use percent ratios,
+  // while Tamivir reports multiples (e.g. 24.1x), so ratio alone is not comparable.
+  if (normalized === "DANGER" || status === "위험" || status === "부족")
+    return "danger";
+  if (status === "과잉") return "warning";
+  if (status === "적정") return "safe";
+  if (
+    normalized === "WARNING" ||
+    status === "주의" ||
+    stockRatio >= 130
+  )
+    return "warning";
+  if (stockRatio < 100) return "danger";
   return "safe";
 }
 
@@ -67,7 +80,7 @@ function normalizeRegions(regions: RawRegion[] = []) {
   return Object.fromEntries(
     regions.map((item) => {
       const id = toRegionId(item.region);
-      const riskLevel = toRiskLevel(item.status);
+      const riskLevel = toRiskLevel(item.status, item.stock_ratio);
       return [
         id,
         {
@@ -76,10 +89,10 @@ function normalizeRegions(regions: RawRegion[] = []) {
           riskLevel,
           riskText:
             riskLevel === "danger"
-              ? "위험 (Danger)"
+              ? "부족"
               : riskLevel === "warning"
-                ? "주의 (Warning)"
-                : "안전 (Safe)",
+                ? "과잉"
+                : "적정",
         } satisfies DashboardRegion,
       ];
     }),
@@ -110,16 +123,27 @@ const lipilouLatest = [...lipilouRaw.scenarios]
   .filter((scenario) => scenario.map_monitoring?.length)
   .sort((a, b) => b.date.localeCompare(a.date))[0];
 const lipilouRegions = normalizeRegions(lipilouLatest?.map_monitoring);
+const lipilouTotalTarget = Object.values(lipilouRegions).reduce(
+  (sum, region) => sum + region.target_stock,
+  0,
+);
+const lipilouTotalInventory = Object.values(lipilouRegions).reduce(
+  (sum, region) => sum + region.current_stock,
+  0,
+);
 
 export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
   ? {
       date: lipilouLatest.date,
       sceneName: lipilouLatest.scene_name,
       regions: lipilouRegions,
-      totalInventory: Object.values(lipilouRegions).reduce(
-        (sum, region) => sum + region.current_stock,
-        0,
-      ),
+      totalInventory: lipilouTotalInventory,
+      inventoryLevel:
+        lipilouTotalInventory < lipilouTotalTarget
+          ? "danger"
+          : lipilouTotalInventory >= lipilouTotalTarget * 1.3
+            ? "warning"
+            : "safe",
       recommendations: (lipilouLatest.ai_solutions ?? []).map((solution) => ({
         id: solution.id,
         title: solution.summary ?? solution.title,
@@ -133,55 +157,65 @@ export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
   : null;
 
 type TamivirRaw = {
-  scenarios: Array<{
-    phase: string;
-    dashboard_card?: { operation_rate: number; current_stock: number };
-    external_event?: { event: string; policy: string };
-    prediction?: { ai_target_stock: number; prediction_result: string };
-    decision?: { current_stock: number; risk_score: number };
-    recommendation?: { title: string; main_action: string; sub_actions: string[] };
-    xai_cards?: Array<{ title: string; description: string }>;
-    approval?: { button_text: string };
+  scenario: string;
+  f2a_target: number;
+  ai_target: number;
+  current_stock: number;
+  ratio: number;
+  dead_stock_quantity: number;
+  dead_stock_cost_billion_str: string;
+  status: string;
+  risk_score: number;
+  recommendation: string;
+  trace_log: string[];
+  xai_cards: Array<{ title: string; value: string; description: string }>;
+  zone_details: Array<{
+    zone_name: string;
+    f2a_target: number;
+    ai_target: number;
+    current_stock: number;
+    ratio: number;
+    status: string;
   }>;
 };
 
 const tamivirRaw = rawTamivirScenario as TamivirRaw;
-const tamivirOperation = tamivirRaw.scenarios.find((scenario) => scenario.dashboard_card);
-const tamivirEvent = tamivirRaw.scenarios.find((scenario) => scenario.external_event);
-const tamivirDecision = tamivirRaw.scenarios.find((scenario) => scenario.decision);
-const tamivirApproval = tamivirRaw.scenarios.find((scenario) => scenario.recommendation);
+const tamivirRegions = normalizeRegions(
+  tamivirRaw.zone_details.map((region) => ({
+    region: region.zone_name,
+    current_stock: region.current_stock,
+    target_stock: region.ai_target,
+    stock_ratio: region.ratio,
+    stockRatioLabel: `${region.ratio.toFixed(1)}배`,
+    status: region.status,
+  })),
+);
+const operationRateText = tamivirRaw.xai_cards.find((card) =>
+  card.title.includes("생산 관성"),
+)?.value;
+const operationRate = Number(operationRateText?.match(/[\d.]+/)?.[0] ?? 97);
+const externalShock = tamivirRaw.xai_cards.find((card) => card.title.includes("외부 이벤트"));
+const inventoryXai = tamivirRaw.xai_cards.find((card) => card.title.includes("재고 상태"));
 
 export const tamivirDashboard: ProductDashboardScenario = {
   date: "현재",
-  sceneName: "외부 충격 기반 AI 생산 감축 의사결정",
-  regions: {},
-  totalInventory:
-    tamivirDecision?.decision?.current_stock ?? tamivirOperation?.dashboard_card?.current_stock,
-  utilization: tamivirOperation?.dashboard_card?.operation_rate,
-  riskScore: tamivirDecision?.decision?.risk_score,
-  externalSignal: tamivirEvent?.external_event
-    ? {
-        title: tamivirEvent.external_event.event,
-        value: tamivirEvent.prediction
-          ? `${tamivirEvent.prediction.prediction_result} · 목표 ${tamivirEvent.prediction.ai_target_stock.toLocaleString()}EA`
-          : "외부 충격 감지",
-        detail: tamivirEvent.external_event.policy,
-      }
-    : undefined,
-  recommendations: tamivirApproval?.recommendation
-    ? [
-        {
-          id: "TAMIVIR-PRODUCTION-REDUCTION",
-          title: tamivirApproval.recommendation.main_action,
-          description: [
-            ...(tamivirApproval.recommendation.sub_actions ?? []),
-            tamivirApproval.xai_cards?.[1]?.description,
-          ]
-            .filter(Boolean)
-            .join(" · "),
-          approvalButtonText: tamivirApproval.approval?.button_text ?? "생산 감축 승인",
-        },
-      ]
-    : [],
+  sceneName: tamivirRaw.scenario,
+  regions: tamivirRegions,
+  totalInventory: tamivirRaw.current_stock,
+  utilization: operationRate,
+  riskScore: tamivirRaw.risk_score,
+  inventoryLevel: tamivirRaw.status === "과잉" ? "warning" : tamivirRaw.status === "부족" ? "danger" : "safe",
+  externalSignal: {
+    title: "인플루엔자 시장 충격 감지",
+    value: `현재 ${tamivirRaw.current_stock.toLocaleString()}EA · AI 목표 ${tamivirRaw.ai_target.toLocaleString()}EA`,
+    detail: externalShock?.description ?? tamivirRaw.trace_log[0],
+  },
+  recommendations: [
+    {
+      id: "TAMIVIR-PRODUCTION-REDUCTION",
+      title: "전국 타미비어 생산 즉시 감축",
+      description: `${tamivirRaw.recommendation} · Dead Stock ${tamivirRaw.dead_stock_quantity.toLocaleString()}정 · 예상 손실 ${tamivirRaw.dead_stock_cost_billion_str} · ${inventoryXai?.description ?? ""}`,
+      approvalButtonText: "생산 감축 승인",
+    },
+  ],
 };
-
