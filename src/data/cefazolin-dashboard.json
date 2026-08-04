@@ -1,0 +1,1070 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "package": "cefazolin_lovable_dashboard_csv_package (1).zip",
+    "packageSha256": "5aad3c253ec9663c2d613e87028af471c97663e02f292e9a5edef92e457b8830",
+    "csvFiles": [
+      "01_dashboard_overview.csv",
+      "02_dashboard_regions.csv",
+      "03_dashboard_scenarios.csv",
+      "04_dashboard_monthly_flow.csv",
+      "05_dashboard_integration.csv",
+      "06_dashboard_procurement.csv",
+      "07_dashboard_model_validation.csv"
+    ]
+  },
+  "product": "세파졸린",
+  "overview": {
+    "baselineScenario": "S3_통합대응",
+    "annualForecastDemand": 5688488.695,
+    "nationalCurrentStock": 408477.104,
+    "nationalSafetyStock": 77249.588,
+    "nationalTargetStock": 647528.611,
+    "nationalTargetStockCoveragePct": 63.08,
+    "nationalInventoryStatus": "부족",
+    "regionCounts": {
+      "shortage": 3,
+      "adequate": 3,
+      "excess": 2
+    },
+    "excessTransferableQuantity": 11287.058,
+    "averageUtilizationPct": 86.96,
+    "integratedResponse": {
+      "serviceRatePct": 100,
+      "unmetDemand": 0,
+      "unmetDemandRatePct": 0,
+      "serviceRateImprovementVsS1PctPoints": 4.999,
+      "unmetDemandReductionVsS1Pct": 100,
+      "emergencyProcurementQuantity": 414078.693,
+      "totalProcurementCostKrw": 40944607794.63
+    },
+    "policyRisk": {
+      "score": 66,
+      "grade": "높음 (High Risk)"
+    }
+  },
+  "regions": [
+    {
+      "id": "National",
+      "code": "National",
+      "name": "전국 통합",
+      "annualForecastDemand": 5688488.695,
+      "currentStock": 408477.104,
+      "safetyStock": 77249.588,
+      "targetStock": 647528.611,
+      "targetStockCoveragePct": 63.08,
+      "inventoryStatus": "부족",
+      "stockStatusCode": "danger",
+      "transferableQuantity": 11287.058,
+      "averageLeadTimeHours": 5.68,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 66,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 96
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 66
+          },
+          {
+            "label": "과소예측 위험",
+            "score": 83
+          },
+          {
+            "label": "원자재 공급 차질",
+            "score": 30
+          }
+        ]
+      },
+      "recommendations": [
+        "긴급조달·위험기반 우선배분 유지",
+        "S3 통합대응 효과"
+      ]
+    },
+    {
+      "id": "Seoul",
+      "code": "Zone1",
+      "name": "서울권",
+      "annualForecastDemand": 1579638.426,
+      "currentStock": 41340.887,
+      "safetyStock": 26160.776,
+      "targetStock": 206704.434,
+      "targetStockCoveragePct": 20,
+      "inventoryStatus": "부족",
+      "stockStatusCode": "danger",
+      "transferableQuantity": 0,
+      "averageLeadTimeHours": 1.76,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 66,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 96
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 66
+          },
+          {
+            "label": "과소예측 위험",
+            "score": 83
+          },
+          {
+            "label": "원자재 공급 차질",
+            "score": 30
+          }
+        ]
+      },
+      "recommendations": [
+        "긴급조달·위험기반 우선배분 유지",
+        "S3 통합대응 효과"
+      ]
+    },
+    {
+      "id": "Gyeonggi",
+      "code": "Zone2",
+      "name": "경기인천수도권",
+      "annualForecastDemand": 1901464.984,
+      "currentStock": 91093.906,
+      "safetyStock": 22139.753,
+      "targetStock": 202430.903,
+      "targetStockCoveragePct": 45,
+      "inventoryStatus": "부족",
+      "stockStatusCode": "danger",
+      "transferableQuantity": 0,
+      "averageLeadTimeHours": 1.36,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 60,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 96
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 60
+          },
+          {
+            "label": "권역 구조 위험",
+            "score": 85
+          },
+          {
+            "label": "원자재 공급 차질",
+            "score": 30
+          }
+        ]
+      },
+      "recommendations": [
+        "긴급조달·위험기반 우선배분 유지",
+        "S3 통합대응 효과"
+      ]
+    },
+    {
+      "id": "Gangwon",
+      "code": "Zone3",
+      "name": "강원권",
+      "annualForecastDemand": 101480.415,
+      "currentStock": 11386.065,
+      "safetyStock": 1071.096,
+      "targetStock": 10843.871,
+      "targetStockCoveragePct": 105,
+      "inventoryStatus": "적정",
+      "stockStatusCode": "safe",
+      "transferableQuantity": 0,
+      "averageLeadTimeHours": 1.86,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 60,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 97
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 65
+          },
+          {
+            "label": "권역 구조 위험",
+            "score": 76
+          },
+          {
+            "label": "원자재 공급 차질",
+            "score": 30
+          }
+        ]
+      },
+      "recommendations": [
+        "중앙재고 우선배분·입고일 모니터링",
+        "S3 통합대응 효과"
+      ]
+    },
+    {
+      "id": "Chungcheong",
+      "code": "Zone4",
+      "name": "대전세종충청권",
+      "annualForecastDemand": 457199.094,
+      "currentStock": 53486.398,
+      "safetyStock": 6382.665,
+      "targetStock": 48623.998,
+      "targetStockCoveragePct": 110,
+      "inventoryStatus": "적정",
+      "stockStatusCode": "safe",
+      "transferableQuantity": 0,
+      "averageLeadTimeHours": 0.98,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 61,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 95
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 62
+          },
+          {
+            "label": "권역 구조 위험",
+            "score": 70
+          },
+          {
+            "label": "원자재 공급 차질",
+            "score": 30
+          }
+        ]
+      },
+      "recommendations": [
+        "긴급조달·위험기반 우선배분 유지",
+        "S3 통합대응 효과"
+      ]
+    },
+    {
+      "id": "Honam",
+      "code": "Zone5",
+      "name": "광주전북전남권",
+      "annualForecastDemand": 518294.646,
+      "currentStock": 70700.004,
+      "safetyStock": 6100.548,
+      "targetStock": 56560.003,
+      "targetStockCoveragePct": 125,
+      "inventoryStatus": "과잉",
+      "stockStatusCode": "warning",
+      "transferableQuantity": 2828,
+      "averageLeadTimeHours": 2.91,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 64,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 96
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 66
+          },
+          {
+            "label": "권역 구조 위험",
+            "score": 67
+          },
+          {
+            "label": "원자재 공급 차질",
+            "score": 30
+          }
+        ]
+      },
+      "recommendations": [
+        "긴급조달·위험기반 우선배분 유지",
+        "S3 통합대응 효과"
+      ]
+    },
+    {
+      "id": "Daegu",
+      "code": "Zone6",
+      "name": "대구경북권",
+      "annualForecastDemand": 257410.347,
+      "currentStock": 20127.263,
+      "safetyStock": 4655.652,
+      "targetStock": 28753.232,
+      "targetStockCoveragePct": 70,
+      "inventoryStatus": "부족",
+      "stockStatusCode": "danger",
+      "transferableQuantity": 0,
+      "averageLeadTimeHours": 2.76,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 63,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 93
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 57
+          },
+          {
+            "label": "권역 구조 위험",
+            "score": 76
+          },
+          {
+            "label": "과소예측 위험",
+            "score": 67
+          }
+        ]
+      },
+      "recommendations": [
+        "긴급조달·위험기반 우선배분 유지",
+        "S3 통합대응 효과"
+      ]
+    },
+    {
+      "id": "Busan",
+      "code": "Zone7",
+      "name": "부산울산경남권",
+      "annualForecastDemand": 790168.372,
+      "currentStock": 109967.754,
+      "safetyStock": 8914.627,
+      "targetStock": 84590.58,
+      "targetStockCoveragePct": 130,
+      "inventoryStatus": "과잉",
+      "stockStatusCode": "warning",
+      "transferableQuantity": 8459.058,
+      "averageLeadTimeHours": 3.85,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 63,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 96
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 62
+          },
+          {
+            "label": "권역 구조 위험",
+            "score": 81
+          },
+          {
+            "label": "원자재 공급 차질",
+            "score": 30
+          }
+        ]
+      },
+      "recommendations": [
+        "긴급조달·위험기반 우선배분 유지",
+        "S3 통합대응 효과"
+      ]
+    },
+    {
+      "id": "Jeju",
+      "code": "Zone8",
+      "name": "제주권",
+      "annualForecastDemand": 82832.411,
+      "currentStock": 10374.827,
+      "safetyStock": 1824.47,
+      "targetStock": 9021.589,
+      "targetStockCoveragePct": 115,
+      "inventoryStatus": "적정",
+      "stockStatusCode": "safe",
+      "transferableQuantity": 0,
+      "averageLeadTimeHours": 30,
+      "policyRisk": {
+        "asOf": "2025-09-29",
+        "score": 65,
+        "grade": "높음 (High Risk)",
+        "causes": [
+          {
+            "label": "목표재고 미달",
+            "score": 89
+          },
+          {
+            "label": "안전재고 미달",
+            "score": 48
+          },
+          {
+            "label": "권역 구조 위험",
+            "score": 100
+          },
+          {
+            "label": "원자재 공급 차질",
+            "score": 30
+          }
+        ]
+      },
+      "recommendations": [
+        "긴급조달·위험기반 우선배분 유지",
+        "S3 통합대응 효과"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S0_정상",
+      "serviceRatePct": 100,
+      "unmetDemandRatePct": 0,
+      "totalUnmetDemand": 0,
+      "shortageWeeks": 0,
+      "firstShortageWeek": null,
+      "maxWeeklyShortage": 0,
+      "minimumRegionalServiceRatePct": 100,
+      "emergencyProcurementQuantity": 0,
+      "totalProcurementCostKrw": 43675617397.86
+    },
+    {
+      "id": "S1_무대응",
+      "serviceRatePct": 95,
+      "unmetDemandRatePct": 5,
+      "totalUnmetDemand": 284354.773,
+      "shortageWeeks": 20,
+      "firstShortageWeek": "2025-08-04",
+      "maxWeeklyShortage": 42480.537,
+      "minimumRegionalServiceRatePct": 60.7,
+      "emergencyProcurementQuantity": 0,
+      "totalProcurementCostKrw": 37330308121.26
+    },
+    {
+      "id": "S2_내부대응",
+      "serviceRatePct": 95.08,
+      "unmetDemandRatePct": 4.92,
+      "totalUnmetDemand": 279707.452,
+      "shortageWeeks": 20,
+      "firstShortageWeek": "2025-08-04",
+      "maxWeeklyShortage": 42480.537,
+      "minimumRegionalServiceRatePct": 65,
+      "emergencyProcurementQuantity": 0,
+      "totalProcurementCostKrw": 37330308121.26
+    },
+    {
+      "id": "S3_통합대응",
+      "serviceRatePct": 100,
+      "unmetDemandRatePct": 0,
+      "totalUnmetDemand": 0,
+      "shortageWeeks": 0,
+      "firstShortageWeek": null,
+      "maxWeeklyShortage": 0,
+      "minimumRegionalServiceRatePct": 100,
+      "emergencyProcurementQuantity": 414078.693,
+      "totalProcurementCostKrw": 40944607794.63
+    }
+  ],
+  "monthlyFlow": [
+    {
+      "month": "2025-01",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 570279.024,
+      "approvedShipment": 570279.024,
+      "availableProduction": 570279.024,
+      "regionalShipment": 285326.514,
+      "emergencyProcurementOrder": 0,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 100,
+      "endingRawMaterialInventory": 124747.56,
+      "endingCentralInventory": 341980.411,
+      "maxActiveEvents": 0,
+      "operatingPhase": "Phase 1 정상기준"
+    },
+    {
+      "month": "2025-02",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 447281.216,
+      "approvedShipment": 447281.216,
+      "availableProduction": 447281.216,
+      "regionalShipment": 384392.46,
+      "emergencyProcurementOrder": 0,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 100,
+      "endingRawMaterialInventory": 124747.56,
+      "endingCentralInventory": 404869.168,
+      "maxActiveEvents": 0,
+      "operatingPhase": "Phase 1 정상기준"
+    },
+    {
+      "month": "2025-03",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 450695.97,
+      "approvedShipment": 504572.17,
+      "availableProduction": 504572.17,
+      "regionalShipment": 450993.467,
+      "emergencyProcurementOrder": 42697.512,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 100,
+      "endingRawMaterialInventory": 67817.543,
+      "endingCentralInventory": 458447.868,
+      "maxActiveEvents": 1,
+      "operatingPhase": "Phase 1 정상기준 / Phase 2 위험감지·선행대응"
+    },
+    {
+      "month": "2025-04",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 449508.296,
+      "approvedShipment": 451003.801,
+      "availableProduction": 451003.801,
+      "regionalShipment": 449293.292,
+      "emergencyProcurementOrder": 70974.996,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 80,
+      "endingRawMaterialInventory": 0,
+      "endingCentralInventory": 460158.376,
+      "maxActiveEvents": 2,
+      "operatingPhase": "Phase 2 위험감지·선행대응"
+    },
+    {
+      "month": "2025-05",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 448337.464,
+      "approvedShipment": 291419.352,
+      "availableProduction": 291419.352,
+      "regionalShipment": 448884.45,
+      "emergencyProcurementOrder": 70790.124,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 50,
+      "endingRawMaterialInventory": 0,
+      "endingCentralInventory": 303492.507,
+      "maxActiveEvents": 1,
+      "operatingPhase": "Phase 3 공급차질"
+    },
+    {
+      "month": "2025-06",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 452724.555,
+      "approvedShipment": 357309.011,
+      "availableProduction": 357309.011,
+      "regionalShipment": 453670.855,
+      "emergencyProcurementOrder": 71482.825,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 50,
+      "endingRawMaterialInventory": 0,
+      "endingCentralInventory": 207345.267,
+      "maxActiveEvents": 1,
+      "operatingPhase": "Phase 3 공급차질"
+    },
+    {
+      "month": "2025-07",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 516018.636,
+      "approvedShipment": 402578.454,
+      "availableProduction": 402578.454,
+      "regionalShipment": 524688.196,
+      "emergencyProcurementOrder": 81476.628,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 50,
+      "endingRawMaterialInventory": 0,
+      "endingCentralInventory": 85235.527,
+      "maxActiveEvents": 1,
+      "operatingPhase": "Phase 3 공급차질"
+    },
+    {
+      "month": "2025-08",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 485491.856,
+      "approvedShipment": 378512.436,
+      "availableProduction": 378512.436,
+      "regionalShipment": 468049.872,
+      "emergencyProcurementOrder": 76656.608,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 50,
+      "endingRawMaterialInventory": 0,
+      "endingCentralInventory": 0,
+      "maxActiveEvents": 1,
+      "operatingPhase": "Phase 3 공급차질"
+    },
+    {
+      "month": "2025-09",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 473822.6,
+      "approvedShipment": 449920.485,
+      "availableProduction": 449920.485,
+      "regionalShipment": 449920.485,
+      "emergencyProcurementOrder": 0,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 70,
+      "endingRawMaterialInventory": 0,
+      "endingCentralInventory": 0,
+      "maxActiveEvents": 2,
+      "operatingPhase": "Phase 4 공급회복"
+    },
+    {
+      "month": "2025-10",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 468783.304,
+      "approvedShipment": 468548.912,
+      "availableProduction": 468548.912,
+      "regionalShipment": 468548.912,
+      "emergencyProcurementOrder": 0,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 90,
+      "endingRawMaterialInventory": 45328.026,
+      "endingCentralInventory": 0,
+      "maxActiveEvents": 1,
+      "operatingPhase": "Phase 4 공급회복"
+    },
+    {
+      "month": "2025-11",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 468288.084,
+      "approvedShipment": 468288.084,
+      "availableProduction": 468288.084,
+      "regionalShipment": 468288.084,
+      "emergencyProcurementOrder": 0,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 100,
+      "endingRawMaterialInventory": 96432.432,
+      "endingCentralInventory": 0,
+      "maxActiveEvents": 0,
+      "operatingPhase": "Phase 5 정상화"
+    },
+    {
+      "month": "2025-12",
+      "scenarioId": "S3_통합대응",
+      "forecastDemand": 457257.693,
+      "approvedShipment": 457257.693,
+      "availableProduction": 457257.693,
+      "regionalShipment": 457257.693,
+      "emergencyProcurementOrder": 0,
+      "unmetDemand": 0,
+      "serviceRatePct": 100,
+      "averageSupplyFulfillmentPct": 100,
+      "endingRawMaterialInventory": 96432.431,
+      "endingCentralInventory": 0,
+      "maxActiveEvents": 0,
+      "operatingPhase": "Phase 5 정상화"
+    }
+  ],
+  "integration": [
+    {
+      "regionId": "Seoul",
+      "regionCode": "Zone1",
+      "regionName": "서울권",
+      "system": "ERP",
+      "documentNumber": "PO-20250106-CEFA",
+      "quantity": 150073.427,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Seoul",
+      "regionCode": "Zone1",
+      "regionName": "서울권",
+      "system": "MES",
+      "documentNumber": "CEFA-01-L1",
+      "quantity": 142569.756,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Seoul",
+      "regionCode": "Zone1",
+      "regionName": "서울권",
+      "system": "WMS",
+      "documentNumber": "FG-R01-L001",
+      "quantity": 41340.887,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Gyeonggi",
+      "regionCode": "Zone2",
+      "regionName": "경기인천수도권",
+      "system": "ERP",
+      "documentNumber": "PO-20250106-CEFA",
+      "quantity": 150073.427,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Gyeonggi",
+      "regionCode": "Zone2",
+      "regionName": "경기인천수도권",
+      "system": "MES",
+      "documentNumber": "CEFA-01-L1",
+      "quantity": 142569.756,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Gyeonggi",
+      "regionCode": "Zone2",
+      "regionName": "경기인천수도권",
+      "system": "WMS",
+      "documentNumber": "FG-R02-L001",
+      "quantity": 91093.906,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Gangwon",
+      "regionCode": "Zone3",
+      "regionName": "강원권",
+      "system": "ERP",
+      "documentNumber": "PO-20250106-CEFA",
+      "quantity": 150073.427,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Gangwon",
+      "regionCode": "Zone3",
+      "regionName": "강원권",
+      "system": "MES",
+      "documentNumber": "CEFA-01-L1",
+      "quantity": 142569.756,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Gangwon",
+      "regionCode": "Zone3",
+      "regionName": "강원권",
+      "system": "WMS",
+      "documentNumber": "FG-R03-L001",
+      "quantity": 11386.065,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Chungcheong",
+      "regionCode": "Zone4",
+      "regionName": "대전세종충청권",
+      "system": "ERP",
+      "documentNumber": "PO-20250106-CEFA",
+      "quantity": 150073.427,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Chungcheong",
+      "regionCode": "Zone4",
+      "regionName": "대전세종충청권",
+      "system": "MES",
+      "documentNumber": "CEFA-01-L1",
+      "quantity": 142569.756,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Chungcheong",
+      "regionCode": "Zone4",
+      "regionName": "대전세종충청권",
+      "system": "WMS",
+      "documentNumber": "FG-R04-L001",
+      "quantity": 53486.398,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Honam",
+      "regionCode": "Zone5",
+      "regionName": "광주전북전남권",
+      "system": "ERP",
+      "documentNumber": "PO-20250106-CEFA",
+      "quantity": 150073.427,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Honam",
+      "regionCode": "Zone5",
+      "regionName": "광주전북전남권",
+      "system": "MES",
+      "documentNumber": "CEFA-01-L1",
+      "quantity": 142569.756,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Honam",
+      "regionCode": "Zone5",
+      "regionName": "광주전북전남권",
+      "system": "WMS",
+      "documentNumber": "FG-R07-L001",
+      "quantity": 70700.004,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Daegu",
+      "regionCode": "Zone6",
+      "regionName": "대구경북권",
+      "system": "ERP",
+      "documentNumber": "PO-20250106-CEFA",
+      "quantity": 150073.427,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Daegu",
+      "regionCode": "Zone6",
+      "regionName": "대구경북권",
+      "system": "MES",
+      "documentNumber": "CEFA-01-L1",
+      "quantity": 142569.756,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Daegu",
+      "regionCode": "Zone6",
+      "regionName": "대구경북권",
+      "system": "WMS",
+      "documentNumber": "FG-R05-L001",
+      "quantity": 20127.263,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Busan",
+      "regionCode": "Zone7",
+      "regionName": "부산울산경남권",
+      "system": "ERP",
+      "documentNumber": "PO-20250106-CEFA",
+      "quantity": 150073.427,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Busan",
+      "regionCode": "Zone7",
+      "regionName": "부산울산경남권",
+      "system": "MES",
+      "documentNumber": "CEFA-01-L1",
+      "quantity": 142569.756,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Busan",
+      "regionCode": "Zone7",
+      "regionName": "부산울산경남권",
+      "system": "WMS",
+      "documentNumber": "FG-R06-L001",
+      "quantity": 109967.754,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Jeju",
+      "regionCode": "Zone8",
+      "regionName": "제주권",
+      "system": "ERP",
+      "documentNumber": "PO-20250106-CEFA",
+      "quantity": 150073.427,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Jeju",
+      "regionCode": "Zone8",
+      "regionName": "제주권",
+      "system": "MES",
+      "documentNumber": "CEFA-01-L1",
+      "quantity": 142569.756,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    },
+    {
+      "regionId": "Jeju",
+      "regionCode": "Zone8",
+      "regionName": "제주권",
+      "system": "WMS",
+      "documentNumber": "FG-R08-L001",
+      "quantity": 10374.827,
+      "unit": "환산단위",
+      "status": "동기화 완료"
+    }
+  ],
+  "procurement": [
+    {
+      "scenarioId": "S0_정상",
+      "supplierId": "S1",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 4191517.985,
+      "totalProcurementCostKrw": 29340625895,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S0_정상",
+      "supplierId": "S2",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 1197576.567,
+      "totalProcurementCostKrw": 9389000285.28,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S0_정상",
+      "supplierId": "S3",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 598788.283,
+      "totalProcurementCostKrw": 4945991217.58,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S1_무대응",
+      "supplierId": "S1",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 3285045.231,
+      "totalProcurementCostKrw": 22995316618.4,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S1_무대응",
+      "supplierId": "S2",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 1197576.567,
+      "totalProcurementCostKrw": 9389000285.28,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S1_무대응",
+      "supplierId": "S3",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 598788.283,
+      "totalProcurementCostKrw": 4945991217.58,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S2_내부대응",
+      "supplierId": "S1",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 3285045.231,
+      "totalProcurementCostKrw": 22995316618.4,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S2_내부대응",
+      "supplierId": "S2",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 1197576.567,
+      "totalProcurementCostKrw": 9389000285.28,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S2_내부대응",
+      "supplierId": "S3",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 598788.283,
+      "totalProcurementCostKrw": 4945991217.58,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S3_통합대응",
+      "supplierId": "S1",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 3285045.231,
+      "totalProcurementCostKrw": 22995316618.4,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S3_통합대응",
+      "supplierId": "S2",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 1197576.567,
+      "totalProcurementCostKrw": 9389000285.28,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S3_통합대응",
+      "supplierId": "S2",
+      "receiptType": "긴급조달",
+      "receiptCount": 24,
+      "totalReceiptQuantity": 276052.462,
+      "totalProcurementCostKrw": 2337391405.53,
+      "firstReceiptWeek": "2025-06-02",
+      "lastReceiptWeek": "2025-11-10"
+    },
+    {
+      "scenarioId": "S3_통합대응",
+      "supplierId": "S3",
+      "receiptType": "기본입고",
+      "receiptCount": 50,
+      "totalReceiptQuantity": 598788.283,
+      "totalProcurementCostKrw": 4945991217.58,
+      "firstReceiptWeek": "2025-01-06",
+      "lastReceiptWeek": "2025-12-15"
+    },
+    {
+      "scenarioId": "S3_통합대응",
+      "supplierId": "S3",
+      "receiptType": "긴급조달",
+      "receiptCount": 24,
+      "totalReceiptQuantity": 138026.231,
+      "totalProcurementCostKrw": 1276908267.84,
+      "firstReceiptWeek": "2025-06-16",
+      "lastReceiptWeek": "2025-11-24"
+    }
+  ],
+  "modelValidation": {
+    "model": "XGBoost + TreeSHAP",
+    "trainingRows": 56400,
+    "simulationRuns": 50,
+    "classificationThreshold": 0.3,
+    "rocAuc": 0.900756,
+    "prAuc": 0.804083,
+    "f1": 0.763756,
+    "precision": 0.792164,
+    "recall": 0.737315,
+    "topFeatures": [
+      {
+        "label": "최근4주재고최저충족률",
+        "meanAbsShap": 2.0704
+      },
+      {
+        "label": "보조공급사추가공급률",
+        "meanAbsShap": 0.44436
+      },
+      {
+        "label": "최근4주평균공급이행률",
+        "meanAbsShap": 0.413992
+      }
+    ]
+  }
+}

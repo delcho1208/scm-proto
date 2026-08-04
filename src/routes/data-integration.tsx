@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { ScmShell, Icon } from "@/components/ScmShell";
+import { getCefazolinIntegrationRecords } from "@/data/cefazolin-dashboard";
 import {
   getIntegrationRecords,
   markerOrder,
@@ -46,12 +47,18 @@ function getTwinStatus(records: ReturnType<typeof getIntegrationRecords>): TwinS
   return "safe";
 }
 
+function getProductIntegrationRecords(regionId: string, productKey: string) {
+  return productKey === "세파졸린"
+    ? getCefazolinIntegrationRecords(regionId)
+    : getIntegrationRecords(regionId, productKey);
+}
+
 function DataIntegrationView({ product }: { product: Product }) {
   const [regionId, setRegionId] = useState("Seoul");
   const [viewMode, setViewMode] = useState<"twin" | "table">("twin");
   const detailSectionRef = useRef<HTMLDivElement>(null);
   const region = regions[regionId];
-  const records = getIntegrationRecords(regionId, product.key);
+  const records = getProductIntegrationRecords(regionId, product.key);
 
   const selectTwinRegion = (id: string) => {
     setRegionId(id);
@@ -143,7 +150,7 @@ function DataIntegrationView({ product }: { product: Product }) {
               </div>
               <div className="twin-grid">
                 {markerOrder.map((id) => {
-                  const rows = getIntegrationRecords(id, product.key);
+                  const rows = getProductIntegrationRecords(id, product.key);
                   const twinStatus = getTwinStatus(rows);
                   const isActive = regionId === id;
                   return (
@@ -190,7 +197,7 @@ function DataIntegrationView({ product }: { product: Product }) {
                 </thead>
                 <tbody>
                   {markerOrder.map((id) => {
-                    const rows = getIntegrationRecords(id, product.key);
+                    const rows = getProductIntegrationRecords(id, product.key);
                     return (
                       <tr
                         key={id}

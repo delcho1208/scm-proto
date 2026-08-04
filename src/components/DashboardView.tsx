@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
 import { lipilouDashboard, tamivirDashboard } from "@/data/dashboard-scenario";
+import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
 import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
 
@@ -144,7 +145,14 @@ export function DashboardView({ product }: { product: Product }) {
       ? lipilouDashboard
       : product.key === "타미비어"
         ? tamivirDashboard
-        : null;
+        : product.key === "세파졸린"
+          ? cefazolinDashboard
+          : null;
+  const forecastPaths = product.key === "세파졸린" ? cefazolinDashboard.chart : product.paths;
+  const annualDemand =
+    product.key === "세파졸린"
+      ? Math.round(cefazolinDashboard.annualForecastDemand).toLocaleString("ko-KR")
+      : product.annualDemand;
   const isCurrentTimeline = timelineKey === "PRES";
   const scenarioRegion = isCurrentTimeline ? scenario?.regions[regionId] : undefined;
   const timelineRegion = timeline.regions[regionId];
@@ -264,7 +272,7 @@ export function DashboardView({ product }: { product: Product }) {
               </p>
               <div className="flex items-end gap-sm">
                 <span className="font-display text-display-lg text-scm-primary">
-                  {product.annualDemand}
+                  {annualDemand}
                 </span>
                 <span className="mb-1 text-on-surface-variant">BOX</span>
               </div>
@@ -312,8 +320,8 @@ export function DashboardView({ product }: { product: Product }) {
                     y1="20"
                     y2="180"
                   />
-                  <path className="path-actual" d={product.paths.actual} />
-                  <path className="path-prediction" d={product.paths.prediction} />
+                  <path className="path-actual" d={forecastPaths.actual} />
+                  <path className="path-prediction" d={forecastPaths.prediction} />
                   <circle className="chart-dot" cx="0" cy={product.dots[0]} r="3" />
                   <circle className="chart-dot" cx="120" cy={product.dots[1]} r="3" />
                   <circle className="chart-dot" cx="300" cy={product.dots[2]} r="3" />
