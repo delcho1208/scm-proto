@@ -95,13 +95,15 @@ export function DashboardView({ product }: { product: Product }) {
       </div>
 
       {/* Bento grid */}
-      <div className="grid grid-cols-12 gap-lg lg:h-[520px]">
+      <div className="grid grid-cols-12 gap-lg lg:h-[520px] lg:min-h-0 lg:grid-rows-[minmax(0,520px)]">
         {/* Forecast */}
-        <div className="col-span-12 h-full lg:col-span-3">
-          <div className="bento-card flex h-full flex-col p-md">
-            <div className="mb-md flex items-center justify-between">
-              <h4 className="font-display text-headline-sm">{product.forecastTitle}</h4>
-              <Icon name="show_chart" className="text-outline" />
+        <div className="col-span-12 h-full min-h-0 min-w-0 lg:col-span-3">
+          <div className="bento-card flex h-full min-h-0 flex-col overflow-hidden p-md">
+            <div className="mb-md flex min-w-0 items-start justify-between gap-sm">
+              <h4 className="min-w-0 break-words font-display text-headline-sm">
+                {product.forecastTitle}
+              </h4>
+              <Icon name="show_chart" className="shrink-0 text-outline" />
             </div>
             <div className="mb-xs">
               <p className="mb-base text-label-caps text-on-surface-variant">
@@ -184,7 +186,7 @@ export function DashboardView({ product }: { product: Product }) {
         </div>
 
         {/* Map */}
-        <div className="bento-card relative col-span-12 flex min-h-[420px] flex-col overflow-hidden bg-white lg:col-span-6">
+        <div className="bento-card relative col-span-12 flex min-h-[420px] min-w-0 flex-col overflow-hidden bg-white lg:col-span-6 lg:min-h-0">
           <div className="pointer-events-none relative z-10 flex items-start justify-between p-lg">
             <div className="pointer-events-auto">
               <h4 className="mb-1 font-display text-headline-sm text-on-surface">
@@ -309,8 +311,8 @@ export function DashboardView({ product }: { product: Product }) {
         </div>
 
         {/* Right column */}
-        <div className="col-span-12 flex h-full flex-col gap-lg lg:col-span-3">
-          <div className="bento-card flex flex-col items-center p-md">
+        <div className="col-span-12 flex h-full min-h-0 min-w-0 flex-col gap-lg lg:col-span-3">
+          <div className="bento-card flex shrink-0 flex-col items-center p-md">
             <div className="mb-md flex w-full items-center justify-between">
               <h4 className="font-display text-headline-sm">리스크 지수 (Risk Index)</h4>
               <Icon name="warning" className="text-error" />
@@ -349,14 +351,14 @@ export function DashboardView({ product }: { product: Product }) {
             </div>
           </div>
 
-          <div className="bento-card flex flex-1 flex-col bg-on-surface-variant/5 p-md">
+          <div className="bento-card flex min-h-0 flex-1 flex-col overflow-hidden bg-on-surface-variant/5 p-md">
             <div className="mb-md flex items-center gap-sm">
               <div className="flex h-6 w-6 items-center justify-center rounded bg-scm-primary text-white">
                 <Icon name="auto_awesome" className="text-[16px]" filled />
               </div>
               <h4 className="font-display text-headline-sm">AI 추천 실행안</h4>
             </div>
-            <div className="flex-1 space-y-sm overflow-y-auto">
+            <div className="min-h-0 flex-1 space-y-sm overflow-y-auto">
               {(scenario?.recommendation
                 ? [
                     {
