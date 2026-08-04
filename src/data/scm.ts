@@ -23,7 +23,7 @@ export const products: Product[] = [
     name: "리피로우",
     icon: "medication",
     subtitle: "이상지질혈증 치료제",
-    forecastTitle: "2025 리피로우 Regional Forecast",
+    forecastTitle: "2026 리피로우 Regional Forecast",
     annualDemand: "1,124,000",
     yoyGrowth: "+2.4% YoY",
     stock: "124,000",
