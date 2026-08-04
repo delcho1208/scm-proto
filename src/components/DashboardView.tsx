@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
 import { lipilouDashboard, tamivirDashboard } from "@/data/dashboard-scenario";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
+import { createLipilouGraph, getLipilouGraphRegion } from "@/data/lipilou-graph";
 import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
 
@@ -148,11 +149,19 @@ export function DashboardView({ product }: { product: Product }) {
         : product.key === "세파졸린"
           ? cefazolinDashboard
           : null;
-  const forecastPaths = product.key === "세파졸린" ? cefazolinDashboard.chart : product.paths;
+  const lipilouGraphRegion = product.key === "리피로우" ? getLipilouGraphRegion(regionId) : null;
+  const lipilouGraph = lipilouGraphRegion ? createLipilouGraph(lipilouGraphRegion) : null;
+  const forecastPaths =
+    lipilouGraph ?? (product.key === "세파졸린" ? cefazolinDashboard.chart : product.paths);
   const annualDemand =
-    product.key === "세파졸린"
+    lipilouGraphRegion
+      ? lipilouGraphRegion.annual_demand_box.toLocaleString("ko-KR")
+      : product.key === "세파졸린"
       ? Math.round(cefazolinDashboard.annualForecastDemand).toLocaleString("ko-KR")
       : product.annualDemand;
+  const forecastYoy = lipilouGraphRegion
+    ? `${lipilouGraphRegion.yoy_pct >= 0 ? "+" : ""}${lipilouGraphRegion.yoy_pct}% YoY`
+    : product.yoyGrowth;
   const isCurrentTimeline = timelineKey === "PRES";
   const scenarioRegion = isCurrentTimeline ? scenario?.regions[regionId] : undefined;
   const timelineRegion = timeline.regions[regionId];
@@ -163,11 +172,22 @@ export function DashboardView({ product }: { product: Product }) {
   const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
   const nationalRisk = riskStyles[nationalRiskLevel];
+  const forecastRiskLevel: RiskLevel = lipilouGraphRegion
+    ? lipilouGraphRegion.stock_status === "부족"
+      ? "danger"
+      : lipilouGraphRegion.stock_status === "과잉"
+        ? "warning"
+        : "safe"
+    : nationalRiskLevel;
+  const forecastRisk = riskStyles[forecastRiskLevel];
+  const forecastRiskText = forecastRiskLevel === "danger" ? "부족" : forecastRiskLevel === "warning" ? "과잉" : "적정";
 
   const displayedTotalInventory =
     (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
+  const forecastInventory = lipilouGraphRegion?.current_stock_box ?? displayedTotalInventory;
+  const forecastUtilization = lipilouGraphRegion?.operating_rate_pct ?? displayedUtilization;
   const panelInventory = scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
   const riskText = regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
   const nationalRiskText = nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
@@ -278,7 +298,7 @@ export function DashboardView({ product }: { product: Product }) {
               </div>
               <div className="mt-2 flex items-center gap-xs font-bold text-scm-primary">
                 <Icon name="trending_up" className="text-[16px]" />
-                <span className="text-sm">{product.yoyGrowth}</span>
+                <span className="text-sm">{forecastYoy}</span>
               </div>
             </div>
             <div className="mt-sm flex h-[170px] shrink-0 flex-col justify-between rounded-xl border border-outline-variant/30 bg-surface-container-low p-sm">
@@ -322,23 +342,32 @@ export function DashboardView({ product }: { product: Product }) {
                   />
                   <path className="path-actual" d={forecastPaths.actual} />
                   <path className="path-prediction" d={forecastPaths.prediction} />
-                  <circle className="chart-dot" cx="0" cy={product.dots[0]} r="3" />
-                  <circle className="chart-dot" cx="120" cy={product.dots[1]} r="3" />
-                  <circle className="chart-dot" cx="300" cy={product.dots[2]} r="3" />
-                  <circle
-                    className="chart-dot chart-dot-prediction"
-                    cx="380"
-                    cy={product.dots[3]}
-                    r="3"
-                  />
+                  {lipilouGraph ? (
+                    lipilouGraph.points.map((point) => (
+                      <circle
+                        key={point.period}
+                        className={`chart-dot ${point.type === "predicted" ? "chart-dot-prediction" : ""}`}
+                        cx={point.x}
+                        cy={point.y}
+                        r="3"
+                      />
+                    ))
+                  ) : (
+                    <>
+                      <circle className="chart-dot" cx="0" cy={product.dots[0]} r="3" />
+                      <circle className="chart-dot" cx="120" cy={product.dots[1]} r="3" />
+                      <circle className="chart-dot" cx="300" cy={product.dots[2]} r="3" />
+                      <circle className="chart-dot chart-dot-prediction" cx="380" cy={product.dots[3]} r="3" />
+                    </>
+                  )}
                 </svg>
-                <div className="mt-2 grid grid-cols-6 text-center text-[9px] font-bold text-on-surface-variant/60">
-                  {timelineKeys.map((key, index) => (
+                <div className={`mt-2 grid text-center text-[9px] font-bold text-on-surface-variant/60 ${lipilouGraph ? "grid-cols-5" : "grid-cols-6"}`}>
+                  {(lipilouGraph?.ticks ?? timelineKeys).map((key, index) => (
                     <span
                       key={key}
                       className={index === timelineIndex ? (timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary") : ""}
                     >
-                      {timelineData[key].tick}
+                      {lipilouGraph ? key : timelineData[key as TimelineKey].tick}
                     </span>
                   ))}
                 </div>
@@ -348,26 +377,26 @@ export function DashboardView({ product }: { product: Product }) {
               <div className="forecast-kpi-row">
                 <div>
                   <p>현재 재고 (BOX)</p>
-                  <strong><AnimatedNumber value={displayedTotalInventory} /></strong>
+                  <strong><AnimatedNumber value={forecastInventory} /></strong>
                 </div>
                 <Icon name="inventory_2" className="text-[18px] text-scm-primary" />
               </div>
               <div className="forecast-kpi-row">
                 <div>
                   <p>가동률 (Operating Rate)</p>
-                  <strong className="text-scm-primary"><AnimatedNumber value={displayedUtilization} decimals={1} />%</strong>
+                  <strong className="text-scm-primary"><AnimatedNumber value={forecastUtilization} decimals={1} />%</strong>
                 </div>
                 <Icon name="precision_manufacturing" className="text-[18px] text-scm-primary" />
               </div>
               <div className="forecast-kpi-row">
                 <div>
                   <p>품절 위험</p>
-                  <div className={`mt-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 ${nationalRisk.badge}`}>
-                    <span className={`h-2 w-2 rounded-full ${nationalRisk.bullet}`} />
-                    <span className={`text-[10px] font-bold uppercase ${nationalRisk.text}`}>{nationalRiskText}</span>
+                  <div className={`mt-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 ${forecastRisk.badge}`}>
+                    <span className={`h-2 w-2 rounded-full ${forecastRisk.bullet}`} />
+                    <span className={`text-[10px] font-bold uppercase ${forecastRisk.text}`}>{forecastRiskText}</span>
                   </div>
                 </div>
-                <Icon name="warning" className={`text-[18px] ${nationalRisk.text}`} />
+                <Icon name="warning" className={`text-[18px] ${forecastRisk.text}`} />
               </div>
             </div>
           </div>
