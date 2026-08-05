@@ -51,6 +51,15 @@ type AiRecommendation = {
   xai?: { summary: string; evidence: string[]; limitation: string };
 };
 
+type ChartPoint = { x: number; y: number };
+
+function getPathPoints(path: string): ChartPoint[] {
+  return Array.from(path.matchAll(/[ML]\s*(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/gi), (match) => ({
+    x: Number(match[1]),
+    y: Number(match[2]),
+  }));
+}
+
 const productApiMeta: Record<string, { title: string; description: string; endpoint: string; icon: string }> = {
   리피로우: {
     title: "건강검진 데이터 API",
@@ -180,6 +189,12 @@ export function DashboardView({ product }: { product: Product }) {
   const tamivirMonthlyTicks = ["26.08", "26.09", "26.10", "26.11", "26.12", "27.01"];
   const forecastPaths =
     lipilouGraph ?? tamivirForecastRegion?.paths ?? (product.key === "세파졸린" ? (cefazolinDashboard.chartByRegion[regionId] ?? cefazolinDashboard.chart) : product.paths);
+  const actualChartPoints = getPathPoints(forecastPaths.actual);
+  const predictionChartPoints = getPathPoints(forecastPaths.prediction).filter((point, index) => {
+    if (index > 0) return true;
+    const lastActualPoint = actualChartPoints.at(-1);
+    return !lastActualPoint || point.x !== lastActualPoint.x || point.y !== lastActualPoint.y;
+  });
   const annualDemand =
     lipilouGraphRegion
       ? lipilouGraphRegion.annual_demand_box.toLocaleString("ko-KR")
@@ -499,24 +514,12 @@ export function DashboardView({ product }: { product: Product }) {
                   />
                   <path className="path-actual" d={forecastPaths.actual} />
                   <path className="path-prediction" d={forecastPaths.prediction} />
-                  {lipilouGraph ? (
-                    lipilouGraph.points.map((point) => (
-                      <circle
-                        key={point.period}
-                        className={`chart-dot ${point.type === "predicted" ? "chart-dot-prediction" : ""}`}
-                        cx={point.x}
-                        cy={point.y}
-                        r="3"
-                      />
-                    ))
-                  ) : (
-                    <>
-                      <circle className="chart-dot" cx="0" cy={product.dots[0]} r="3" />
-                      <circle className="chart-dot" cx="120" cy={product.dots[1]} r="3" />
-                      <circle className="chart-dot" cx="300" cy={product.dots[2]} r="3" />
-                      <circle className="chart-dot chart-dot-prediction" cx="380" cy={product.dots[3]} r="3" />
-                    </>
-                  )}
+                  {actualChartPoints.map((point, index) => (
+                    <circle key={`actual-${index}`} className="chart-dot" cx={point.x} cy={point.y} r="3" />
+                  ))}
+                  {predictionChartPoints.map((point, index) => (
+                    <circle key={`prediction-${index}`} className="chart-dot chart-dot-prediction" cx={point.x} cy={point.y} r="3" />
+                  ))}
                 </svg>
                 <div className="mt-2 grid grid-cols-6 text-center text-[9px] font-bold text-on-surface-variant/60">
                   {(lipilouGraph?.ticks ?? (tamivirForecastRegion ? tamivirMonthlyTicks : timelineKeys)).map((key, index) => (
