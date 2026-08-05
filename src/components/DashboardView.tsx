@@ -765,25 +765,7 @@ export function DashboardView({ product }: { product: Product }) {
             </div>
           </div>
 
-          <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
-            <div className="flex items-start gap-sm">
-              <div className="api-placeholder-icon news">
-                <Icon name="newspaper" className="text-[18px]" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-xs">
-                  <h4 className="truncate text-sm font-bold text-on-surface">뉴스 크롤링 API</h4>
-                  <span className="api-ready-badge">연결 대기</span>
-                </div>
-                <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
-                  공급망·의약품 이슈와 실시간 뉴스 신호 연동 영역
-                </p>
-                <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
-                  /api/news-crawling
-                </code>
-              </div>
-            </div>
-          </div>
+          <NewsApiCard productName={product.name} />
         </div>
       </div>
 
@@ -886,6 +868,152 @@ export function DashboardView({ product }: { product: Product }) {
                 </div>
               </div>
             </div>
+          </section>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+type NewsItem = {
+  title: string;
+  url: string;
+  publishedAt: string;
+};
+
+function NewsApiCard({ productName }: { productName: string }) {
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [newsState, setNewsState] = useState<"loading" | "ready" | "error">("loading");
+  const [newsError, setNewsError] = useState("");
+  const [isNewsOpen, setIsNewsOpen] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setNewsState("loading");
+    setNewsError("");
+    fetch(`/api/news?query=${encodeURIComponent(productName)}`, { signal: controller.signal })
+      .then(async (response) => {
+        const payload = (await response.json()) as { items?: NewsItem[]; error?: string };
+        if (!response.ok) throw new Error(payload.error ?? "뉴스를 불러오지 못했습니다.");
+        setNews(payload.items ?? []);
+        setNewsState("ready");
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setNews([]);
+        setNewsError(error instanceof Error ? error.message : "뉴스를 불러오지 못했습니다.");
+        setNewsState("error");
+      });
+    return () => controller.abort();
+  }, [productName]);
+
+  return (
+    <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
+      <div className="flex h-full min-h-0 flex-1 items-start gap-sm overflow-hidden">
+        <div className="api-placeholder-icon news shrink-0">
+          <Icon name="newspaper" className="text-[18px]" />
+        </div>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="flex items-center justify-between gap-xs">
+            <h4 className="truncate text-sm font-bold text-on-surface">{productName} 뉴스</h4>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="api-ready-badge">
+                {newsState === "loading" ? "검색 중" : newsState === "ready" ? "연결됨" : "설정 필요"}
+              </span>
+              <button
+                type="button"
+                aria-label={`${productName} 뉴스 전체 보기`}
+                title="뉴스 전체 보기"
+                disabled={news.length === 0}
+                onClick={() => setIsNewsOpen(true)}
+                className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-outline-variant bg-white text-scm-primary transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Icon name="add" className="text-[16px]" />
+              </button>
+            </div>
+          </div>
+          <p className="mt-1 text-[10px] font-bold text-scm-primary">최신 뉴스</p>
+          <div className="mt-2 min-h-0 flex-1 overflow-hidden pr-1">
+            {newsState === "loading" ? (
+              <p className="text-[10px] text-on-surface-variant">뉴스를 불러오는 중입니다.</p>
+            ) : newsState === "error" ? (
+              <p className="text-[10px] leading-tight text-error">{newsError}</p>
+            ) : news.length === 0 ? (
+              <p className="text-[10px] text-on-surface-variant">검색된 뉴스가 없습니다.</p>
+            ) : (
+              <ul className="space-y-1.5 pb-1">
+                {news.slice(0, 2).map((item) => (
+                  <li key={`${item.url}-${item.publishedAt}`}>
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="line-clamp-1 text-[10px] font-semibold leading-tight text-on-surface hover:text-scm-primary hover:underline"
+                    >
+                      {item.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {isNewsOpen ? (
+        <div
+          className="fixed inset-0 z-[500] flex items-center justify-center bg-black/45 p-6 backdrop-blur-[2px]"
+          role="presentation"
+          onMouseDown={() => setIsNewsOpen(false)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="news-dialog-title"
+            onMouseDown={(event) => event.stopPropagation()}
+            className="w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl"
+          >
+            <header className="flex items-center justify-between border-b border-outline-variant px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="api-placeholder-icon news">
+                  <Icon name="newspaper" className="text-[18px]" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-scm-primary">NAVER NEWS</p>
+                  <h3 id="news-dialog-title" className="font-display text-lg font-bold text-on-surface">
+                    {productName} 최신 뉴스
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                aria-label="닫기"
+                onClick={() => setIsNewsOpen(false)}
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-low"
+              >
+                <Icon name="close" className="text-[20px]" />
+              </button>
+            </header>
+            <ul className="max-h-[60vh] divide-y divide-outline-variant/50 overflow-y-auto px-6">
+              {news.map((item) => (
+                <li key={`${item.url}-${item.publishedAt}`} className="py-4">
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group block"
+                  >
+                    <span className="text-sm font-bold leading-6 text-on-surface group-hover:text-scm-primary group-hover:underline">
+                      {item.title}
+                    </span>
+                    <span className="mt-1 flex items-center gap-1 text-[10px] text-on-surface-variant">
+                      <Icon name="open_in_new" className="text-[13px]" />
+                      {new Date(item.publishedAt).toLocaleDateString("ko-KR")}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </section>
         </div>
       ) : null}
