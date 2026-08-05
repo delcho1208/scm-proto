@@ -304,7 +304,7 @@ export function DashboardView({ product }: { product: Product }) {
   const displayedTotalInventory = appliedProjectedRecommendation
     ? appliedProjectedRecommendation.projectedTotalInventory!
     : appliedCefazolinScenario
-    ? Math.max(0, cefazolinDashboard.totalInventory + cefazolinScenarioInventoryDelta)
+    ? Math.max(0, (cefazolinDashboard.totalInventory ?? 0) + cefazolinScenarioInventoryDelta)
     : (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;

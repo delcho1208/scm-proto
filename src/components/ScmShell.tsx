@@ -133,7 +133,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
           <div className="flex items-center gap-md">
             <div className="flex items-center gap-xs text-on-surface-variant">
               <Icon name="schedule" />
-              <span className="font-data text-data-sm">2026-10-01</span>
+              <span className="font-data text-data-sm">2026-10-28</span>
             </div>
             <button className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant">
               <Icon name="notifications" />
