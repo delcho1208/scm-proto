@@ -686,7 +686,7 @@ export function DashboardView({ product }: { product: Product }) {
                 return (
                 <label
                   key={rec.t}
-                  className="flex cursor-pointer items-start gap-md rounded p-xs transition-colors hover:bg-white/50"
+                  className="flex cursor-pointer items-center gap-sm rounded p-xs transition-colors hover:bg-white/50"
                 >
                   <input
                     checked={checked}
@@ -696,14 +696,11 @@ export function DashboardView({ product }: { product: Product }) {
                         [checkKey]: event.target.checked,
                       }))
                     }
-                    className="mt-1 h-4 w-4 rounded accent-[#004ccd]"
+                    className="h-4 w-4 shrink-0 rounded accent-[#004ccd]"
                     type="checkbox"
                   />
                   <div>
                     <p className="text-xs font-bold text-on-surface">{rec.t}</p>
-                    <p className="mt-0.5 text-[10px] leading-tight text-on-surface-variant">
-                      {rec.d}
-                    </p>
                   </div>
                 </label>
                 );
