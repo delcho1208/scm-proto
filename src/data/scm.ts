@@ -42,7 +42,7 @@ export const products: Product[] = [
     name: "타미비어",
     icon: "vaccines",
     subtitle: "항바이러스제",
-    forecastTitle: "2025 타미비어 Regional Forecast",
+    forecastTitle: "2026 타미비어 Regional Forecast",
     annualDemand: "980,000",
     yoyGrowth: "-1.2% YoY",
     stock: "85,000",
@@ -61,7 +61,7 @@ export const products: Product[] = [
     name: "세파졸린",
     icon: "science",
     subtitle: "항생제",
-    forecastTitle: "2025 세파졸린 Regional Forecast",
+    forecastTitle: "2026 세파졸린 Regional Forecast",
     annualDemand: "1,450,000",
     yoyGrowth: "+5.8% YoY",
     stock: "310,000",
@@ -213,12 +213,6 @@ export const markerOrder = [
   "Jeju",
 ];
 
-export const riskFactors = [
-  { label: "감염병 확산", score: "85/100", color: "var(--scm-error)" },
-  { label: "공급 지연 가능성", score: "80/100", color: "#faad14" },
-  { label: "원자재 수급 불안", score: "65/100", color: "#fadb14" },
-  { label: "생산 CAPA 부족", score: "70/100", color: "var(--scm-primary)" },
-];
 
 export const brandLogo =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuB1LKVuQtpI1jLGmHDfVMPMt7ADuLDiB5goL-09hc5SISdGqx7hz_z89VQfVfzdBcK1-Z8-rMDGv_2RCTGpELMnYKwTBD3g4BLXLqtupQjnpuyoqVqRlep8q6OnrcOBnU2sqT9SssGqZVrPiYB6x1ABdv-SaLgrmFqVm_eT-YFFP_f-AsSq3D8_7QqSQ0RRLonPGLzXvZK3Cm-rkHGjOmiTCv89bbGPEQBAcIpEP3AHzoDaRF3YxXMbOjWlplUwiMUz6w";
@@ -268,10 +262,10 @@ export function getIntegrationRecords(regionId: string, productKey: string): Sys
     const meta = systemMeta[system];
     return {
       system,
-      docNo: `${meta.prefix}-2025-${(1000 + (seed % 8999)).toString()}`,
+      docNo: `${meta.prefix}-2026-${(1000 + (seed % 8999)).toString()}`,
       status: statuses[(seed >>> 3) % statuses.length],
       qty: (2000 + ((seed >>> 5) % 48000)).toLocaleString(),
-      updatedAt: `2025-07-1${(seed % 5) + 1} ${String(8 + ((seed >>> 7) % 10)).padStart(2, "0")}:${String((seed >>> 2) % 60).padStart(2, "0")}`,
+      updatedAt: `2026-03-${String(6 + (seed % 5)).padStart(2, "0")} ${String(8 + ((seed >>> 7) % 10)).padStart(2, "0")}:${String((seed >>> 2) % 60).padStart(2, "0")}`,
       note: meta.notes[(seed >>> 9) % meta.notes.length],
     };
   }).map((r, i) => ({ ...r, system: (["ERP", "MES", "WMS"] as SystemKey[])[i] }));

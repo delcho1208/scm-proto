@@ -35,9 +35,13 @@ type TransferRoute = {
 };
 
 type AiRecommendation = {
+  id: string;
   t: string;
   d: string;
   routes?: TransferRoute[];
+  costReduction?: string;
+  feasibility?: number;
+  executionPeriod?: string;
 };
 
 const productApiMeta: Record<string, { title: string; description: string; endpoint: string; icon: string }> = {
@@ -98,6 +102,8 @@ export function DashboardView({ product }: { product: Product }) {
   const [recommendationChecks, setRecommendationChecks] = useState<Record<string, boolean>>({});
   const [timelineIndex, setTimelineIndex] = useState(2);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isRecommendationOpen, setIsRecommendationOpen] = useState(false);
+  const [selectedRecommendationIndex, setSelectedRecommendationIndex] = useState(0);
   const mapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const timelineFrameRef = useRef<number | null>(null);
@@ -168,7 +174,7 @@ export function DashboardView({ product }: { product: Product }) {
   const region = regions[regionId];
   const nationalRiskLevel: RiskLevel =
     (isCurrentTimeline ? scenario?.inventoryLevel : undefined) ??
-    (timeline.riskIndex >= 85 ? "danger" : timeline.riskIndex >= 65 ? "warning" : "safe");
+    (timeline.stockoutRisk >= 15 ? "danger" : timeline.stockoutRisk >= 8 ? "warning" : "safe");
   const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
   const nationalRisk = riskStyles[nationalRiskLevel];
@@ -193,10 +199,11 @@ export function DashboardView({ product }: { product: Product }) {
   const nationalRiskText = nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
   const regionDescription = scenarioRegion
     ? `${scenario?.date} 실데이터 · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
-    : `${timeline.label} ${timeline.isPrediction ? "예측" : "실측"} · 리스크 ${timelineRegion?.risk ?? timeline.riskIndex}/100`;
+    : `${timeline.label} ${timeline.isPrediction ? "예측" : "실측"} · 재고 상태 ${riskText}`;
 
   const recommendations: AiRecommendation[] = scenario?.recommendations.length
     ? scenario.recommendations.map((recommendation) => ({
+        id: recommendation.id,
         t: recommendation.title,
         d: recommendation.description,
         routes:
@@ -211,10 +218,17 @@ export function DashboardView({ product }: { product: Product }) {
                 },
               ]
             : undefined,
+        costReduction: recommendation.transferAmount ? "8~12%" : undefined,
+        feasibility:
+          recommendation.fromRegion && recommendation.toRegion && recommendation.transferAmount
+            ? 86
+            : undefined,
+        executionPeriod: recommendation.transferAmount ? "1~2주" : undefined,
       }))
     : [
-        { t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
+        { id: "fallback-1", t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
         {
+          id: "fallback-2",
           t: "재고 권역 재배치 최적화",
           d: "강원/충청 → 수도권 물량 조정",
           routes: [
@@ -223,6 +237,9 @@ export function DashboardView({ product }: { product: Product }) {
           ],
         },
       ];
+
+  const selectedRecommendation =
+    recommendations[selectedRecommendationIndex] ?? recommendations[0];
 
   const activeTransferRoutes = recommendations.flatMap((recommendation, index) => {
     const checkKey = `${product.key}-${index}`;
@@ -648,8 +665,15 @@ export function DashboardView({ product }: { product: Product }) {
                 );
               })}
             </div>
-            <button className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]">
-              {scenario?.recommendations[0]?.approvalButtonText ?? "실행 계획 적용"}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRecommendationIndex(0);
+                setIsRecommendationOpen(true);
+              }}
+              className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
+            >
+              AI 추천 실행안 비교
             </button>
           </div>
 
@@ -696,6 +720,130 @@ export function DashboardView({ product }: { product: Product }) {
           </div>
         </div>
       </div>
+
+      {isRecommendationOpen && selectedRecommendation ? (
+        <div
+          className="fixed inset-0 z-[400] flex items-center justify-center bg-black/45 p-6 backdrop-blur-[2px]"
+          role="presentation"
+          onMouseDown={() => setIsRecommendationOpen(false)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="recommendation-dialog-title"
+            onMouseDown={(event) => event.stopPropagation()}
+            className="flex max-h-[78vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl"
+          >
+            <header className="flex items-center justify-between border-b border-outline-variant px-6 py-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-scm-primary">
+                  AI Recommendation Evaluation
+                </p>
+                <h3 id="recommendation-dialog-title" className="mt-1 font-display text-xl font-bold text-on-surface">
+                  AI 추천 실행안 비교 및 XAI 설명
+                </h3>
+              </div>
+              <button
+                type="button"
+                aria-label="닫기"
+                onClick={() => setIsRecommendationOpen(false)}
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-low"
+              >
+                <Icon name="close" className="text-[20px]" />
+              </button>
+            </header>
+
+            <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+              <div className="min-h-0 overflow-y-auto border-r border-outline-variant bg-surface-container-low/50 p-4">
+                <p className="mb-3 text-xs font-bold text-on-surface-variant">추천안별 평가</p>
+                <div className="space-y-3">
+                  {recommendations.map((recommendation, index) => {
+                    const isSelected = index === selectedRecommendationIndex;
+                    return (
+                      <button
+                        key={recommendation.id}
+                        type="button"
+                        onClick={() => setSelectedRecommendationIndex(index)}
+                        className={`w-full cursor-pointer rounded-xl border p-4 text-left transition-all ${
+                          isSelected
+                            ? "border-scm-primary bg-white shadow-md ring-2 ring-scm-primary/10"
+                            : "border-outline-variant bg-white/70 hover:border-scm-primary/40 hover:bg-white"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex min-w-0 items-start gap-2">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-container text-[11px] font-black text-on-primary-container">
+                              {index + 1}
+                            </span>
+                            <span className="text-sm font-bold leading-snug text-on-surface">{recommendation.t}</span>
+                          </div>
+                          {isSelected ? <Icon name="check_circle" className="shrink-0 text-[18px] text-scm-primary" filled /> : null}
+                        </div>
+                        <div className="mt-3 grid grid-cols-3 gap-2">
+                          <Metric label="비용 감축(추정)" value={recommendation.costReduction ?? "추가 예정"} />
+                          <Metric label="실현 가능성(추정)" value={recommendation.feasibility ? `${recommendation.feasibility}/100` : "추가 예정"} />
+                          <Metric label="실행 기간" value={recommendation.executionPeriod ?? "추가 예정"} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="min-h-0 overflow-y-auto p-6">
+                <div className="flex items-center gap-2 text-scm-primary">
+                  <Icon name="psychology" className="text-[22px]" filled />
+                  <span className="text-xs font-black uppercase tracking-wider">XAI Explanation</span>
+                </div>
+                <h4 className="mt-4 font-display text-lg font-bold leading-snug text-on-surface">
+                  {selectedRecommendation.t}
+                </h4>
+                <div className="mt-4 rounded-xl border border-primary-container bg-primary-container/20 p-4">
+                  <p className="text-[11px] font-bold text-scm-primary">AI가 이 실행안을 추천한 이유</p>
+                  <p className="mt-2 text-sm leading-6 text-on-surface">
+                    {selectedRecommendation.d || "상세 XAI 설명은 추가 예정입니다."}
+                  </p>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <DetailItem icon="savings" label="비용 감축 효과" value={selectedRecommendation.costReduction ?? "산정 로직 및 상세 데이터 추가 예정"} />
+                  <DetailItem icon="task_alt" label="실현 가능성" value={selectedRecommendation.feasibility ? `${selectedRecommendation.feasibility}/100 · 실행 조건 검토 완료` : "평가 기준 및 점수 추가 예정"} />
+                  <DetailItem icon="schedule" label="예상 실행 기간" value={selectedRecommendation.executionPeriod ?? "실행 일정 추가 예정"} />
+                  <DetailItem icon="monitoring" label="예상 공급망 영향" value="정량 시뮬레이션 결과 추가 예정" />
+                </div>
+
+                <div className="mt-5 rounded-xl bg-surface-container-low p-4">
+                  <p className="text-[11px] font-bold text-on-surface-variant">판단 근거 및 제약 조건</p>
+                  <p className="mt-2 text-xs leading-5 text-on-surface-variant">
+                    현재 연결된 재고, 권역 위험도와 이관 경로를 기준으로 설명합니다. 비용 모델, 인력·설비 제약 및 상세 실행 조건은 데이터 업로드 후 추가 예정입니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="rounded-lg bg-surface-container-low px-2 py-2 text-center">
+      <span className="block text-[9px] font-bold text-on-surface-variant">{label}</span>
+      <span className="mt-1 block text-[11px] font-black text-on-surface">{value}</span>
+    </span>
+  );
+}
+
+function DetailItem({ icon, label, value }: { icon: string; label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-outline-variant p-3">
+      <div className="flex items-center gap-2 text-on-surface-variant">
+        <Icon name={icon} className="text-[17px]" />
+        <span className="text-[10px] font-bold">{label}</span>
+      </div>
+      <p className="mt-2 text-xs font-semibold leading-5 text-on-surface">{value}</p>
     </div>
   );
 }

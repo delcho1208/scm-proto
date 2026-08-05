@@ -133,7 +133,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
           <div className="flex items-center gap-md">
             <div className="flex items-center gap-xs text-on-surface-variant">
               <Icon name="schedule" />
-              <span className="font-data text-data-sm">2025-07-15</span>
+              <span className="font-data text-data-sm">2026-03-10</span>
             </div>
             <button className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant">
               <Icon name="notifications" />
@@ -151,7 +151,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
 
         <footer className="fixed bottom-0 left-0 right-0 z-40 flex w-full min-w-[1440px] items-center justify-between border-t border-outline-variant bg-surface-container-lowest px-xl py-xs">
           <p className="text-[10px] font-bold text-on-surface-variant">
-            © 2025 SCM Logistics Intelligence. LG CNS x Chong Kun Dang Integrated System.
+            © 2026 SCM Logistics Intelligence. LG CNS x Chong Kun Dang Integrated System.
           </p>
           <div className="flex gap-lg">
             {["Privacy Policy", "Terms of Service", "API Documentation"].map((l) => (

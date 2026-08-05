@@ -57,22 +57,21 @@ const monthlyValues = [...monthlyForecast, ...monthlyShipments];
 const emergencyProcurement = rawDashboard.overview.integratedResponse.emergencyProcurementQuantity;
 
 const dashboardScenario: ProductDashboardScenario = {
-  date: national.policyRisk.asOf,
+  date: "2026-03-10",
   sceneName: rawDashboard.overview.baselineScenario,
   regions,
   totalInventory: rawDashboard.overview.nationalCurrentStock,
   utilization: rawDashboard.overview.averageUtilizationPct,
-  riskScore: rawDashboard.overview.policyRisk.score,
   inventoryLevel: toRiskLevel(national.stockStatusCode),
   externalSignal: {
-    title: "세파졸린 통합 공급 리스크",
-    value: `정책 리스크 ${rawDashboard.overview.policyRisk.score}/100`,
+    title: "세파졸린 통합 공급 현황",
+    value: `전국 재고 충족률 ${national.targetStockCoveragePct}%`,
     detail: `S3 서비스율 ${rawDashboard.overview.integratedResponse.serviceRatePct}% · 긴급조달 ${Math.round(emergencyProcurement).toLocaleString("ko-KR")} BOX`,
   },
   recommendations: national.recommendations.map((recommendation, index) => ({
     id: `CEFAZOLIN-${index + 1}`,
     title: recommendation,
-    description: `전국 재고 충족률 ${national.targetStockCoveragePct}% · 정책 리스크 ${national.policyRisk.score}/100`,
+    description: `전국 재고 충족률 ${national.targetStockCoveragePct}% · 긴급조달 ${Math.round(emergencyProcurement).toLocaleString("ko-KR")} BOX`,
     approvalButtonText: "S3 통합대응 적용",
   })),
 };
@@ -85,7 +84,7 @@ export function getCefazolinIntegrationRecords(regionId: string): SystemRecord[]
       docNo: record.documentNumber,
       status: toIntegrationStatus(record.status),
       qty: Math.round(record.quantity).toLocaleString("ko-KR"),
-      updatedAt: national?.policyRisk.asOf ?? "",
+      updatedAt: "2026-03-10",
       note: `${record.unit} · 세파졸린 실데이터`,
     }));
 }

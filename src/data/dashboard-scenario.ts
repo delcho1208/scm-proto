@@ -34,7 +34,6 @@ export type ProductDashboardScenario = {
   recommendations: DashboardRecommendation[];
   totalInventory?: number;
   utilization?: number;
-  riskScore?: number;
   inventoryLevel?: RiskLevel;
   externalSignal?: {
     title: string;
@@ -208,12 +207,11 @@ const externalShock = tamivirRaw.xai_cards.find((card) => card.title.includes("�
 const inventoryXai = tamivirRaw.xai_cards.find((card) => card.title.includes("재고 상태"));
 
 export const tamivirDashboard: ProductDashboardScenario = {
-  date: "현재",
+  date: "2026-03-10",
   sceneName: tamivirRaw.scenario,
   regions: tamivirRegions,
   totalInventory: tamivirRaw.summary.current_stock,
   utilization: operationRate,
-  riskScore: tamivirRaw.summary.risk_score,
   inventoryLevel: tamivirRaw.summary.status === "과잉" ? "warning" : tamivirRaw.summary.status === "부족" ? "danger" : "safe",
   externalSignal: {
     title: "인플루엔자 시장 충격 감지",
