@@ -24,6 +24,9 @@ export type DashboardRecommendation = {
   fromRegion?: string;
   toRegion?: string;
   transferAmount?: number;
+  projectedTotalInventory?: number;
+  projectedStatus?: string;
+  affectedRegions?: string[];
   approvalButtonText: string;
 };
 
@@ -155,29 +158,19 @@ export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
     }
   : null;
 
-type TamivirRaw = {
-  scenario: string;
-  f2a_target: number;
-  ai_target: number;
-  current_stock: number;
-  ratio: number;
-  dead_stock_quantity: number;
-  dead_stock_cost: number;
-  dead_stock_cost_billion_str: string;
+type TamivirScenario = {
+  time: string;
+  phase: "normal" | "prediction";
   status: string;
-  decision: string;
-  recommendations: Array<{
-    id: number;
-    title: string;
-    name: string;
-    priority: string;
-    action: string;
-    expected_effect: string[];
-    xai: string[];
-  }>;
-  trace_log: string[];
-  contributions: Array<{ factor: string; score: number; contribution_pct: number }>;
-  xai_cards: Array<{ title: string; value: string; impact: string; description: string }>;
+  summary: {
+    f2a_target: number;
+    ai_target: number;
+    current_stock: number;
+    ratio: number;
+    dead_stock_quantity: number;
+    status: string;
+    risk_score: number;
+  };
   zone_details: Array<{
     zone_name: string;
     f2a_target: number;
@@ -185,12 +178,37 @@ type TamivirRaw = {
     current_stock: number;
     ratio: number;
     status: string;
+    forecast: number;
+    yoy: number;
+    actual_trend: number[];
+    forecast_trend: number[];
   }>;
+  recommendations: Array<{
+    id: number;
+    priority: string;
+    title: string;
+    name: string;
+    action: string;
+    expected_effect: string[];
+    xai: string[];
+    approval_action: { initial_button_text: string };
+    after_apply: {
+      current_stock: number;
+      ratio: number;
+      status: string;
+      dead_stock_quantity: number;
+      affected_regions: string[];
+    };
+  }>;
+  xai_cards: Array<{ title: string; value: string; description: string }>;
 };
 
+type TamivirRaw = { project: string; scenarios: TamivirScenario[] };
+
 const tamivirRaw = rawTamivirScenario as TamivirRaw;
-const tamivirRegions = normalizeRegions(
-  tamivirRaw.zone_details.map((region) => ({
+const tamivirLatest = [...tamivirRaw.scenarios].sort((a, b) => b.time.localeCompare(a.time))[0];
+const tamivirZoneRegions = normalizeRegions(
+  tamivirLatest.zone_details.map((region) => ({
     region: region.zone_name,
     current_stock: region.current_stock,
     target_stock: region.ai_target,
@@ -199,29 +217,48 @@ const tamivirRegions = normalizeRegions(
     status: region.status,
   })),
 );
-const operationRateText = tamivirRaw.xai_cards.find((card) =>
+const tamivirNationalRisk = tamivirLatest.summary.status === "과잉"
+  ? "warning"
+  : tamivirLatest.summary.status === "부족" ? "danger" : "safe";
+const tamivirRegions: Record<string, DashboardRegion> = {
+  National: {
+    id: "National",
+    region: "National_전국 통합",
+    current_stock: tamivirLatest.summary.current_stock,
+    target_stock: tamivirLatest.summary.ai_target,
+    stock_ratio: tamivirLatest.summary.ratio,
+    stockRatioLabel: `${tamivirLatest.summary.ratio.toFixed(1)}배`,
+    status: tamivirLatest.summary.status,
+    riskLevel: tamivirNationalRisk,
+    riskText: tamivirLatest.summary.status,
+  },
+  ...tamivirZoneRegions,
+};
+const operationRateText = tamivirLatest.xai_cards.find((card) =>
   card.title.includes("생산 관성"),
 )?.value;
 const operationRate = Number(operationRateText?.match(/[\d.]+/)?.[0] ?? 97);
-const externalShock = tamivirRaw.xai_cards.find((card) => card.title.includes("외부 이벤트"));
-const inventoryXai = tamivirRaw.xai_cards.find((card) => card.title.includes("재고 상태"));
+const demandXai = tamivirLatest.xai_cards.find((card) => card.title.includes("수요 예측"));
 
 export const tamivirDashboard: ProductDashboardScenario = {
-  date: "2026-03-10",
-  sceneName: tamivirRaw.scenario,
+  date: `${tamivirLatest.time.replace(".", "-")}-01`,
+  sceneName: `${tamivirRaw.project} · ${tamivirLatest.status}`,
   regions: tamivirRegions,
-  totalInventory: tamivirRaw.current_stock,
+  totalInventory: tamivirLatest.summary.current_stock,
   utilization: operationRate,
-  inventoryLevel: tamivirRaw.status === "과잉" ? "warning" : tamivirRaw.status === "부족" ? "danger" : "safe",
+  inventoryLevel: tamivirNationalRisk,
   externalSignal: {
-    title: "인플루엔자 시장 충격 감지",
-    value: `현재 ${tamivirRaw.current_stock.toLocaleString()}EA · AI 목표 ${tamivirRaw.ai_target.toLocaleString()}EA`,
-    detail: externalShock?.description ?? tamivirRaw.trace_log[0],
+    title: "인플루엔자 수요 급감 예측",
+    value: `현재 ${tamivirLatest.summary.current_stock.toLocaleString()}EA · AI 목표 ${tamivirLatest.summary.ai_target.toLocaleString()}EA`,
+    detail: demandXai?.description ?? `전국 재고가 AI 목표의 ${tamivirLatest.summary.ratio.toFixed(1)}배로 예측되었습니다.`,
   },
-  recommendations: tamivirRaw.recommendations.map((recommendation) => ({
+  recommendations: tamivirLatest.recommendations.map((recommendation) => ({
     id: `TAMIVIR-${recommendation.id}`,
     title: recommendation.name,
-    description: `${recommendation.action} · 기대효과: ${recommendation.expected_effect.join(", ")} · XAI 근거: ${recommendation.xai.join(", ")}${recommendation.id === 1 ? ` · Dead Stock ${tamivirRaw.dead_stock_quantity.toLocaleString()}정 · 예상 손실 ${tamivirRaw.dead_stock_cost_billion_str} · ${inventoryXai?.description ?? ""}` : ""}`,
-    approvalButtonText: recommendation.id === 1 ? "생산 감축 승인" : "CDC 비축 전환 검토",
+    description: `${recommendation.action} · 기대효과: ${recommendation.expected_effect.join(", ")} · XAI 근거: ${recommendation.xai.join(", ")}`,
+    projectedTotalInventory: recommendation.after_apply.current_stock,
+    projectedStatus: recommendation.after_apply.status,
+    affectedRegions: recommendation.after_apply.affected_regions.map(toRegionId),
+    approvalButtonText: recommendation.approval_action.initial_button_text,
   })),
 };

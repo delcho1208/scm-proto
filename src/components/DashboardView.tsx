@@ -44,6 +44,8 @@ type AiRecommendation = {
   feasibility?: number;
   executionPeriod?: string;
   scenarioId?: string;
+  projectedTotalInventory?: number;
+  affectedRegions?: string[];
   xai?: { summary: string; evidence: string[]; limitation: string };
 };
 
@@ -199,6 +201,19 @@ export function DashboardView({ product }: { product: Product }) {
   const cefazolinRegionalTargetTotal = Object.entries(cefazolinDashboard.regions)
     .filter(([id]) => id !== "National")
     .reduce((sum, [, item]) => sum + item.target_stock, 0);
+  const cefazolinRedistributionPool = Object.entries(cefazolinDashboard.regions)
+    .filter(([id]) => id !== "National")
+    .reduce((sum, [id]) => sum + (cefazolinDashboard.transferableQuantityByRegion[id] ?? 0), 0);
+  const cefazolinShortfallTotal = Object.entries(cefazolinDashboard.regions)
+    .filter(([id]) => id !== "National")
+    .reduce((sum, [, item]) => sum + Math.max(0, item.target_stock - item.current_stock), 0);
+  const appliedProjectedRecommendation = isRecommendationApplied
+    ? scenario?.recommendations.find((item) => item.id === checkedRecommendationId && item.projectedTotalInventory !== undefined)
+    : undefined;
+  const projectedAffectedStockTotal = (appliedProjectedRecommendation?.affectedRegions ?? []).reduce(
+    (sum, id) => sum + (scenario?.regions[id]?.current_stock ?? 0),
+    0,
+  );
   const appliedTransfers = (scenario?.recommendations ?? []).flatMap((recommendation) => {
     return isRecommendationApplied &&
       checkedRecommendationId === recommendation.id &&
@@ -219,9 +234,27 @@ export function DashboardView({ product }: { product: Product }) {
     const scenarioDelta = appliedCefazolinScenario
       ? id === "National"
         ? cefazolinScenarioInventoryDelta
-        : cefazolinScenarioInventoryDelta * (baseRegion.target_stock / cefazolinRegionalTargetTotal)
+        : (appliedCefazolinScenario.emergencyProcurementQuantity - appliedCefazolinScenario.totalUnmetDemand) *
+            (baseRegion.target_stock / cefazolinRegionalTargetTotal)
       : 0;
-    const inventoryDelta = transferDelta + scenarioDelta;
+    const shouldRedistribute = appliedCefazolinScenarioId === "S2_내부대응" || appliedCefazolinScenarioId === "S3_통합대응";
+    const transferableQuantity = cefazolinDashboard.transferableQuantityByRegion[id] ?? 0;
+    const redistributionDelta = shouldRedistribute && id !== "National"
+      ? transferableQuantity
+        ? -transferableQuantity
+        : cefazolinShortfallTotal > 0
+          ? cefazolinRedistributionPool * (Math.max(0, baseRegion.target_stock - baseRegion.current_stock) / cefazolinShortfallTotal)
+          : 0
+      : 0;
+    const projectedInventoryDelta = appliedProjectedRecommendation
+      ? id === "National"
+        ? appliedProjectedRecommendation.projectedTotalInventory! - (scenario?.totalInventory ?? baseRegion.current_stock)
+        : appliedProjectedRecommendation.affectedRegions?.includes(id) && projectedAffectedStockTotal > 0
+          ? (appliedProjectedRecommendation.projectedTotalInventory! - (scenario?.totalInventory ?? 0)) *
+            (baseRegion.current_stock / projectedAffectedStockTotal)
+          : 0
+      : 0;
+    const inventoryDelta = transferDelta + scenarioDelta + redistributionDelta + projectedInventoryDelta;
     if (inventoryDelta === 0) return baseRegion;
     const currentStock = Math.max(0, baseRegion.current_stock + inventoryDelta);
     const stockRatio = baseRegion.target_stock > 0 ? (currentStock / baseRegion.target_stock) * 100 : 0;
@@ -256,7 +289,9 @@ export function DashboardView({ product }: { product: Product }) {
   const forecastRisk = riskStyles[forecastRiskLevel];
   const forecastRiskText = forecastRiskLevel === "danger" ? "부족" : forecastRiskLevel === "warning" ? "과잉" : "적정";
 
-  const displayedTotalInventory = appliedCefazolinScenario
+  const displayedTotalInventory = appliedProjectedRecommendation
+    ? appliedProjectedRecommendation.projectedTotalInventory!
+    : appliedCefazolinScenario
     ? Math.max(0, cefazolinDashboard.totalInventory + cefazolinScenarioInventoryDelta)
     : (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
   const displayedUtilization =
@@ -308,6 +343,8 @@ export function DashboardView({ product }: { product: Product }) {
             ? 86
             : undefined,
         executionPeriod: recommendation.transferAmount ? "1~2주" : undefined,
+        projectedTotalInventory: recommendation.projectedTotalInventory,
+        affectedRegions: recommendation.affectedRegions,
       }))
     : [
         { id: "fallback-1", t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
@@ -328,7 +365,7 @@ export function DashboardView({ product }: { product: Product }) {
   const checkedRecommendation = recommendations.find((recommendation) => recommendation.id === checkedRecommendationId);
   const activeTransferRoutes = checkedRecommendation?.routes ?? [];
   const canApplyCheckedRecommendation = Boolean(
-    checkedRecommendation && (checkedRecommendation.routes?.length || checkedRecommendation.scenarioId),
+    checkedRecommendation && (checkedRecommendation.routes?.length || checkedRecommendation.scenarioId || checkedRecommendation.projectedTotalInventory !== undefined),
   );
   const displayedTransferRoutes = isRecommendationApplied ? activeTransferRoutes : [];
   const productApi = productApiMeta[product.key] ?? productApiMeta.리피로우;

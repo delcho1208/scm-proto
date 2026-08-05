@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { ScmShell, Icon } from "@/components/ScmShell";
 import { getCefazolinIntegrationRecords } from "@/data/cefazolin-dashboard";
+import { getLipilouIntegrationRecords } from "@/data/lipilou-integration";
+import { getTamivirIntegrationRecords } from "@/data/tamivir-integration";
 import {
   getIntegrationRecords,
   markerOrder,
@@ -42,6 +44,8 @@ const dataTypeStyle: Record<string, string> = {
   "ERP 확정공급 배분": "bg-blue-50 text-blue-700 border-blue-200",
   "MES 생산·품질 실적": "bg-violet-50 text-violet-700 border-violet-200",
   "WMS 재고·출하 실적": "bg-amber-50 text-amber-700 border-amber-200",
+  "ERP 원료·구매 실적": "bg-blue-50 text-blue-700 border-blue-200",
+  "WMS 일별 재고 실적": "bg-amber-50 text-amber-700 border-amber-200",
 };
 
 type TwinStatus = "safe" | "warning" | "danger";
@@ -54,9 +58,10 @@ function getTwinStatus(records: ReturnType<typeof getIntegrationRecords>): TwinS
 }
 
 function getProductIntegrationRecords(regionId: string, productKey: string) {
-  return productKey === "세파졸린"
-    ? getCefazolinIntegrationRecords(regionId)
-    : getIntegrationRecords(regionId, productKey);
+  if (productKey === "세파졸린") return getCefazolinIntegrationRecords(regionId);
+  if (productKey === "리피로우") return getLipilouIntegrationRecords(regionId);
+  if (productKey === "타미비어") return getTamivirIntegrationRecords(regionId);
+  return getIntegrationRecords(regionId, productKey);
 }
 
 function DataIntegrationView({ product }: { product: Product }) {
@@ -92,17 +97,17 @@ function DataIntegrationView({ product }: { product: Product }) {
           {records.map((rec) => {
             const meta = systemColumns[rec.system as SystemKey];
             return (
-              <div key={rec.system} className="bento-card flex min-h-0 flex-1 flex-col p-md">
-                <div className="mb-sm flex items-start gap-sm border-b border-outline-variant/40 pb-xs">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
+              <div key={rec.system} className="bento-card flex min-h-0 flex-1 flex-col overflow-hidden p-sm">
+                <div className="mb-xs flex shrink-0 items-start gap-sm border-b border-outline-variant/40 pb-xs">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
                     <Icon name={meta.icon} className="text-[20px]" />
                   </div>
                   <div>
-                    <h4 className="font-display text-headline-sm text-on-surface">{meta.title}</h4>
-                    <p className="text-[11px] text-on-surface-variant">{meta.desc}</p>
+                    <h4 className="font-display text-[16px] font-bold leading-tight text-on-surface">{meta.title}</h4>
+                    <p className="mt-0.5 text-[10px] leading-tight text-on-surface-variant">{meta.desc}</p>
                   </div>
                 </div>
-                <dl className="space-y-2 text-[13px]">
+                <dl className="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain pr-1 text-[12px]">
                   <Row label="문서번호" value={<span className="font-data">{rec.docNo}</span>} />
                   <Row
                     label="연동 상태"
@@ -249,11 +254,11 @@ function DataIntegrationView({ product }: { product: Product }) {
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-md">
+    <div className="flex min-w-0 items-start justify-between gap-sm">
       <dt className="shrink-0 pt-0.5 text-[11px] font-bold uppercase leading-tight text-on-surface-variant">
         {label}
       </dt>
-      <dd className="max-w-[68%] text-right text-[12px] leading-snug text-on-surface">{value}</dd>
+      <dd className="min-w-0 max-w-[72%] break-words text-right text-[11px] leading-snug text-on-surface">{value}</dd>
     </div>
   );
 }

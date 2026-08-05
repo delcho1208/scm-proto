@@ -124,7 +124,7 @@ const dashboardScenario: ProductDashboardScenario = {
   externalSignal: {
     title: "세파졸린 통합 공급 현황",
     value: `전국 재고 충족률 ${national.targetStockCoveragePct}%`,
-    detail: `S3 서비스율 ${rawDashboard.overview.integratedResponse.serviceRatePct}% · 긴급조달 ${Math.round(emergencyProcurement).toLocaleString("ko-KR")} BOX`,
+    detail: `S3 서비스율 ${rawDashboard.overview.integratedResponse.serviceRatePct}% · 원료 추가 발주 ${Math.round(emergencyProcurement).toLocaleString("ko-KR")} BOX`,
   },
   recommendations: national.recommendations.map((recommendation, index) => ({
     id: `CEFAZOLIN-${index + 1}`,
@@ -157,6 +157,9 @@ export const cefazolinDashboard = {
   annualForecastDemand: rawDashboard.overview.annualForecastDemand,
   annualForecastDemandByRegion: Object.fromEntries(
     Object.entries(sourceRegions).map(([id, region]) => [id, region.annualForecastDemand]),
+  ) as Record<string, number>,
+  transferableQuantityByRegion: Object.fromEntries(
+    Object.entries(sourceRegions).map(([id, region]) => [id, region.transferableQuantity]),
   ) as Record<string, number>,
   serviceRatePct: rawDashboard.overview.integratedResponse.serviceRatePct,
   unmetDemandRatePct: rawDashboard.overview.integratedResponse.unmetDemandRatePct,
@@ -231,11 +234,11 @@ export const cefazolinDashboard = {
       regionId: undefined,
       scenarioId: "S3_통합대응",
       title: "S3 통합대응",
-      description: "긴급조달과 배분 정책을 결합해 전 권역 서비스율을 유지하는 시나리오",
+      description: "실행 내용: 원료 추가 발주 + 권역 재배분",
       costKpi: { label: "S0 대비 총조달비 차이", value: formatCostDelta(costDeltaVsS0) },
       feasibility: { label: feasibilityLabel(s3FeasibilityScore), score: s3FeasibilityScore, metric: "시뮬레이션 실현성" },
       xai: {
-        summary: "S3 시뮬레이션은 미충족 수요와 부족 주차를 제거하고 전 권역 서비스율을 유지했습니다.",
+        summary: "S3는 원료 추가 발주와 권역 재배분을 함께 적용해 미충족 수요와 부족 주차를 제거하는 대응안입니다.",
         evidence: [
           `S0 대비 총조달비 차이 ${formatCostDelta(costDeltaVsS0)}`,
           `서비스율 ${s3.serviceRatePct.toFixed(2)}%, 최저 권역 서비스율 ${s3.minimumRegionalServiceRatePct.toFixed(2)}%`,

@@ -1,186 +1,232 @@
 {
-  "scenario": "타미비어 Overproduction",
-  "f2a_target": 1515522,
-  "ai_target": 49375,
-  "current_stock": 1188421,
-  "ratio": 24.07,
-  "dead_stock_quantity": 1139046,
-  "dead_stock_cost": 339435708,
-  "dead_stock_cost_billion_str": "약 3.39억원",
-  "status": "과잉",
-  "risk_score": 100,
-  "decision": "Critical (🔴위험)",
-
-  "recommendations": [
+  "project": "종근당 타미비어 SCM 모니터링 대시보드",
+  "scenarios": [
     {
-      "id": 1,
-      "priority": "HIGH",
-      "title": "추천안 1",
-      "name": "타미비어 생산 감축 및 신규 원료 발주 보류",
-      "action": "전국 타미비어 생산 즉시 감축 (감축 기준 10배 초과), 신규 원료 발주 보류, 기존 재고 우선 출하",
-      "expected_effect": [
-        "Dead Stock 증가 방지",
-        "원료 구매 비용 절감",
-        "생산 CAPA 확보"
+      "time": "2026.09",
+      "phase": "normal",
+      "status": "적정",
+      "summary": {
+        "f2a_target": 2837033,
+        "ai_target": 1166666,
+        "current_stock": 1400000,
+        "ratio": 1.2,
+        "dead_stock_quantity": 0,
+        "status": "적정",
+        "risk_score": 15
+      },
+      "zone_details": [
+        {"zone_name": "Zone1_서울권", "f2a_target": 439926, "ai_target": 183333, "current_stock": 220000, "ratio": 1.2, "status": "적정", "forecast": 183333, "yoy": 3.2, "actual_trend": [210000, 216000, 220000], "forecast_trend": [213000, 220000, 183333]},
+        {"zone_name": "Zone2_경기인천수도권", "f2a_target": 1088444, "ai_target": 450000, "current_stock": 540000, "ratio": 1.2, "status": "적정", "forecast": 450000, "yoy": 2.5, "actual_trend": [516666, 533333, 540000], "forecast_trend": [526666, 540000, 450000]},
+        {"zone_name": "Zone3_강원권", "f2a_target": 112040, "ai_target": 46666, "current_stock": 56000, "ratio": 1.2, "status": "적정", "forecast": 46666, "yoy": 1.1, "actual_trend": [53333, 55000, 56000], "forecast_trend": [54000, 55333, 46666]},
+        {"zone_name": "Zone4_대전세종충청권", "f2a_target": 297784, "ai_target": 123333, "current_stock": 148000, "ratio": 1.2, "status": "적정", "forecast": 123333, "yoy": 2.8, "actual_trend": [140000, 145000, 148000], "forecast_trend": [143333, 146666, 123333]},
+        {"zone_name": "Zone5_광주전북전남권", "f2a_target": 274574, "ai_target": 113333, "current_stock": 136000, "ratio": 1.2, "status": "적정", "forecast": 113333, "yoy": 1.7, "actual_trend": [130000, 133333, 136000], "forecast_trend": [131666, 135000, 113333]},
+        {"zone_name": "Zone6_대구경북권", "f2a_target": 222121, "ai_target": 90000, "current_stock": 108000, "ratio": 1.2, "status": "적정", "forecast": 90000, "yoy": 2.1, "actual_trend": [103333, 106666, 108000], "forecast_trend": [105000, 107333, 90000]},
+        {"zone_name": "Zone7_부산울산경남권", "f2a_target": 357877, "ai_target": 146666, "current_stock": 176000, "ratio": 1.2, "status": "적정", "forecast": 146666, "yoy": 3.5, "actual_trend": [166666, 173333, 176000], "forecast_trend": [170000, 175000, 146666]},
+        {"zone_name": "Zone8_제주권", "f2a_target": 44265, "ai_target": 13333, "current_stock": 16000, "ratio": 1.2, "status": "적정", "forecast": 13333, "yoy": 4.1, "actual_trend": [15000, 15666, 16000], "forecast_trend": [15333, 15833, 13333]}
       ],
-      "xai": [
-        "AI 수요 급감 예측",
-        "재고 약 24배 초과",
-        "생산라인 가동률 97% 유지"
-      ]
+      "recommendations": [],
+      "xai_cards": []
     },
     {
-      "id": 2,
-      "priority": "MEDIUM",
-      "title": "추천안 2",
-      "name": "잉여 완제품 CDC 장기저장 및 국가 비축분 전환",
-      "action": "권역별 잉여 재고를 중앙 CDC 장기저장창고로 이송하고 국가 비축 의약품 전환 검토",
-      "expected_effect": [
-        "재고 폐기 최소화",
-        "창고 운영비 절감",
-        "국가 비축 활용"
+      "time": "2026.11",
+      "phase": "prediction",
+      "status": "위험 (과잉 예측)",
+      "summary": {
+        "f2a_target": 2837033,
+        "ai_target": 90785,
+        "current_stock": 1280777,
+        "ratio": 14.1,
+        "dead_stock_quantity": 1189992,
+        "status": "과잉",
+        "risk_score": 92
+      },
+      "zone_details": [
+        {
+          "zone_name": "Zone1_서울권",
+          "f2a_target": 439926,
+          "ai_target": 14077,
+          "current_stock": 344902,
+          "ratio": 24.5,
+          "status": "과잉",
+          "forecast": 14077,
+          "yoy": -82.9,
+          "actual_trend": [216666, 220000, 344902],
+          "forecast_trend": [220000, 183333, 14077]
+        },
+        {
+          "zone_name": "Zone2_경기인천수도권",
+          "f2a_target": 1088444,
+          "ai_target": 34830,
+          "current_stock": 633909,
+          "ratio": 18.2,
+          "status": "과잉",
+          "forecast": 34830,
+          "yoy": -72.6,
+          "actual_trend": [533333, 540000, 633909],
+          "forecast_trend": [540000, 450000, 34830]
+        },
+        {
+          "zone_name": "Zone3_강원권",
+          "f2a_target": 112040,
+          "ai_target": 3585,
+          "current_stock": 6812,
+          "ratio": 1.9,
+          "status": "적정",
+          "forecast": 3585,
+          "yoy": -82.3,
+          "actual_trend": [55000, 56000, 6812],
+          "forecast_trend": [55333, 46666, 3585]
+        },
+        {
+          "zone_name": "Zone4_대전세종충청권",
+          "f2a_target": 297784,
+          "ai_target": 9529,
+          "current_stock": 70515,
+          "ratio": 7.4,
+          "status": "과잉",
+          "forecast": 9529,
+          "yoy": -75.3,
+          "actual_trend": [145000, 148000, 70515],
+          "forecast_trend": [146666, 123333, 9529]
+        },
+        {
+          "zone_name": "Zone5_광주전북전남권",
+          "f2a_target": 274574,
+          "ai_target": 8786,
+          "current_stock": 49203,
+          "ratio": 5.6,
+          "status": "과잉",
+          "forecast": 8786,
+          "yoy": -81.7,
+          "actual_trend": [133333, 136000, 49203],
+          "forecast_trend": [135000, 113333, 8786]
+        },
+        {
+          "zone_name": "Zone6_대구경북권",
+          "f2a_target": 222121,
+          "ai_target": 7107,
+          "current_stock": 27009,
+          "ratio": 3.8,
+          "status": "과잉",
+          "forecast": 7107,
+          "yoy": -77.5,
+          "actual_trend": [106666, 108000, 27009],
+          "forecast_trend": [107333, 90000, 7107]
+        },
+        {
+          "zone_name": "Zone7_부산울산경남권",
+          "f2a_target": 357877,
+          "ai_target": 11452,
+          "current_stock": 146586,
+          "ratio": 12.8,
+          "status": "과잉",
+          "forecast": 11452,
+          "yoy": -74.3,
+          "actual_trend": [173333, 176000, 146586],
+          "forecast_trend": [175000, 146666, 11452]
+        },
+        {
+          "zone_name": "Zone8_제주권",
+          "f2a_target": 44265,
+          "ai_target": 1416,
+          "current_stock": 1841,
+          "ratio": 1.3,
+          "status": "적정",
+          "forecast": 1416,
+          "yoy": -70.2,
+          "actual_trend": [15666, 16000, 1841],
+          "forecast_trend": [15833, 13333, 1416]
+        }
       ],
-      "xai": [
-        "Dead Stock 113만정 발생",
-        "유효기간 최대 120개월 확보",
-        "CDC 장기보관 가능"
+      "recommendations": [
+        {
+          "id": 1,
+          "priority": "HIGH",
+          "title": "수도권 및 영남권 중심 타미비어 생산 감축",
+          "name": "수도권/영남권 핀셋 감축 및 신규 발주 보류",
+          "action": "감축 Trigger(10배)를 초과한 서울, 경기, 부산 권역 생산 라인 즉시 감축. 강원/제주 등은 현 수준 유지.",
+          "expected_effect": [
+            "Dead Stock 65% 증가 방지",
+            "원료 구매 비용 절감",
+            "과잉 권역 CAPA 최적화"
+          ],
+          "xai": [
+            "AI 수도권 수요 급감 예측",
+            "서울/경기 재고 18~24배 초과",
+            "생산라인 가동률 97% 유지"
+          ],
+          "approval_action": {
+            "initial_button_text": "체크 실행안 적용",
+            "approved_button_text": "승인완료 ✓ (SCM총괄본부장, 2026-11-15)",
+            "approval_user": "SCM총괄본부장",
+            "approval_date": "2026-11-15"
+          },
+          "after_apply": {
+            "current_stock": 650000,
+            "ratio": 7.1,
+            "risk_score": 45,
+            "status": "과잉 (감축 진행 중)",
+            "dead_stock_quantity": 559215,
+            "affected_regions": [
+              "Zone1_서울권",
+              "Zone2_경기인천수도권",
+              "Zone7_부산울산경남권"
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "priority": "MEDIUM",
+          "title": "잉여 완제품 CDC 장기저장 및 국가 비축분 전환",
+          "name": "수도권/영남권 잉여 재고 CDC 이송",
+          "action": "재고 과잉이 심각한 권역의 잉여 재고를 중앙 CDC로 이송하여 장기 보관.\n\n[CDC 이송 대상]\n- 서울권: 266,000 BOX\n- 경기인천권: 400,000 BOX\n- 부산울산경남권: 134,000 BOX\n- 총 이송량: 800,000 BOX",
+          "expected_effect": [
+            "권역 물류창고 부하 해소",
+            "국가 비축 의약품 전환 가능성",
+            "폐기 비용 최소화"
+          ],
+          "xai": [
+            "수도권 악성 재고 집중 현상",
+            "유효기간 최대 120개월 확보",
+            "CDC 여유 공간 활용 가능"
+          ],
+          "approval_action": {
+            "initial_button_text": "이관 계획 적용",
+            "approved_button_text": "이관승인 ✓ (물류센터장, 2026-11-16)",
+            "approval_user": "물류센터장",
+            "approval_date": "2026-11-16"
+          },
+          "after_apply": {
+            "current_stock": 700000,
+            "ratio": 7.7,
+            "risk_score": 50,
+            "status": "과잉 (이관 진행 중)",
+            "dead_stock_quantity": 609215,
+            "affected_regions": [
+              "Zone1_서울권",
+              "Zone2_경기인천수도권",
+              "Zone7_부산울산경남권"
+            ]
+          }
+        }
+      ],
+      "xai_cards": [
+        {
+          "title": "AI 수요 예측 근거",
+          "value": "고정 시장 점유율 7.44% 반영",
+          "description": "과거 2개년(23~24년) 오셀타미비르 전체 시장 대비 당사 평균 점유율(7.44%)을 기반으로 외부 충격에 따른 수요 변동을 산출."
+        },
+        {
+          "title": "권역별 재고 양극화 상태",
+          "value": "전국 평균: 과잉 (14.1배)",
+          "description": "서울/경기는 18배 이상 과잉이나, 강원/제주는 2배 미만으로 적정 수준 유지 중."
+        },
+        {
+          "title": "생산 관성 유지",
+          "value": "수도권 가동률 97.0%",
+          "description": "수요 감소 및 재고 누적에도 과잉 권역의 생산라인이 지속 가동 중."
+        }
       ]
-    }
-  ],
-
-  "trace_log": [
-    "External Event: Influenza Market Shock & Mandate Lift Detected",
-    "Demand Forecast: AI Model Projected Sharp Volatility Drop",
-    "Inventory Analysis: Status [과잉], Ratio 24.1x (Trigger Standard: >10x)",
-    "Risk Assessment: Critical Severity Triggered (Score: 100/100)",
-    "Prescription: Automated Production Halt & Inventory Optimization Recommended"
-  ],
-
-  "contributions": [
-    {
-      "factor": "External_Shock",
-      "score": 20,
-      "contribution_pct": 20
-    },
-    {
-      "factor": "Inventory_Risk",
-      "score": 40,
-      "contribution_pct": 40
-    },
-    {
-      "factor": "Production_Inertia",
-      "score": 20,
-      "contribution_pct": 20
-    },
-    {
-      "factor": "Supply_Stability",
-      "score": 10,
-      "contribution_pct": 10
-    },
-    {
-      "factor": "Logistics_Avail",
-      "score": 10,
-      "contribution_pct": 10
-    }
-  ],
-
-  "xai_cards": [
-    {
-      "title": "외부 이벤트 감지",
-      "value": "Flag: 1",
-      "impact": "+20점 (20%)",
-      "description": "마스크 의무화 등 외부 충격 발생으로 인플루엔자 시장 수요 급감 감지"
-    },
-    {
-      "title": "전국 재고 상태 및 과잉 판정",
-      "value": "상태: 과잉 (전국 평균 24.1배)",
-      "impact": "+40점 (40%)",
-      "description": "AI 목표 대비 10배 초과 시 생산 감축 Trigger 발생. 현재 전국 평균 약 24배 초과."
-    },
-    {
-      "title": "생산 관성 유지",
-      "value": "가동률 97.0%",
-      "impact": "+20점 (20%)",
-      "description": "심각한 과잉 재고에도 생산라인이 지속 가동되어 재고가 계속 증가."
-    },
-    {
-      "title": "원료 수급 안정성",
-      "value": "잔여 50,000kg",
-      "impact": "+10점 (10%)",
-      "description": "원료는 충분하여 생산 감축의 원인은 원료 부족이 아님."
-    },
-    {
-      "title": "물류 출하 여력",
-      "value": "운송가능 200,000정",
-      "impact": "+10점 (10%)",
-      "description": "물류 여력은 충분하며 출하 정체 원인은 시장 수요 감소."
-    }
-  ],
-
-  "zone_details": [
-    {
-      "zone_name": "Zone1_서울권",
-      "f2a_target": 378881,
-      "ai_target": 12343,
-      "current_stock": 364146,
-      "ratio": 29.5,
-      "status": "과잉"
-    },
-    {
-      "zone_name": "Zone2_경기인천수도권",
-      "f2a_target": 378881,
-      "ai_target": 12343,
-      "current_stock": 348099,
-      "ratio": 28.2,
-      "status": "과잉"
-    },
-    {
-      "zone_name": "Zone3_강원권",
-      "f2a_target": 75776,
-      "ai_target": 2468,
-      "current_stock": 30612,
-      "ratio": 12.4,
-      "status": "과잉"
-    },
-    {
-      "zone_name": "Zone4_대전세종충청권",
-      "f2a_target": 151552,
-      "ai_target": 4937,
-      "current_stock": 92332,
-      "ratio": 18.7,
-      "status": "과잉"
-    },
-    {
-      "zone_name": "Zone5_광주전북전남권",
-      "f2a_target": 151552,
-      "ai_target": 4937,
-      "current_stock": 70607,
-      "ratio": 14.3,
-      "status": "과잉"
-    },
-    {
-      "zone_name": "Zone6_대구경북권",
-      "f2a_target": 151552,
-      "ai_target": 4937,
-      "current_stock": 106651,
-      "ratio": 21.6,
-      "status": "과잉"
-    },
-    {
-      "zone_name": "Zone7_부산울산경남권",
-      "f2a_target": 197018,
-      "ai_target": 6418,
-      "current_stock": 165606,
-      "ratio": 25.8,
-      "status": "과잉"
-    },
-    {
-      "zone_name": "Zone8_제주권",
-      "f2a_target": 30310,
-      "ai_target": 987,
-      "current_stock": 10368,
-      "ratio": 10.5,
-      "status": "과잉"
     }
   ]
 }
