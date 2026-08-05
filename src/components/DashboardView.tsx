@@ -32,6 +32,7 @@ type TransferRoute = {
   from: string;
   to: string;
   label?: string;
+  amount?: number;
 };
 
 type AiRecommendation = {
@@ -104,6 +105,7 @@ export function DashboardView({ product }: { product: Product }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecommendationOpen, setIsRecommendationOpen] = useState(false);
   const [selectedRecommendationIndex, setSelectedRecommendationIndex] = useState(0);
+  const [isRecommendationApplied, setIsRecommendationApplied] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const timelineFrameRef = useRef<number | null>(null);
@@ -132,6 +134,10 @@ export function DashboardView({ product }: { product: Product }) {
     },
     [],
   );
+
+  useEffect(() => {
+    setIsRecommendationApplied(false);
+  }, [product.key]);
 
   const changeTimeline = (nextIndex: number) => {
     pendingTimelineIndex.current = nextIndex;
@@ -169,7 +175,38 @@ export function DashboardView({ product }: { product: Product }) {
     ? `${lipilouGraphRegion.yoy_pct >= 0 ? "+" : ""}${lipilouGraphRegion.yoy_pct}% YoY`
     : product.yoyGrowth;
   const isCurrentTimeline = timelineKey === "PRES";
-  const scenarioRegion = isCurrentTimeline ? scenario?.regions[regionId] : undefined;
+  const appliedTransfers = (scenario?.recommendations ?? []).flatMap((recommendation, index) => {
+    const checkKey = `${product.key}-${index}`;
+    return isRecommendationApplied &&
+      (recommendationChecks[checkKey] ?? true) &&
+      recommendation.fromRegion &&
+      recommendation.toRegion &&
+      recommendation.transferAmount
+      ? [{ from: recommendation.fromRegion, to: recommendation.toRegion, amount: recommendation.transferAmount }]
+      : [];
+  });
+  const getScenarioRegion = (id: string) => {
+    const baseRegion = isCurrentTimeline ? scenario?.regions[id] : undefined;
+    if (!baseRegion || !isRecommendationApplied) return baseRegion;
+    const inventoryDelta = appliedTransfers.reduce((sum, transfer) => {
+      if (transfer.from === id) return sum - transfer.amount;
+      if (transfer.to === id) return sum + transfer.amount;
+      return sum;
+    }, 0);
+    if (inventoryDelta === 0) return baseRegion;
+    const currentStock = Math.max(0, baseRegion.current_stock + inventoryDelta);
+    const stockRatio = baseRegion.target_stock > 0 ? (currentStock / baseRegion.target_stock) * 100 : 0;
+    const riskLevel: RiskLevel = stockRatio < 100 ? "danger" : stockRatio >= 130 ? "warning" : "safe";
+    return {
+      ...baseRegion,
+      current_stock: currentStock,
+      stock_ratio: Math.round(stockRatio * 10) / 10,
+      stockRatioLabel: `${stockRatio.toFixed(1)}%`,
+      riskLevel,
+      riskText: riskLevel === "danger" ? "부족" : riskLevel === "warning" ? "과잉" : "적정",
+    };
+  };
+  const scenarioRegion = getScenarioRegion(regionId);
   const timelineRegion = timeline.regions[regionId];
   const region = regions[regionId];
   const nationalRiskLevel: RiskLevel =
@@ -198,7 +235,7 @@ export function DashboardView({ product }: { product: Product }) {
   const riskText = regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
   const nationalRiskText = nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
   const regionDescription = scenarioRegion
-    ? `${scenario?.date} 실데이터 · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
+    ? `${scenario?.date} ${isRecommendationApplied ? "추천안 적용 예상값" : "실데이터"} · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
     : `${timeline.label} ${timeline.isPrediction ? "예측" : "실측"} · 재고 상태 ${riskText}`;
 
   const recommendations: AiRecommendation[] = scenario?.recommendations.length
@@ -215,6 +252,7 @@ export function DashboardView({ product }: { product: Product }) {
                   label: recommendation.transferAmount
                     ? `${recommendation.transferAmount.toLocaleString()}EA`
                     : undefined,
+                  amount: recommendation.transferAmount,
                 },
               ]
             : undefined,
@@ -245,6 +283,7 @@ export function DashboardView({ product }: { product: Product }) {
     const checkKey = `${product.key}-${index}`;
     return (recommendationChecks[checkKey] ?? true) ? recommendation.routes ?? [] : [];
   });
+  const displayedTransferRoutes = isRecommendationApplied ? activeTransferRoutes : [];
   const productApi = productApiMeta[product.key] ?? productApiMeta.리피로우;
 
   const selectRegion = (id: string) => {
@@ -425,6 +464,11 @@ export function DashboardView({ product }: { product: Product }) {
             <h4 className="shrink-0 font-display text-headline-sm text-on-surface">
               지능형 권역 모니터링
             </h4>
+            {isRecommendationApplied ? (
+              <span className="shrink-0 rounded-full border border-scm-primary/30 bg-primary-container px-2.5 py-1 text-[10px] font-black text-on-primary-container">
+                AI 추천 적용 예상 결과
+              </span>
+            ) : null}
             <div className="time-scrubber min-w-0 flex-1">
               <div className="mb-1 flex items-center justify-between gap-sm">
                 <div className="flex items-center gap-xs">
@@ -476,7 +520,7 @@ export function DashboardView({ product }: { product: Product }) {
               className="max-h-[90%] max-w-[90%] object-contain transition-opacity duration-300"
             />
             <div key={timelineKey} className="timeline-data-fade pointer-events-none absolute left-1/2 top-1/2 aspect-[1456/1941] h-[90%] -translate-x-1/2 -translate-y-1/2">
-              {activeTransferRoutes.length > 0 && (
+              {displayedTransferRoutes.length > 0 && (
                 <svg
                   aria-label="AI 추천 물류 이동 경로"
                   className="transfer-route-layer"
@@ -496,7 +540,7 @@ export function DashboardView({ product }: { product: Product }) {
                       <path d="M0,0 L4,2 L0,4 Z" fill="var(--scm-primary)" />
                     </marker>
                   </defs>
-                  {activeTransferRoutes.map((route, index) => {
+                  {displayedTransferRoutes.map((route, index) => {
                     const from = getMarkerCenter(route.from);
                     const to = getMarkerCenter(route.to);
                     if (!from || !to) return null;
@@ -529,7 +573,7 @@ export function DashboardView({ product }: { product: Product }) {
               {markerOrder.map((id) => {
                 const r = regions[id];
                 const markerRisk =
-                  (isCurrentTimeline ? scenario?.regions[id]?.riskLevel : undefined) ??
+                  getScenarioRegion(id)?.riskLevel ??
                   timeline.regions[id]?.status;
                 if (!r.box) return null;
                 return (
@@ -568,7 +612,7 @@ export function DashboardView({ product }: { product: Product }) {
               <div className="pointer-events-none space-y-3">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold uppercase tracking-tight text-on-surface-variant">
-                    현재 재고
+                    {isRecommendationApplied ? "예상 재고" : "현재 재고"}
                   </span>
                   <div className="flex items-baseline gap-1">
                     <span className="font-data text-[18px] font-semibold text-scm-primary">
@@ -665,16 +709,41 @@ export function DashboardView({ product }: { product: Product }) {
                 );
               })}
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRecommendationIndex(0);
-                setIsRecommendationOpen(true);
-              }}
-              className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
-            >
-              AI 추천 실행안 비교
-            </button>
+            <div className="mt-md grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedRecommendationIndex(0);
+                  setIsRecommendationOpen(true);
+                }}
+                className="cursor-pointer rounded-lg border border-on-surface bg-white py-sm text-[11px] font-bold text-on-surface transition-colors hover:bg-surface-container-low active:scale-[0.98]"
+              >
+                실행안 비교
+              </button>
+              {isRecommendationApplied ? (
+                <button
+                  type="button"
+                  onClick={() => setIsRecommendationApplied(false)}
+                  className="cursor-pointer rounded-lg bg-on-surface py-sm text-[11px] font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
+                >
+                  원래 값으로 복원
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={activeTransferRoutes.length === 0}
+                  title={activeTransferRoutes.length === 0 ? "적용 가능한 이관 실행안을 선택해 주세요" : undefined}
+                  onClick={() => {
+                    setIsPlaying(false);
+                    setTimelineIndex(2);
+                    setIsRecommendationApplied(true);
+                  }}
+                  className="cursor-pointer rounded-lg bg-scm-primary py-sm text-[11px] font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  체크 실행안 적용
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bento-card flex min-h-0 flex-1 flex-col p-md">

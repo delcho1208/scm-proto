@@ -1,53 +1,50 @@
 {
   "scenario": "타미비어 Overproduction",
-
-  "summary": {
-    "f2a_target": 1515522,
-    "ai_target": 49375,
-    "current_stock": 1188421,
-    "ratio": 24.07,
-    "status": "과잉",
-    "dead_stock_quantity": 1139046,
-    "dead_stock_cost": 339435708,
-    "dead_stock_cost_billion_str": "약 3.39억원",
-    "risk_score": 100,
-    "decision": "Critical (🔴위험)"
-  },
+  "f2a_target": 1515522,
+  "ai_target": 49375,
+  "current_stock": 1188421,
+  "ratio": 24.07,
+  "dead_stock_quantity": 1139046,
+  "dead_stock_cost": 339435708,
+  "dead_stock_cost_billion_str": "약 3.39억원",
+  "status": "과잉",
+  "risk_score": 100,
+  "decision": "Critical (🔴위험)",
 
   "recommendations": [
     {
       "id": 1,
+      "priority": "HIGH",
       "title": "추천안 1",
       "name": "타미비어 생산 감축 및 신규 원료 발주 보류",
-      "priority": "HIGH",
-      "recommendation": "전국 타미비어 생산 즉시 감축 (감축 기준 10배 초과), 신규 원료 발주 보류, 기존 재고 우선 출하",
+      "action": "전국 타미비어 생산 즉시 감축 (감축 기준 10배 초과), 신규 원료 발주 보류, 기존 재고 우선 출하",
       "expected_effect": [
         "Dead Stock 증가 방지",
-        "과잉 생산 즉시 차단",
         "원료 구매 비용 절감",
         "생산 CAPA 확보"
       ],
-      "xai_reason": {
-        "title": "생산 감축 권고 근거",
-        "description": "마스크 의무화 이후 AI가 수요 급감을 예측하였으며 현재 재고가 AI 목표 대비 약 24배 초과하여 생산을 지속할 경우 Dead Stock이 급격히 증가할 것으로 판단"
-      }
+      "xai": [
+        "AI 수요 급감 예측",
+        "재고 약 24배 초과",
+        "생산라인 가동률 97% 유지"
+      ]
     },
     {
       "id": 2,
+      "priority": "MEDIUM",
       "title": "추천안 2",
       "name": "잉여 완제품 CDC 장기저장 및 국가 비축분 전환",
-      "priority": "MEDIUM",
-      "recommendation": "권역별 잉여 재고를 중앙 CDC 장기저장창고로 이송하고 국가 비축 의약품 전환을 검토",
+      "action": "권역별 잉여 재고를 중앙 CDC 장기저장창고로 이송하고 국가 비축 의약품 전환 검토",
       "expected_effect": [
         "재고 폐기 최소화",
         "창고 운영비 절감",
-        "정부 비축 활용",
-        "유효기간 연장 활용"
+        "국가 비축 활용"
       ],
-      "xai_reason": {
-        "title": "CDC 장기보관 권고 근거",
-        "description": "현재 완제품은 장기 보관이 가능하며 정부 비축 의약품 전환 시 일반 유통보다 긴 보존기간 확보가 가능하여 폐기 손실 최소화 가능"
-      }
+      "xai": [
+        "Dead Stock 113만정 발생",
+        "유효기간 최대 120개월 확보",
+        "CDC 장기보관 가능"
+      ]
     }
   ],
 
@@ -56,7 +53,7 @@
     "Demand Forecast: AI Model Projected Sharp Volatility Drop",
     "Inventory Analysis: Status [과잉], Ratio 24.1x (Trigger Standard: >10x)",
     "Risk Assessment: Critical Severity Triggered (Score: 100/100)",
-    "AI Generated Two Alternative SCM Action Plans"
+    "Prescription: Automated Production Halt & Inventory Optimization Recommended"
   ],
 
   "contributions": [
@@ -98,25 +95,25 @@
       "title": "전국 재고 상태 및 과잉 판정",
       "value": "상태: 과잉 (전국 평균 24.1배)",
       "impact": "+40점 (40%)",
-      "description": "AI 목표 대비 10배 초과 시 생산 감축 Trigger가 발생하며 현재는 약 24배 초과 상태"
+      "description": "AI 목표 대비 10배 초과 시 생산 감축 Trigger 발생. 현재 전국 평균 약 24배 초과."
     },
     {
       "title": "생산 관성 유지",
       "value": "가동률 97.0%",
       "impact": "+20점 (20%)",
-      "description": "생산라인이 계속 가동되어 Dead Stock이 증가하는 상황"
+      "description": "심각한 과잉 재고에도 생산라인이 지속 가동되어 재고가 계속 증가."
     },
     {
       "title": "원료 수급 안정성",
       "value": "잔여 50,000kg",
       "impact": "+10점 (10%)",
-      "description": "원료 부족이 아닌 수요 감소가 생산 감축의 원인"
+      "description": "원료는 충분하여 생산 감축의 원인은 원료 부족이 아님."
     },
     {
       "title": "물류 출하 여력",
       "value": "운송가능 200,000정",
       "impact": "+10점 (10%)",
-      "description": "물류에는 문제가 없으며 시장 수요 감소로 창고 적체 발생"
+      "description": "물류 여력은 충분하며 출하 정체 원인은 시장 수요 감소."
     }
   ],
 
