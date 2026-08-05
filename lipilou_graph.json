@@ -1,0 +1,335 @@
+{
+  "product": "리피로우",
+  "generated_at": "2026-08-04 08:04:31",
+  "unit": "BOX",
+  "assumptions": {
+    "ea_per_box": 400,
+    "note": "annual_demand_box/yoy_pct/monthly_trend의 26Q1 값은 2025년 월별 실측 추세를 선형회귀로 외삽한 예측치입니다. operating_rate_pct는 MES 가동률 데이터가 없어 임의 추정한 더미값이며, 실제 MES 연동 시 교체가 필요합니다."
+  },
+  "national": {
+    "region": "전국",
+    "region_key": "national",
+    "annual_demand_box": 1177249,
+    "yoy_pct": 5.3,
+    "monthly_trend": [
+      {
+        "period": "25Q1",
+        "value_box": 271590,
+        "type": "actual"
+      },
+      {
+        "period": "25Q2",
+        "value_box": 279123,
+        "type": "actual"
+      },
+      {
+        "period": "25Q3",
+        "value_box": 287270,
+        "type": "actual"
+      },
+      {
+        "period": "25Q4",
+        "value_box": 279865,
+        "type": "actual"
+      },
+      {
+        "period": "26Q1",
+        "value_box": 288744,
+        "type": "predicted"
+      }
+    ],
+    "current_stock_box": 109626,
+    "operating_rate_pct": 87.9,
+    "stock_status": "과잉"
+  },
+  "regions": [
+    {
+      "region": "서울",
+      "region_key": "seoul",
+      "annual_demand_box": 361848,
+      "yoy_pct": 5.8,
+      "monthly_trend": [
+        {
+          "period": "25Q1",
+          "value_box": 82930,
+          "type": "actual"
+        },
+        {
+          "period": "25Q2",
+          "value_box": 85110,
+          "type": "actual"
+        },
+        {
+          "period": "25Q3",
+          "value_box": 88233,
+          "type": "actual"
+        },
+        {
+          "period": "25Q4",
+          "value_box": 85649,
+          "type": "actual"
+        },
+        {
+          "period": "26Q1",
+          "value_box": 88594,
+          "type": "predicted"
+        }
+      ],
+      "current_stock_box": 33267,
+      "operating_rate_pct": 89.2,
+      "stock_status": "과잉"
+    },
+    {
+      "region": "경기인천",
+      "region_key": "gyeonggi_incheon",
+      "annual_demand_box": 412848,
+      "yoy_pct": 5.6,
+      "monthly_trend": [
+        {
+          "period": "25Q1",
+          "value_box": 94849,
+          "type": "actual"
+        },
+        {
+          "period": "25Q2",
+          "value_box": 97896,
+          "type": "actual"
+        },
+        {
+          "period": "25Q3",
+          "value_box": 100333,
+          "type": "actual"
+        },
+        {
+          "period": "25Q4",
+          "value_box": 97892,
+          "type": "actual"
+        },
+        {
+          "period": "26Q1",
+          "value_box": 101161,
+          "type": "predicted"
+        }
+      ],
+      "current_stock_box": 38809,
+      "operating_rate_pct": 83.8,
+      "stock_status": "과잉"
+    },
+    {
+      "region": "강원",
+      "region_key": "gangwon",
+      "annual_demand_box": 62776,
+      "yoy_pct": 4.1,
+      "monthly_trend": [
+        {
+          "period": "25Q1",
+          "value_box": 14720,
+          "type": "actual"
+        },
+        {
+          "period": "25Q2",
+          "value_box": 15098,
+          "type": "actual"
+        },
+        {
+          "period": "25Q3",
+          "value_box": 15475,
+          "type": "actual"
+        },
+        {
+          "period": "25Q4",
+          "value_box": 15027,
+          "type": "actual"
+        },
+        {
+          "period": "26Q1",
+          "value_box": 15464,
+          "type": "predicted"
+        }
+      ],
+      "current_stock_box": 5772,
+      "operating_rate_pct": 91.0,
+      "stock_status": "과잉"
+    },
+    {
+      "region": "충북충남대전세종",
+      "region_key": "chungcheong_daejeon_sejong",
+      "annual_demand_box": 48325,
+      "yoy_pct": 4.4,
+      "monthly_trend": [
+        {
+          "period": "25Q1",
+          "value_box": 11328,
+          "type": "actual"
+        },
+        {
+          "period": "25Q2",
+          "value_box": 11504,
+          "type": "actual"
+        },
+        {
+          "period": "25Q3",
+          "value_box": 11867,
+          "type": "actual"
+        },
+        {
+          "period": "25Q4",
+          "value_box": 11598,
+          "type": "actual"
+        },
+        {
+          "period": "26Q1",
+          "value_box": 11891,
+          "type": "predicted"
+        }
+      ],
+      "current_stock_box": 4458,
+      "operating_rate_pct": 91.8,
+      "stock_status": "과잉"
+    },
+    {
+      "region": "전북광주전남광주",
+      "region_key": "jeolla_gwangju",
+      "annual_demand_box": 57553,
+      "yoy_pct": 3.9,
+      "monthly_trend": [
+        {
+          "period": "25Q1",
+          "value_box": 13473,
+          "type": "actual"
+        },
+        {
+          "period": "25Q2",
+          "value_box": 13908,
+          "type": "actual"
+        },
+        {
+          "period": "25Q3",
+          "value_box": 14271,
+          "type": "actual"
+        },
+        {
+          "period": "25Q4",
+          "value_box": 13743,
+          "type": "actual"
+        },
+        {
+          "period": "26Q1",
+          "value_box": 14186,
+          "type": "predicted"
+        }
+      ],
+      "current_stock_box": 5335,
+      "operating_rate_pct": 80.2,
+      "stock_status": "과잉"
+    },
+    {
+      "region": "경북대구",
+      "region_key": "gyeongbuk_daegu",
+      "annual_demand_box": 103474,
+      "yoy_pct": 5.5,
+      "monthly_trend": [
+        {
+          "period": "25Q1",
+          "value_box": 23830,
+          "type": "actual"
+        },
+        {
+          "period": "25Q2",
+          "value_box": 24446,
+          "type": "actual"
+        },
+        {
+          "period": "25Q3",
+          "value_box": 25157,
+          "type": "actual"
+        },
+        {
+          "period": "25Q4",
+          "value_box": 24650,
+          "type": "actual"
+        },
+        {
+          "period": "26Q1",
+          "value_box": 25363,
+          "type": "predicted"
+        }
+      ],
+      "current_stock_box": 9708,
+      "operating_rate_pct": 82.8,
+      "stock_status": "과잉"
+    },
+    {
+      "region": "경남울산부산",
+      "region_key": "gyeongnam_ulsan_busan",
+      "annual_demand_box": 105220,
+      "yoy_pct": 4.6,
+      "monthly_trend": [
+        {
+          "period": "25Q1",
+          "value_box": 24528,
+          "type": "actual"
+        },
+        {
+          "period": "25Q2",
+          "value_box": 25117,
+          "type": "actual"
+        },
+        {
+          "period": "25Q3",
+          "value_box": 25704,
+          "type": "actual"
+        },
+        {
+          "period": "25Q4",
+          "value_box": 25239,
+          "type": "actual"
+        },
+        {
+          "period": "26Q1",
+          "value_box": 25871,
+          "type": "predicted"
+        }
+      ],
+      "current_stock_box": 9851,
+      "operating_rate_pct": 88.5,
+      "stock_status": "과잉"
+    },
+    {
+      "region": "제주",
+      "region_key": "jeju",
+      "annual_demand_box": 25205,
+      "yoy_pct": 3.8,
+      "monthly_trend": [
+        {
+          "period": "25Q1",
+          "value_box": 5932,
+          "type": "actual"
+        },
+        {
+          "period": "25Q2",
+          "value_box": 6045,
+          "type": "actual"
+        },
+        {
+          "period": "25Q3",
+          "value_box": 6231,
+          "type": "actual"
+        },
+        {
+          "period": "25Q4",
+          "value_box": 6067,
+          "type": "actual"
+        },
+        {
+          "period": "26Q1",
+          "value_box": 6214,
+          "type": "predicted"
+        }
+      ],
+      "current_stock_box": 2426,
+      "operating_rate_pct": 86.7,
+      "stock_status": "과잉"
+    }
+  ]
+}

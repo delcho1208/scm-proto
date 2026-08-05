@@ -57,9 +57,6 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
               </div>
             </Link>
             <span className="block h-7 w-px bg-outline-variant" />
-            <h2 className="font-display text-headline-sm font-black uppercase tracking-tight text-scm-primary">
-              Digital Twin SCM Portal
-            </h2>
             <nav className="flex items-center gap-lg">
               {topNav.map((item) => (
                 <Link
