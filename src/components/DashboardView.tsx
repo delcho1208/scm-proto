@@ -43,6 +43,8 @@ type AiRecommendation = {
   costReduction?: string;
   feasibility?: number;
   executionPeriod?: string;
+  scenarioId?: string;
+  xai?: { summary: string; evidence: string[]; limitation: string };
 };
 
 const productApiMeta: Record<string, { title: string; description: string; endpoint: string; icon: string }> = {
@@ -100,7 +102,7 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
 export function DashboardView({ product }: { product: Product }) {
   const [regionId, setRegionId] = useState("National");
   const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
-  const [recommendationChecks, setRecommendationChecks] = useState<Record<string, boolean>>({});
+  const [checkedRecommendationId, setCheckedRecommendationId] = useState<string | null>(null);
   const [timelineIndex, setTimelineIndex] = useState(2);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecommendationOpen, setIsRecommendationOpen] = useState(false);
@@ -113,6 +115,11 @@ export function DashboardView({ product }: { product: Product }) {
 
   const timelineKey: TimelineKey = timelineKeys[timelineIndex];
   const timeline = timelineData[timelineKey];
+
+  useEffect(() => {
+    setCheckedRecommendationId(null);
+    setIsRecommendationApplied(false);
+  }, [product.key]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -164,21 +171,37 @@ export function DashboardView({ product }: { product: Product }) {
   const lipilouGraphRegion = product.key === "리피로우" ? getLipilouGraphRegion(regionId) : null;
   const lipilouGraph = lipilouGraphRegion ? createLipilouGraph(lipilouGraphRegion) : null;
   const forecastPaths =
-    lipilouGraph ?? (product.key === "세파졸린" ? cefazolinDashboard.chart : product.paths);
+    lipilouGraph ?? (product.key === "세파졸린" ? (cefazolinDashboard.chartByRegion[regionId] ?? cefazolinDashboard.chart) : product.paths);
   const annualDemand =
     lipilouGraphRegion
       ? lipilouGraphRegion.annual_demand_box.toLocaleString("ko-KR")
       : product.key === "세파졸린"
-      ? Math.round(cefazolinDashboard.annualForecastDemand).toLocaleString("ko-KR")
+      ? Math.round(cefazolinDashboard.annualForecastDemandByRegion[regionId] ?? cefazolinDashboard.annualForecastDemand).toLocaleString("ko-KR")
       : product.annualDemand;
   const forecastYoy = lipilouGraphRegion
     ? `${lipilouGraphRegion.yoy_pct >= 0 ? "+" : ""}${lipilouGraphRegion.yoy_pct}% YoY`
     : product.yoyGrowth;
   const isCurrentTimeline = timelineKey === "PRES";
-  const appliedTransfers = (scenario?.recommendations ?? []).flatMap((recommendation, index) => {
-    const checkKey = `${product.key}-${index}`;
+  const appliedCefazolinScenarioId = isRecommendationApplied && product.key === "세파졸린"
+    ? ({
+        "CEFAZOLIN-S1-NO-RESPONSE": "S1_무대응",
+        "CEFAZOLIN-S2-INTERNAL-RESPONSE": "S2_내부대응",
+        "CEFAZOLIN-EMERGENCY-PROCUREMENT": "S3_통합대응",
+        "CEFAZOLIN-S3-INTEGRATED-RESPONSE": "S3_통합대응",
+      } as Record<string, string>)[checkedRecommendationId ?? ""]
+    : undefined;
+  const appliedCefazolinScenario = appliedCefazolinScenarioId
+    ? cefazolinDashboard.scenarios.find((item) => item.id === appliedCefazolinScenarioId)
+    : undefined;
+  const cefazolinScenarioInventoryDelta = appliedCefazolinScenario
+    ? appliedCefazolinScenario.emergencyProcurementQuantity - appliedCefazolinScenario.totalUnmetDemand
+    : 0;
+  const cefazolinRegionalTargetTotal = Object.entries(cefazolinDashboard.regions)
+    .filter(([id]) => id !== "National")
+    .reduce((sum, [, item]) => sum + item.target_stock, 0);
+  const appliedTransfers = (scenario?.recommendations ?? []).flatMap((recommendation) => {
     return isRecommendationApplied &&
-      (recommendationChecks[checkKey] ?? true) &&
+      checkedRecommendationId === recommendation.id &&
       recommendation.fromRegion &&
       recommendation.toRegion &&
       recommendation.transferAmount
@@ -188,11 +211,17 @@ export function DashboardView({ product }: { product: Product }) {
   const getScenarioRegion = (id: string) => {
     const baseRegion = isCurrentTimeline ? scenario?.regions[id] : undefined;
     if (!baseRegion || !isRecommendationApplied) return baseRegion;
-    const inventoryDelta = appliedTransfers.reduce((sum, transfer) => {
+    const transferDelta = appliedTransfers.reduce((sum, transfer) => {
       if (transfer.from === id) return sum - transfer.amount;
       if (transfer.to === id) return sum + transfer.amount;
       return sum;
     }, 0);
+    const scenarioDelta = appliedCefazolinScenario
+      ? id === "National"
+        ? cefazolinScenarioInventoryDelta
+        : cefazolinScenarioInventoryDelta * (baseRegion.target_stock / cefazolinRegionalTargetTotal)
+      : 0;
+    const inventoryDelta = transferDelta + scenarioDelta;
     if (inventoryDelta === 0) return baseRegion;
     const currentStock = Math.max(0, baseRegion.current_stock + inventoryDelta);
     const stockRatio = baseRegion.target_stock > 0 ? (currentStock / baseRegion.target_stock) * 100 : 0;
@@ -210,7 +239,9 @@ export function DashboardView({ product }: { product: Product }) {
   const timelineRegion = timeline.regions[regionId];
   const region = regions[regionId];
   const nationalRiskLevel: RiskLevel =
-    (isCurrentTimeline ? scenario?.inventoryLevel : undefined) ??
+    (appliedCefazolinScenario
+      ? appliedCefazolinScenario.unmetDemandRatePct > 0 ? "danger" : "safe"
+      : isCurrentTimeline ? scenario?.inventoryLevel : undefined) ??
     (timeline.stockoutRisk >= 15 ? "danger" : timeline.stockoutRisk >= 8 ? "warning" : "safe");
   const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
@@ -225,8 +256,9 @@ export function DashboardView({ product }: { product: Product }) {
   const forecastRisk = riskStyles[forecastRiskLevel];
   const forecastRiskText = forecastRiskLevel === "danger" ? "부족" : forecastRiskLevel === "warning" ? "과잉" : "적정";
 
-  const displayedTotalInventory =
-    (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
+  const displayedTotalInventory = appliedCefazolinScenario
+    ? Math.max(0, cefazolinDashboard.totalInventory + cefazolinScenarioInventoryDelta)
+    : (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
   const forecastInventory = lipilouGraphRegion?.current_stock_box ?? displayedTotalInventory;
@@ -235,10 +267,24 @@ export function DashboardView({ product }: { product: Product }) {
   const riskText = regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
   const nationalRiskText = nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
   const regionDescription = scenarioRegion
-    ? `${scenario?.date} ${isRecommendationApplied ? "추천안 적용 예상값" : "실데이터"} · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
+    ? appliedCefazolinScenario && regionId === "National"
+      ? `${appliedCefazolinScenario.id} 예상 · 조달·미충족 반영 재고 ${Math.round(scenarioRegion.current_stock).toLocaleString("ko-KR")} BOX · 서비스율 ${appliedCefazolinScenario.serviceRatePct.toFixed(2)}% · 부족 ${appliedCefazolinScenario.shortageWeeks}주`
+      : `${scenario?.date} ${isRecommendationApplied ? "추천안 적용 예상값" : "실데이터"} · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
     : `${timeline.label} ${timeline.isPrediction ? "예측" : "실측"} · 재고 상태 ${riskText}`;
 
-  const recommendations: AiRecommendation[] = scenario?.recommendations.length
+  const recommendations: AiRecommendation[] = product.key === "세파졸린"
+    ? cefazolinDashboard.recommendationEvaluations
+      .filter((recommendation) => !recommendation.regionId || recommendation.regionId === regionId)
+      .map((recommendation) => ({
+        id: recommendation.id,
+        t: recommendation.title,
+        d: recommendation.description,
+        costReduction: recommendation.costKpi.value,
+        feasibility: recommendation.feasibility ? Math.round(recommendation.feasibility.score) : undefined,
+        scenarioId: recommendation.scenarioId,
+        xai: recommendation.xai,
+      }))
+    : scenario?.recommendations.length
     ? scenario.recommendations.map((recommendation) => ({
         id: recommendation.id,
         t: recommendation.title,
@@ -279,10 +325,11 @@ export function DashboardView({ product }: { product: Product }) {
   const selectedRecommendation =
     recommendations[selectedRecommendationIndex] ?? recommendations[0];
 
-  const activeTransferRoutes = recommendations.flatMap((recommendation, index) => {
-    const checkKey = `${product.key}-${index}`;
-    return (recommendationChecks[checkKey] ?? true) ? recommendation.routes ?? [] : [];
-  });
+  const checkedRecommendation = recommendations.find((recommendation) => recommendation.id === checkedRecommendationId);
+  const activeTransferRoutes = checkedRecommendation?.routes ?? [];
+  const canApplyCheckedRecommendation = Boolean(
+    checkedRecommendation && (checkedRecommendation.routes?.length || checkedRecommendation.scenarioId),
+  );
   const displayedTransferRoutes = isRecommendationApplied ? activeTransferRoutes : [];
   const productApi = productApiMeta[product.key] ?? productApiMeta.리피로우;
 
@@ -681,8 +728,7 @@ export function DashboardView({ product }: { product: Product }) {
             </p>
             <div className="min-h-0 flex-1 space-y-sm overflow-y-auto">
               {recommendations.map((rec, index) => {
-                const checkKey = `${product.key}-${index}`;
-                const checked = recommendationChecks[checkKey] ?? true;
+                const checked = checkedRecommendationId === rec.id;
                 return (
                 <label
                   key={rec.t}
@@ -690,12 +736,10 @@ export function DashboardView({ product }: { product: Product }) {
                 >
                   <input
                     checked={checked}
-                    onChange={(event) =>
-                      setRecommendationChecks((current) => ({
-                        ...current,
-                        [checkKey]: event.target.checked,
-                      }))
-                    }
+                    onChange={(event) => {
+                      setCheckedRecommendationId(event.target.checked ? rec.id : null);
+                      setIsRecommendationApplied(false);
+                    }}
                     className="h-4 w-4 shrink-0 rounded accent-[#004ccd]"
                     type="checkbox"
                   />
@@ -728,8 +772,12 @@ export function DashboardView({ product }: { product: Product }) {
               ) : (
                 <button
                   type="button"
-                  disabled={activeTransferRoutes.length === 0}
-                  title={activeTransferRoutes.length === 0 ? "적용 가능한 이관 실행안을 선택해 주세요" : undefined}
+                  disabled={!canApplyCheckedRecommendation}
+                  title={!checkedRecommendation
+                    ? "실행안을 하나 선택해 주세요"
+                    : !canApplyCheckedRecommendation
+                      ? "예상 결과 데이터가 추가되면 적용할 수 있습니다"
+                      : undefined}
                   onClick={() => {
                     setIsPlaying(false);
                     setTimelineIndex(2);
@@ -849,8 +897,18 @@ export function DashboardView({ product }: { product: Product }) {
                 <div className="mt-4 rounded-xl border border-primary-container bg-primary-container/20 p-4">
                   <p className="text-[11px] font-bold text-scm-primary">AI가 이 실행안을 추천한 이유</p>
                   <p className="mt-2 text-sm leading-6 text-on-surface">
-                    {selectedRecommendation.d || "상세 XAI 설명은 추가 예정입니다."}
+                    {selectedRecommendation.xai?.summary ?? selectedRecommendation.d ?? "상세 XAI 설명은 추가 예정입니다."}
                   </p>
+                  {selectedRecommendation.xai?.evidence.length ? (
+                    <ul className="mt-3 space-y-1.5 border-t border-scm-primary/15 pt-3">
+                      {selectedRecommendation.xai.evidence.map((evidence) => (
+                        <li key={evidence} className="flex gap-2 text-xs leading-5 text-on-surface-variant">
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-scm-primary" />
+                          {evidence}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </div>
 
                 <div className="mt-5 grid grid-cols-2 gap-3">
@@ -863,7 +921,7 @@ export function DashboardView({ product }: { product: Product }) {
                 <div className="mt-5 rounded-xl bg-surface-container-low p-4">
                   <p className="text-[11px] font-bold text-on-surface-variant">판단 근거 및 제약 조건</p>
                   <p className="mt-2 text-xs leading-5 text-on-surface-variant">
-                    현재 연결된 재고, 권역 위험도와 이관 경로를 기준으로 설명합니다. 비용 모델, 인력·설비 제약 및 상세 실행 조건은 데이터 업로드 후 추가 예정입니다.
+                    {selectedRecommendation.xai?.limitation ?? "현재 연결된 재고와 이관 경로를 기준으로 설명합니다. 비용 모델, 인력·설비 제약 및 상세 실행 조건은 데이터 업로드 후 추가 예정입니다."}
                   </p>
                 </div>
               </div>

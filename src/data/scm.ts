@@ -231,6 +231,9 @@ export type SystemRecord = {
   qty: string;
   updatedAt: string;
   note: string;
+  dataType?: string;
+  calculationBasis?: string;
+  leadTimeHours?: number;
 };
 
 const statuses: SystemRecord["status"][] = ["동기화 완료", "처리중", "지연"];

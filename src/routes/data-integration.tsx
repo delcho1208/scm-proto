@@ -38,6 +38,12 @@ const statusStyle: Record<string, string> = {
   지연: "bg-error-container/30 text-error border-error/20",
 };
 
+const dataTypeStyle: Record<string, string> = {
+  "ERP 확정공급 배분": "bg-blue-50 text-blue-700 border-blue-200",
+  "MES 생산·품질 실적": "bg-violet-50 text-violet-700 border-violet-200",
+  "WMS 재고·출하 실적": "bg-amber-50 text-amber-700 border-amber-200",
+};
+
 type TwinStatus = "safe" | "warning" | "danger";
 
 function getTwinStatus(records: ReturnType<typeof getIntegrationRecords>): TwinStatus {
@@ -108,6 +114,19 @@ function DataIntegrationView({ product }: { product: Product }) {
                   />
                   <Row label="수량 (BOX)" value={<span className="font-data font-semibold text-scm-primary">{rec.qty}</span>} />
                   <Row label="최근 동기화" value={<span className="font-data">{rec.updatedAt}</span>} />
+                  {rec.leadTimeHours !== undefined ? (
+                    <Row
+                      label="평균 리드타임"
+                      value={<span className="font-data font-bold text-scm-primary">{rec.leadTimeHours.toFixed(2)}시간</span>}
+                    />
+                  ) : null}
+                  {rec.dataType ? (
+                    <Row
+                      label="데이터 구분"
+                      value={<span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${dataTypeStyle[rec.dataType] ?? "bg-slate-50 text-slate-700 border-slate-200"}`}>{rec.dataType}</span>}
+                    />
+                  ) : null}
+                  {rec.calculationBasis ? <Row label="산출 기준" value={rec.calculationBasis} /> : null}
                   <Row label="비고" value={rec.note} />
                 </dl>
               </div>
