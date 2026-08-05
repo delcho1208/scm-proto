@@ -115,7 +115,7 @@ const s3FeasibilityScore = Math.min(
 );
 
 const dashboardScenario: ProductDashboardScenario = {
-  date: "2026-03-10",
+  date: "2026-10-01",
   sceneName: rawDashboard.overview.baselineScenario,
   regions,
   totalInventory: rawDashboard.overview.nationalCurrentStock,

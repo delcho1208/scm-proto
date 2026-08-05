@@ -56,7 +56,12 @@ function toPath(points: GraphPoint[]) {
 }
 
 export function createLipilouGraph(region: LipilouGraphRegion): LipilouGraph {
-  const trend = region.monthly_trend;
+  const alignedPeriods = ["26 Q2", "26 Q3", "26 Q4", "27 Q1", "27 Q2", "27 Q3"];
+  const trend = region.monthly_trend.map((point, index) => ({
+    ...point,
+    period: alignedPeriods[index] ?? point.period,
+    type: (index <= 2 ? "actual" : "predicted") as LipilouTrendPoint["type"],
+  }));
   const values = trend.map((point) => point.value_box);
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -64,7 +69,7 @@ export function createLipilouGraph(region: LipilouGraphRegion): LipilouGraph {
 
   const points = trend.map<GraphPoint>((point, index) => ({
     ...point,
-    x: trend.length === 1 ? 200 : (index * 400) / (trend.length - 1),
+    x: trend.length === 1 ? 200 : index * 80,
     y: 170 - ((point.value_box - min) / range) * 130,
   }));
 
@@ -77,6 +82,6 @@ export function createLipilouGraph(region: LipilouGraphRegion): LipilouGraph {
     actual: toPath(actualPoints),
     prediction: toPath(predictionPoints),
     points,
-    ticks: points.map((point) => point.period),
+    ticks: alignedPeriods,
   };
 }

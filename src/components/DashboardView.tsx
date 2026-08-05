@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
-import { lipilouDashboard, tamivirDashboard } from "@/data/dashboard-scenario";
+import { lipilouDashboard, tamivirAnnualF2aTarget, tamivirDashboard, tamivirForecastByRegion } from "@/data/dashboard-scenario";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
+import { cefazolinWorkflowSteps } from "@/data/cefazolin-ai-workflow";
 import { createLipilouGraph, getLipilouGraphRegion } from "@/data/lipilou-graph";
 import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
@@ -46,6 +47,7 @@ type AiRecommendation = {
   scenarioId?: string;
   projectedTotalInventory?: number;
   affectedRegions?: string[];
+  projectedRegions?: Record<string, { current_stock: number; target_stock: number; stock_ratio: number; stockRatioLabel?: string; riskLevel: RiskLevel; riskText: string }>;
   xai?: { summary: string; evidence: string[]; limitation: string };
 };
 
@@ -108,6 +110,7 @@ export function DashboardView({ product }: { product: Product }) {
   const [timelineIndex, setTimelineIndex] = useState(2);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecommendationOpen, setIsRecommendationOpen] = useState(false);
+  const [isCefazolinWorkflowOpen, setIsCefazolinWorkflowOpen] = useState(false);
   const [selectedRecommendationIndex, setSelectedRecommendationIndex] = useState(0);
   const [isRecommendationApplied, setIsRecommendationApplied] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -121,6 +124,7 @@ export function DashboardView({ product }: { product: Product }) {
   useEffect(() => {
     setCheckedRecommendationId(null);
     setIsRecommendationApplied(false);
+    setIsCefazolinWorkflowOpen(false);
   }, [product.key]);
 
   useEffect(() => {
@@ -172,17 +176,23 @@ export function DashboardView({ product }: { product: Product }) {
           : null;
   const lipilouGraphRegion = product.key === "리피로우" ? getLipilouGraphRegion(regionId) : null;
   const lipilouGraph = lipilouGraphRegion ? createLipilouGraph(lipilouGraphRegion) : null;
+  const tamivirForecastRegion = product.key === "타미비어" ? tamivirForecastByRegion[regionId] ?? tamivirForecastByRegion.National : null;
+  const tamivirMonthlyTicks = ["26.08", "26.09", "26.10", "26.11", "26.12", "27.01"];
   const forecastPaths =
-    lipilouGraph ?? (product.key === "세파졸린" ? (cefazolinDashboard.chartByRegion[regionId] ?? cefazolinDashboard.chart) : product.paths);
+    lipilouGraph ?? tamivirForecastRegion?.paths ?? (product.key === "세파졸린" ? (cefazolinDashboard.chartByRegion[regionId] ?? cefazolinDashboard.chart) : product.paths);
   const annualDemand =
     lipilouGraphRegion
       ? lipilouGraphRegion.annual_demand_box.toLocaleString("ko-KR")
       : product.key === "세파졸린"
       ? Math.round(cefazolinDashboard.annualForecastDemandByRegion[regionId] ?? cefazolinDashboard.annualForecastDemand).toLocaleString("ko-KR")
+      : product.key === "타미비어"
+      ? Math.round(regionId === "National" ? tamivirAnnualF2aTarget : tamivirForecastRegion?.forecast ?? 0).toLocaleString("ko-KR")
       : product.annualDemand;
   const forecastYoy = lipilouGraphRegion
     ? `${lipilouGraphRegion.yoy_pct >= 0 ? "+" : ""}${lipilouGraphRegion.yoy_pct}% YoY`
-    : product.yoyGrowth;
+    : tamivirForecastRegion
+      ? `${tamivirForecastRegion.yoy >= 0 ? "+" : ""}${tamivirForecastRegion.yoy.toFixed(1)}% YoY`
+      : product.yoyGrowth;
   const isCurrentTimeline = timelineKey === "PRES";
   const appliedCefazolinScenarioId = isRecommendationApplied && product.key === "세파졸린"
     ? ({
@@ -226,6 +236,8 @@ export function DashboardView({ product }: { product: Product }) {
   const getScenarioRegion = (id: string) => {
     const baseRegion = isCurrentTimeline ? scenario?.regions[id] : undefined;
     if (!baseRegion || !isRecommendationApplied) return baseRegion;
+    const exactProjectedRegion = appliedProjectedRecommendation?.projectedRegions?.[id];
+    if (exactProjectedRegion) return { ...baseRegion, ...exactProjectedRegion };
     const transferDelta = appliedTransfers.reduce((sum, transfer) => {
       if (transfer.from === id) return sum - transfer.amount;
       if (transfer.to === id) return sum + transfer.amount;
@@ -296,8 +308,8 @@ export function DashboardView({ product }: { product: Product }) {
     : (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
-  const forecastInventory = lipilouGraphRegion?.current_stock_box ?? displayedTotalInventory;
-  const forecastUtilization = lipilouGraphRegion?.operating_rate_pct ?? displayedUtilization;
+  const forecastInventory = lipilouGraphRegion?.current_stock_box ?? tamivirForecastRegion?.currentStock ?? displayedTotalInventory;
+  const forecastUtilization = lipilouGraphRegion?.operating_rate_pct ?? tamivirForecastRegion?.operationRate ?? displayedUtilization;
   const panelInventory = scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
   const riskText = regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
   const nationalRiskText = nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
@@ -349,6 +361,7 @@ export function DashboardView({ product }: { product: Product }) {
         executionPeriod: recommendation.transferAmount ? "1~2주" : undefined,
         projectedTotalInventory: recommendation.projectedTotalInventory,
         affectedRegions: recommendation.affectedRegions,
+        projectedRegions: recommendation.projectedRegions,
       }))
     : [
         { id: "fallback-1", t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
@@ -479,8 +492,8 @@ export function DashboardView({ product }: { product: Product }) {
                   <line
                     className="timeline-chart-marker"
                     strokeWidth="2"
-                    x1={timelineIndex * 80}
-                    x2={timelineIndex * 80}
+                    x1={lipilouGraph?.points[timelineIndex]?.x ?? timelineIndex * 80}
+                    x2={lipilouGraph?.points[timelineIndex]?.x ?? timelineIndex * 80}
                     y1="20"
                     y2="180"
                   />
@@ -505,13 +518,13 @@ export function DashboardView({ product }: { product: Product }) {
                     </>
                   )}
                 </svg>
-                <div className={`mt-2 grid text-center text-[9px] font-bold text-on-surface-variant/60 ${lipilouGraph ? "grid-cols-5" : "grid-cols-6"}`}>
-                  {(lipilouGraph?.ticks ?? timelineKeys).map((key, index) => (
+                <div className="mt-2 grid grid-cols-6 text-center text-[9px] font-bold text-on-surface-variant/60">
+                  {(lipilouGraph?.ticks ?? (tamivirForecastRegion ? tamivirMonthlyTicks : timelineKeys)).map((key, index) => (
                     <span
                       key={key}
                       className={index === timelineIndex ? (timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary") : ""}
                     >
-                      {lipilouGraph ? key : timelineData[key as TimelineKey].tick}
+                      {lipilouGraph || tamivirForecastRegion ? key : timelineData[key as TimelineKey].tick}
                     </span>
                   ))}
                 </div>
@@ -552,11 +565,11 @@ export function DashboardView({ product }: { product: Product }) {
             <h4 className="shrink-0 font-display text-headline-sm text-on-surface">
               지능형 권역 모니터링
             </h4>
-            {isRecommendationApplied ? (
-              <span className="shrink-0 rounded-full border border-scm-primary/30 bg-primary-container px-2.5 py-1 text-[10px] font-black text-on-primary-container">
+            <div className="flex w-[145px] shrink-0 justify-start" aria-hidden={!isRecommendationApplied}>
+              <span className={`whitespace-nowrap rounded-full border border-scm-primary/30 bg-primary-container px-2.5 py-1 text-[10px] font-black text-on-primary-container transition-opacity ${isRecommendationApplied ? "opacity-100" : "pointer-events-none opacity-0"}`}>
                 AI 추천 적용 예상 결과
               </span>
-            ) : null}
+            </div>
             <div className="time-scrubber min-w-0 flex-1">
               <div className="mb-1 flex items-center justify-between gap-sm">
                 <div className="flex items-center gap-xs">
@@ -763,6 +776,15 @@ export function DashboardView({ product }: { product: Product }) {
                 <Icon name="auto_awesome" className="text-[16px]" filled />
               </div>
               <h4 className="font-display text-headline-sm">AI 추천 실행안</h4>
+              {product.key === "세파졸린" ? (
+                <button
+                  type="button"
+                  onClick={() => setIsCefazolinWorkflowOpen(true)}
+                  className="ml-auto cursor-pointer rounded-full border border-scm-primary/30 bg-white px-2.5 py-1 text-[10px] font-bold text-scm-primary hover:bg-primary-container/20"
+                >
+                  AI 운영흐름
+                </button>
+              ) : null}
             </div>
             <p className={`mb-xs text-[10px] font-bold ${timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary"}`}>
               {timeline.label} 시점 기준 추천 · {timeline.isPrediction ? "예측 데이터 기반" : "실측 데이터 기반"}
@@ -857,6 +879,55 @@ export function DashboardView({ product }: { product: Product }) {
           <NewsApiCard productName={product.name} />
         </div>
       </div>
+
+      {isCefazolinWorkflowOpen ? (
+        <div
+          className="fixed inset-0 z-[410] flex items-center justify-center bg-black/45 p-6 backdrop-blur-[2px]"
+          role="presentation"
+          onMouseDown={() => setIsCefazolinWorkflowOpen(false)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-label="세파졸린 AI 운영흐름"
+            onMouseDown={(event) => event.stopPropagation()}
+            className="flex max-h-[84vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl"
+          >
+            <header className="flex items-center justify-between border-b border-outline-variant px-6 py-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wider text-scm-primary">Cefazolin AI Workflow</p>
+                <h3 className="mt-1 font-display text-xl font-bold">AI 운영흐름 10단계</h3>
+              </div>
+              <button type="button" onClick={() => setIsCefazolinWorkflowOpen(false)} className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-surface-container-low">
+                <Icon name="close" className="text-[20px]" />
+              </button>
+            </header>
+            <div className="min-h-0 overflow-y-auto p-5">
+              <div className="grid grid-cols-2 gap-3">
+                {cefazolinWorkflowSteps.map((step) => (
+                  <article key={step.id} className="rounded-xl border border-outline-variant bg-surface-container-low/40 p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
+                        <Icon name={step.icon} className="text-[18px]" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="text-sm font-bold">{step.order}. {step.title}</h4>
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${step.status === "완료" ? "bg-green-50 text-[#318f19]" : step.status === "준비" ? "bg-blue-50 text-scm-primary" : step.status === "승인 필요" ? "bg-orange-50 text-[#ad6800]" : "bg-slate-100 text-slate-500"}`}>{step.status}</span>
+                        </div>
+                        <p className="mt-1 text-[11px] leading-5 text-on-surface-variant">{step.description}</p>
+                        <ul className="mt-2 space-y-1 border-t border-outline-variant/50 pt-2">
+                          {step.evidence.slice(0, 3).map((evidence) => <li key={evidence} className="text-[10px] leading-4 text-on-surface-variant">· {evidence}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : null}
 
       {isRecommendationOpen && selectedRecommendation ? (
         <div

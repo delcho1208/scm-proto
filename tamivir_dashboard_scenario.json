@@ -1,10 +1,9 @@
 {
-  "project": "종근당 타미비어 SCM 모니터링 대시보드",
+  "project": "종근당 타미비어 SCM 모니터링 대시보드 v3 (Final)",
   "scenarios": [
     {
-      "time": "2026.09",
-      "phase": "normal",
-      "status": "적정",
+      "date": "2026-09-01",
+      "scene_name": "타미비어 정상 생산 현황",
       "summary": {
         "f2a_target": 2837033,
         "ai_target": 1166666,
@@ -14,23 +13,159 @@
         "status": "적정",
         "risk_score": 15
       },
-      "zone_details": [
-        {"zone_name": "Zone1_서울권", "f2a_target": 439926, "ai_target": 183333, "current_stock": 220000, "ratio": 1.2, "status": "적정", "forecast": 183333, "yoy": 3.2, "actual_trend": [210000, 216000, 220000], "forecast_trend": [213000, 220000, 183333]},
-        {"zone_name": "Zone2_경기인천수도권", "f2a_target": 1088444, "ai_target": 450000, "current_stock": 540000, "ratio": 1.2, "status": "적정", "forecast": 450000, "yoy": 2.5, "actual_trend": [516666, 533333, 540000], "forecast_trend": [526666, 540000, 450000]},
-        {"zone_name": "Zone3_강원권", "f2a_target": 112040, "ai_target": 46666, "current_stock": 56000, "ratio": 1.2, "status": "적정", "forecast": 46666, "yoy": 1.1, "actual_trend": [53333, 55000, 56000], "forecast_trend": [54000, 55333, 46666]},
-        {"zone_name": "Zone4_대전세종충청권", "f2a_target": 297784, "ai_target": 123333, "current_stock": 148000, "ratio": 1.2, "status": "적정", "forecast": 123333, "yoy": 2.8, "actual_trend": [140000, 145000, 148000], "forecast_trend": [143333, 146666, 123333]},
-        {"zone_name": "Zone5_광주전북전남권", "f2a_target": 274574, "ai_target": 113333, "current_stock": 136000, "ratio": 1.2, "status": "적정", "forecast": 113333, "yoy": 1.7, "actual_trend": [130000, 133333, 136000], "forecast_trend": [131666, 135000, 113333]},
-        {"zone_name": "Zone6_대구경북권", "f2a_target": 222121, "ai_target": 90000, "current_stock": 108000, "ratio": 1.2, "status": "적정", "forecast": 90000, "yoy": 2.1, "actual_trend": [103333, 106666, 108000], "forecast_trend": [105000, 107333, 90000]},
-        {"zone_name": "Zone7_부산울산경남권", "f2a_target": 357877, "ai_target": 146666, "current_stock": 176000, "ratio": 1.2, "status": "적정", "forecast": 146666, "yoy": 3.5, "actual_trend": [166666, 173333, 176000], "forecast_trend": [170000, 175000, 146666]},
-        {"zone_name": "Zone8_제주권", "f2a_target": 44265, "ai_target": 13333, "current_stock": 16000, "ratio": 1.2, "status": "적정", "forecast": 13333, "yoy": 4.1, "actual_trend": [15000, 15666, 16000], "forecast_trend": [15333, 15833, 13333]}
+      "regions_stock": [
+        {
+          "region": "Zone1_서울권",
+          "f2a_target": 439926,
+          "target_stock": 183333,
+          "current_stock": 220000,
+          "stock_ratio": 1.2,
+          "status": "적정",
+          "color_status": "green",
+          "forecast_card": {
+            "forecast": 183333,
+            "current_stock": 220000,
+            "yoy": 3.2,
+            "actual_trend": [210000, 216000, 220000],
+            "forecast_trend": [213000, 220000, 183333],
+            "status": "적정",
+            "operation_rate": 96.5
+          }
+        },
+        {
+          "region": "Zone2_경기인천수도권",
+          "f2a_target": 1088444,
+          "target_stock": 450000,
+          "current_stock": 540000,
+          "stock_ratio": 1.2,
+          "status": "적정",
+          "color_status": "green",
+          "forecast_card": {
+            "forecast": 450000,
+            "current_stock": 540000,
+            "yoy": 2.5,
+            "actual_trend": [516666, 533333, 540000],
+            "forecast_trend": [526666, 540000, 450000],
+            "status": "적정",
+            "operation_rate": 96.8
+          }
+        },
+        {
+          "region": "Zone3_강원권",
+          "f2a_target": 112040,
+          "target_stock": 46666,
+          "current_stock": 56000,
+          "stock_ratio": 1.2,
+          "status": "적정",
+          "color_status": "green",
+          "forecast_card": {
+            "forecast": 46666,
+            "current_stock": 56000,
+            "yoy": 1.1,
+            "actual_trend": [53333, 55000, 56000],
+            "forecast_trend": [54000, 55333, 46666],
+            "status": "적정",
+            "operation_rate": 91.3
+          }
+        },
+        {
+          "region": "Zone4_대전세종충청권",
+          "f2a_target": 297784,
+          "target_stock": 123333,
+          "current_stock": 148000,
+          "stock_ratio": 1.2,
+          "status": "적정",
+          "color_status": "green",
+          "forecast_card": {
+            "forecast": 123333,
+            "current_stock": 148000,
+            "yoy": 2.8,
+            "actual_trend": [140000, 145000, 148000],
+            "forecast_trend": [143333, 146666, 123333],
+            "status": "적정",
+            "operation_rate": 94.5
+          }
+        },
+        {
+          "region": "Zone5_광주전북전남권",
+          "f2a_target": 274574,
+          "target_stock": 113333,
+          "current_stock": 136000,
+          "stock_ratio": 1.2,
+          "status": "적정",
+          "color_status": "green",
+          "forecast_card": {
+            "forecast": 113333,
+            "current_stock": 136000,
+            "yoy": 1.7,
+            "actual_trend": [130000, 133333, 136000],
+            "forecast_trend": [131666, 135000, 113333],
+            "status": "적정",
+            "operation_rate": 93.8
+          }
+        },
+        {
+          "region": "Zone6_대구경북권",
+          "f2a_target": 222121,
+          "target_stock": 90000,
+          "current_stock": 108000,
+          "stock_ratio": 1.2,
+          "status": "적정",
+          "color_status": "green",
+          "forecast_card": {
+            "forecast": 90000,
+            "current_stock": 108000,
+            "yoy": 2.1,
+            "actual_trend": [103333, 106666, 108000],
+            "forecast_trend": [105000, 107333, 90000],
+            "status": "적정",
+            "operation_rate": 92.5
+          }
+        },
+        {
+          "region": "Zone7_부산울산경남권",
+          "f2a_target": 357877,
+          "target_stock": 146666,
+          "current_stock": 176000,
+          "stock_ratio": 1.2,
+          "status": "적정",
+          "color_status": "green",
+          "forecast_card": {
+            "forecast": 146666,
+            "current_stock": 176000,
+            "yoy": 3.5,
+            "actual_trend": [166666, 173333, 176000],
+            "forecast_trend": [170000, 175000, 146666],
+            "status": "적정",
+            "operation_rate": 95.4
+          }
+        },
+        {
+          "region": "Zone8_제주권",
+          "f2a_target": 44265,
+          "target_stock": 13333,
+          "current_stock": 16000,
+          "stock_ratio": 1.2,
+          "status": "적정",
+          "color_status": "green",
+          "forecast_card": {
+            "forecast": 13333,
+            "current_stock": 16000,
+            "yoy": 4.1,
+            "actual_trend": [15000, 15666, 16000],
+            "forecast_trend": [15333, 15833, 13333],
+            "status": "적정",
+            "operation_rate": 89.5
+          }
+        }
       ],
-      "recommendations": [],
+      "ai_solutions": [],
+      "timeline_logs": [],
       "xai_cards": []
     },
     {
-      "time": "2026.11",
-      "phase": "prediction",
-      "status": "위험 (과잉 예측)",
+      "date": "2026-11-15",
+      "scene_name": "AI 타미비어 생산 감축 추천",
       "summary": {
         "f2a_target": 2837033,
         "ai_target": 90785,
@@ -40,155 +175,273 @@
         "status": "과잉",
         "risk_score": 92
       },
-      "zone_details": [
+      "map_monitoring": [
         {
-          "zone_name": "Zone1_서울권",
+          "region": "Zone1_서울권",
           "f2a_target": 439926,
-          "ai_target": 14077,
+          "target_stock": 14077,
           "current_stock": 344902,
-          "ratio": 24.5,
+          "stock_ratio": 24.5,
           "status": "과잉",
-          "forecast": 14077,
-          "yoy": -82.9,
-          "actual_trend": [216666, 220000, 344902],
-          "forecast_trend": [220000, 183333, 14077]
+          "map_color": "red",
+          "animate_transition": true,
+          "forecast_card": {
+            "forecast": 14077,
+            "current_stock": 344902,
+            "yoy": -82.9,
+            "actual_trend": [216666, 220000, 344902],
+            "forecast_trend": [220000, 183333, 14077],
+            "status": "과잉",
+            "operation_rate": 97.2
+          }
         },
         {
-          "zone_name": "Zone2_경기인천수도권",
+          "region": "Zone2_경기인천수도권",
           "f2a_target": 1088444,
-          "ai_target": 34830,
+          "target_stock": 34830,
           "current_stock": 633909,
-          "ratio": 18.2,
+          "stock_ratio": 18.2,
           "status": "과잉",
-          "forecast": 34830,
-          "yoy": -72.6,
-          "actual_trend": [533333, 540000, 633909],
-          "forecast_trend": [540000, 450000, 34830]
+          "map_color": "red",
+          "animate_transition": true,
+          "forecast_card": {
+            "forecast": 34830,
+            "current_stock": 633909,
+            "yoy": -72.6,
+            "actual_trend": [533333, 540000, 633909],
+            "forecast_trend": [540000, 450000, 34830],
+            "status": "과잉",
+            "operation_rate": 97.0
+          }
         },
         {
-          "zone_name": "Zone3_강원권",
+          "region": "Zone3_강원권",
           "f2a_target": 112040,
-          "ai_target": 3585,
+          "target_stock": 3585,
           "current_stock": 6812,
-          "ratio": 1.9,
+          "stock_ratio": 1.9,
           "status": "적정",
-          "forecast": 3585,
-          "yoy": -82.3,
-          "actual_trend": [55000, 56000, 6812],
-          "forecast_trend": [55333, 46666, 3585]
+          "map_color": "green",
+          "animate_transition": false,
+          "forecast_card": {
+            "forecast": 3585,
+            "current_stock": 6812,
+            "yoy": -82.3,
+            "actual_trend": [55000, 56000, 6812],
+            "forecast_trend": [55333, 46666, 3585],
+            "status": "적정",
+            "operation_rate": 91.3
+          }
         },
         {
-          "zone_name": "Zone4_대전세종충청권",
+          "region": "Zone4_대전세종충청권",
           "f2a_target": 297784,
-          "ai_target": 9529,
+          "target_stock": 9529,
           "current_stock": 70515,
-          "ratio": 7.4,
+          "stock_ratio": 7.4,
           "status": "과잉",
-          "forecast": 9529,
-          "yoy": -75.3,
-          "actual_trend": [145000, 148000, 70515],
-          "forecast_trend": [146666, 123333, 9529]
+          "map_color": "yellow",
+          "animate_transition": false,
+          "forecast_card": {
+            "forecast": 9529,
+            "current_stock": 70515,
+            "yoy": -75.3,
+            "actual_trend": [145000, 148000, 70515],
+            "forecast_trend": [146666, 123333, 9529],
+            "status": "과잉",
+            "operation_rate": 94.5
+          }
         },
         {
-          "zone_name": "Zone5_광주전북전남권",
+          "region": "Zone5_광주전북전남권",
           "f2a_target": 274574,
-          "ai_target": 8786,
+          "target_stock": 8786,
           "current_stock": 49203,
-          "ratio": 5.6,
+          "stock_ratio": 5.6,
           "status": "과잉",
-          "forecast": 8786,
-          "yoy": -81.7,
-          "actual_trend": [133333, 136000, 49203],
-          "forecast_trend": [135000, 113333, 8786]
+          "map_color": "yellow",
+          "animate_transition": false,
+          "forecast_card": {
+            "forecast": 8786,
+            "current_stock": 49203,
+            "yoy": -81.7,
+            "actual_trend": [133333, 136000, 49203],
+            "forecast_trend": [135000, 113333, 8786],
+            "status": "과잉",
+            "operation_rate": 93.8
+          }
         },
         {
-          "zone_name": "Zone6_대구경북권",
+          "region": "Zone6_대구경북권",
           "f2a_target": 222121,
-          "ai_target": 7107,
+          "target_stock": 7107,
           "current_stock": 27009,
-          "ratio": 3.8,
+          "stock_ratio": 3.8,
           "status": "과잉",
-          "forecast": 7107,
-          "yoy": -77.5,
-          "actual_trend": [106666, 108000, 27009],
-          "forecast_trend": [107333, 90000, 7107]
+          "map_color": "yellow",
+          "animate_transition": false,
+          "forecast_card": {
+            "forecast": 7107,
+            "current_stock": 27009,
+            "yoy": -77.5,
+            "actual_trend": [106666, 108000, 27009],
+            "forecast_trend": [107333, 90000, 7107],
+            "status": "과잉",
+            "operation_rate": 92.5
+          }
         },
         {
-          "zone_name": "Zone7_부산울산경남권",
+          "region": "Zone7_부산울산경남권",
           "f2a_target": 357877,
-          "ai_target": 11452,
+          "target_stock": 11452,
           "current_stock": 146586,
-          "ratio": 12.8,
+          "stock_ratio": 12.8,
           "status": "과잉",
-          "forecast": 11452,
-          "yoy": -74.3,
-          "actual_trend": [173333, 176000, 146586],
-          "forecast_trend": [175000, 146666, 11452]
+          "map_color": "red",
+          "animate_transition": true,
+          "forecast_card": {
+            "forecast": 11452,
+            "current_stock": 146586,
+            "yoy": -74.3,
+            "actual_trend": [173333, 176000, 146586],
+            "forecast_trend": [175000, 146666, 11452],
+            "status": "과잉",
+            "operation_rate": 95.4
+          }
         },
         {
-          "zone_name": "Zone8_제주권",
+          "region": "Zone8_제주권",
           "f2a_target": 44265,
-          "ai_target": 1416,
+          "target_stock": 1416,
           "current_stock": 1841,
-          "ratio": 1.3,
+          "stock_ratio": 1.3,
           "status": "적정",
-          "forecast": 1416,
-          "yoy": -70.2,
-          "actual_trend": [15666, 16000, 1841],
-          "forecast_trend": [15833, 13333, 1416]
+          "map_color": "green",
+          "animate_transition": false,
+          "forecast_card": {
+            "forecast": 1416,
+            "current_stock": 1841,
+            "yoy": -70.2,
+            "actual_trend": [15666, 16000, 1841],
+            "forecast_trend": [15833, 13333, 1416],
+            "status": "적정",
+            "operation_rate": 89.5
+          }
         }
       ],
-      "recommendations": [
+      "ai_solutions": [
         {
-          "id": 1,
-          "priority": "HIGH",
-          "title": "수도권 및 영남권 중심 타미비어 생산 감축",
-          "name": "수도권/영남권 핀셋 감축 및 신규 발주 보류",
-          "action": "감축 Trigger(10배)를 초과한 서울, 경기, 부산 권역 생산 라인 즉시 감축. 강원/제주 등은 현 수준 유지.",
+          "id": "SOLUTION-01",
+          "type": "PRODUCTION_DECREASE",
+          "title": "① 수도권 및 영남권 타미비어 생산 감축 (추천)",
+          "is_final_selected": true,
+          "summary": "수도권/영남권 핀셋 감축 및 신규 발주 보류",
+          "reason": "감축 Trigger(10배)를 초과한 서울, 경기, 부산 권역 생산 라인 즉시 감축.",
+          "xai_explanation": "AI 수요 급감 예측 결과, 권역별 양극화 현상 감지. 10배 초과 심각 권역 핀셋 감축 제안.",
           "expected_effect": [
-            "Dead Stock 65% 증가 방지",
-            "원료 구매 비용 절감",
+            "주의 권역(대전/광주/대구) 적정 상태 즉시 회복",
+            "심각 권역(서울/경기/부산) 재고 누적 차단",
             "과잉 권역 CAPA 최적화"
           ],
-          "xai": [
-            "AI 수도권 수요 급감 예측",
-            "서울/경기 재고 18~24배 초과",
-            "생산라인 가동률 97% 유지"
-          ],
           "approval_action": {
-            "initial_button_text": "체크 실행안 적용",
+            "initial_button_text": "감축 실행 계획 적용",
             "approved_button_text": "승인완료 ✓ (SCM총괄본부장, 2026-11-15)",
             "approval_user": "SCM총괄본부장",
             "approval_date": "2026-11-15"
           },
           "after_apply": {
-            "current_stock": 650000,
-            "ratio": 7.1,
+            "current_stock": 745570,
+            "stock_ratio": 8.2,
             "risk_score": 45,
             "status": "과잉 (감축 진행 중)",
-            "dead_stock_quantity": 559215,
-            "affected_regions": [
-              "Zone1_서울권",
-              "Zone2_경기인천수도권",
-              "Zone7_부산울산경남권"
+            "dead_stock_quantity": 654785,
+            "map_monitoring": [
+              {
+                "region": "Zone1_서울권",
+                "target_stock": 14077,
+                "current_stock": 211155,
+                "stock_ratio": 15.0,
+                "status": "과잉",
+                "map_color": "red",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone2_경기인천수도권",
+                "target_stock": 34830,
+                "current_stock": 383130,
+                "stock_ratio": 11.0,
+                "status": "과잉",
+                "map_color": "red",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone3_강원권",
+                "target_stock": 3585,
+                "current_stock": 6812,
+                "stock_ratio": 1.9,
+                "status": "적정",
+                "map_color": "green",
+                "animate_transition": false
+              },
+              {
+                "region": "Zone4_대전세종충청권",
+                "target_stock": 9529,
+                "current_stock": 18105,
+                "stock_ratio": 1.9,
+                "status": "적정",
+                "map_color": "green",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone5_광주전북전남권",
+                "target_stock": 8786,
+                "current_stock": 15814,
+                "stock_ratio": 1.8,
+                "status": "적정",
+                "map_color": "green",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone6_대구경북권",
+                "target_stock": 7107,
+                "current_stock": 11371,
+                "stock_ratio": 1.6,
+                "status": "적정",
+                "map_color": "green",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone7_부산울산경남권",
+                "target_stock": 11452,
+                "current_stock": 97342,
+                "stock_ratio": 8.5,
+                "status": "과잉",
+                "map_color": "yellow",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone8_제주권",
+                "target_stock": 1416,
+                "current_stock": 1841,
+                "stock_ratio": 1.3,
+                "status": "적정",
+                "map_color": "green",
+                "animate_transition": false
+              }
             ]
           }
         },
         {
-          "id": 2,
-          "priority": "MEDIUM",
-          "title": "잉여 완제품 CDC 장기저장 및 국가 비축분 전환",
-          "name": "수도권/영남권 잉여 재고 CDC 이송",
-          "action": "재고 과잉이 심각한 권역의 잉여 재고를 중앙 CDC로 이송하여 장기 보관.\n\n[CDC 이송 대상]\n- 서울권: 266,000 BOX\n- 경기인천권: 400,000 BOX\n- 부산울산경남권: 134,000 BOX\n- 총 이송량: 800,000 BOX",
+          "id": "SOLUTION-02",
+          "type": "TRANSFER",
+          "title": "② 잉여 완제품 CDC 장기저장 (참고 옵션)",
+          "is_final_selected": false,
+          "summary": "수도권/영남권 잉여 재고 총 80만 BOX CDC 이송",
+          "reason": "재고 과잉이 심각한 권역의 잉여 재고를 중앙 CDC로 이송하여 장기 보관.",
+          "xai_explanation": "수도권 악성 재고 집중 현상, 유효기간 최대 120개월 확보 및 CDC 여유 공간 활용",
           "expected_effect": [
-            "권역 물류창고 부하 해소",
-            "국가 비축 의약품 전환 가능성",
-            "폐기 비용 최소화"
-          ],
-          "xai": [
-            "수도권 악성 재고 집중 현상",
-            "유효기간 최대 120개월 확보",
-            "CDC 여유 공간 활용 가능"
+            "권역 물류창고 부하 일시적 해소",
+            "국가 비축 의약품 전환 가능성"
           ],
           "approval_action": {
             "initial_button_text": "이관 계획 적용",
@@ -197,17 +450,112 @@
             "approval_date": "2026-11-16"
           },
           "after_apply": {
-            "current_stock": 700000,
-            "ratio": 7.7,
-            "risk_score": 50,
-            "status": "과잉 (이관 진행 중)",
-            "dead_stock_quantity": 609215,
-            "affected_regions": [
-              "Zone1_서울권",
-              "Zone2_경기인천수도권",
-              "Zone7_부산울산경남권"
+            "current_stock": 480777,
+            "stock_ratio": 5.3,
+            "risk_score": 38,
+            "status": "과잉 (CDC 이관 완료)",
+            "dead_stock_quantity": 389992,
+            "map_monitoring": [
+              {
+                "region": "Zone1_서울권",
+                "target_stock": 14077,
+                "current_stock": 78902,
+                "stock_ratio": 5.6,
+                "status": "과잉",
+                "map_color": "yellow",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone2_경기인천수도권",
+                "target_stock": 34830,
+                "current_stock": 233909,
+                "stock_ratio": 6.7,
+                "status": "과잉",
+                "map_color": "yellow",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone3_강원권",
+                "target_stock": 3585,
+                "current_stock": 6812,
+                "stock_ratio": 1.9,
+                "status": "적정",
+                "map_color": "green",
+                "animate_transition": false
+              },
+              {
+                "region": "Zone4_대전세종충청권",
+                "target_stock": 9529,
+                "current_stock": 70515,
+                "stock_ratio": 7.4,
+                "status": "과잉",
+                "map_color": "yellow",
+                "animate_transition": false
+              },
+              {
+                "region": "Zone5_광주전북전남권",
+                "target_stock": 8786,
+                "current_stock": 49203,
+                "stock_ratio": 5.6,
+                "status": "과잉",
+                "map_color": "yellow",
+                "animate_transition": false
+              },
+              {
+                "region": "Zone6_대구경북권",
+                "target_stock": 7107,
+                "current_stock": 27009,
+                "stock_ratio": 3.8,
+                "status": "과잉",
+                "map_color": "yellow",
+                "animate_transition": false
+              },
+              {
+                "region": "Zone7_부산울산경남권",
+                "target_stock": 11452,
+                "current_stock": 12586,
+                "stock_ratio": 1.1,
+                "status": "적정",
+                "map_color": "green",
+                "animate_transition": true
+              },
+              {
+                "region": "Zone8_제주권",
+                "target_stock": 1416,
+                "current_stock": 1841,
+                "stock_ratio": 1.3,
+                "status": "적정",
+                "map_color": "green",
+                "animate_transition": false
+              }
             ]
           }
+        }
+      ],
+      "timeline_logs": [
+        {
+          "id": 1,
+          "timestamp": "2026-11-10 09:00",
+          "type": "ALERT",
+          "message": "외부 충격(마스크 의무화 등)으로 인플루엔자 시장 수요 급감 감지"
+        },
+        {
+          "id": 2,
+          "timestamp": "2026-11-15 08:30",
+          "type": "WARNING",
+          "message": "수도권/영남권 재고율 기준치(Trigger 10배) 초과 감지 (서울권 24.5배)"
+        },
+        {
+          "id": 3,
+          "timestamp": "2026-11-15 09:00",
+          "type": "AI_RECOMMEND",
+          "message": "AI 분석 완료: 수도권 및 영남권 핀셋 감축 최적안 도출"
+        },
+        {
+          "id": 4,
+          "timestamp": "2026-11-15 09:15",
+          "type": "APPROVAL",
+          "message": "SCM총괄본부장 핀셋 생산 감축 실행 계획 최종 승인 완료"
         }
       ],
       "xai_cards": [

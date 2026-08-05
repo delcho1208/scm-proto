@@ -27,6 +27,7 @@ export type DashboardRecommendation = {
   projectedTotalInventory?: number;
   projectedStatus?: string;
   affectedRegions?: string[];
+  projectedRegions?: Record<string, DashboardRegion>;
   approvalButtonText: string;
 };
 
@@ -136,7 +137,7 @@ const lipilouTotalInventory = Object.values(lipilouRegions).reduce(
 
 export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
   ? {
-      date: lipilouLatest.date,
+      date: "2026-10-01",
       sceneName: lipilouLatest.scene_name,
       regions: lipilouRegions,
       totalInventory: lipilouTotalInventory,
@@ -159,9 +160,8 @@ export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
   : null;
 
 type TamivirScenario = {
-  time: string;
-  phase: "normal" | "prediction";
-  status: string;
+  date: string;
+  scene_name: string;
   summary: {
     f2a_target: number;
     ai_target: number;
@@ -171,33 +171,36 @@ type TamivirScenario = {
     status: string;
     risk_score: number;
   };
-  zone_details: Array<{
-    zone_name: string;
+  map_monitoring?: Array<{
+    region: string;
     f2a_target: number;
-    ai_target: number;
+    target_stock: number;
     current_stock: number;
-    ratio: number;
+    stock_ratio: number;
     status: string;
-    forecast: number;
-    yoy: number;
-    actual_trend: number[];
-    forecast_trend: number[];
   }>;
-  recommendations: Array<{
-    id: number;
-    priority: string;
+  regions_stock?: Array<{
+    region: string;
+    f2a_target: number;
+    target_stock: number;
+    current_stock: number;
+    stock_ratio: number;
+    status: string;
+  }>;
+  ai_solutions: Array<{
+    id: string;
     title: string;
-    name: string;
-    action: string;
+    summary?: string;
+    reason: string;
+    xai_explanation: string;
     expected_effect: string[];
-    xai: string[];
     approval_action: { initial_button_text: string };
     after_apply: {
       current_stock: number;
-      ratio: number;
+      stock_ratio: number;
       status: string;
       dead_stock_quantity: number;
-      affected_regions: string[];
+      map_monitoring: RawRegion[];
     };
   }>;
   xai_cards: Array<{ title: string; value: string; description: string }>;
@@ -206,14 +209,15 @@ type TamivirScenario = {
 type TamivirRaw = { project: string; scenarios: TamivirScenario[] };
 
 const tamivirRaw = rawTamivirScenario as TamivirRaw;
-const tamivirLatest = [...tamivirRaw.scenarios].sort((a, b) => b.time.localeCompare(a.time))[0];
+const tamivirLatest = [...tamivirRaw.scenarios].sort((a, b) => b.date.localeCompare(a.date))[0];
+const tamivirLatestRegions = tamivirLatest.map_monitoring ?? tamivirLatest.regions_stock ?? [];
 const tamivirZoneRegions = normalizeRegions(
-  tamivirLatest.zone_details.map((region) => ({
-    region: region.zone_name,
+  tamivirLatestRegions.map((region) => ({
+    region: region.region,
     current_stock: region.current_stock,
-    target_stock: region.ai_target,
-    stock_ratio: region.ratio,
-    stockRatioLabel: `${region.ratio.toFixed(1)}배`,
+    target_stock: region.target_stock,
+    stock_ratio: region.stock_ratio,
+    stockRatioLabel: `${region.stock_ratio.toFixed(1)}배`,
     status: region.status,
   })),
 );
@@ -240,9 +244,72 @@ const operationRateText = tamivirLatest.xai_cards.find((card) =>
 const operationRate = Number(operationRateText?.match(/[\d.]+/)?.[0] ?? 97);
 const demandXai = tamivirLatest.xai_cards.find((card) => card.title.includes("수요 예측"));
 
+type TamivirForecast = {
+  forecast: number;
+  currentStock: number;
+  yoy: number;
+  operationRate: number;
+  status: string;
+  paths: { actual: string; prediction: string };
+};
+
+function createTamivirPaths(actualTrend: number[], forecastTrend: number[]) {
+  const actualValues = actualTrend.slice(-3);
+  const predictionValues = [actualValues.at(-1) ?? 0, ...forecastTrend.slice(-3)];
+  const allValues = [...actualValues, ...predictionValues];
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
+  const range = max - min || 1;
+  const point = (value: number, x: number) => `${x},${170 - ((value - min) / range) * 130}`;
+  return {
+    actual: actualValues.map((value, index) => `${index ? "L" : "M"}${point(value, index * 80)}`).join(" "),
+    prediction: predictionValues.map((value, index) => `${index ? "L" : "M"}${point(value, 160 + index * 80)}`).join(" "),
+  };
+}
+
+const tamivirForecastEntries = tamivirLatestRegions.map((region) => {
+  const id = toRegionId(region.region);
+  const forecastCard = (region as typeof region & {
+    forecast_card?: { forecast: number; current_stock: number; yoy: number; actual_trend: number[]; forecast_trend: number[]; status: string; operation_rate: number };
+  }).forecast_card;
+  if (!forecastCard) return null;
+  return [id, {
+    forecast: forecastCard.forecast,
+    currentStock: forecastCard.current_stock,
+    yoy: forecastCard.yoy,
+    operationRate: forecastCard.operation_rate,
+    status: forecastCard.status,
+    paths: createTamivirPaths(forecastCard.actual_trend, forecastCard.forecast_trend),
+  } satisfies TamivirForecast] as const;
+}).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+
+const normalTamivirScenario = [...tamivirRaw.scenarios].sort((a, b) => a.date.localeCompare(b.date))[0];
+const nationalActualTrend = [0, 1, 2].map((index) => tamivirLatestRegions.reduce((sum, region) => {
+  const card = (region as typeof region & { forecast_card?: { actual_trend: number[] } }).forecast_card;
+  return sum + (card?.actual_trend[index] ?? 0);
+}, 0));
+const nationalForecastTrend = [0, 1, 2].map((index) => tamivirLatestRegions.reduce((sum, region) => {
+  const card = (region as typeof region & { forecast_card?: { forecast_trend: number[] } }).forecast_card;
+  return sum + (card?.forecast_trend[index] ?? 0);
+}, 0));
+
+export const tamivirForecastByRegion: Record<string, TamivirForecast> = {
+  National: {
+    forecast: tamivirLatest.summary.ai_target,
+    currentStock: tamivirLatest.summary.current_stock,
+    yoy: ((tamivirLatest.summary.ai_target / normalTamivirScenario.summary.ai_target) - 1) * 100,
+    operationRate,
+    status: tamivirLatest.summary.status,
+    paths: createTamivirPaths(nationalActualTrend, nationalForecastTrend),
+  },
+  ...Object.fromEntries(tamivirForecastEntries),
+};
+
+export const tamivirAnnualF2aTarget = tamivirLatest.summary.f2a_target;
+
 export const tamivirDashboard: ProductDashboardScenario = {
-  date: `${tamivirLatest.time.replace(".", "-")}-01`,
-  sceneName: `${tamivirRaw.project} · ${tamivirLatest.status}`,
+  date: "2026-10-01",
+  sceneName: tamivirLatest.scene_name,
   regions: tamivirRegions,
   totalInventory: tamivirLatest.summary.current_stock,
   utilization: operationRate,
@@ -252,13 +319,14 @@ export const tamivirDashboard: ProductDashboardScenario = {
     value: `현재 ${tamivirLatest.summary.current_stock.toLocaleString()}EA · AI 목표 ${tamivirLatest.summary.ai_target.toLocaleString()}EA`,
     detail: demandXai?.description ?? `전국 재고가 AI 목표의 ${tamivirLatest.summary.ratio.toFixed(1)}배로 예측되었습니다.`,
   },
-  recommendations: tamivirLatest.recommendations.map((recommendation) => ({
+  recommendations: tamivirLatest.ai_solutions.map((recommendation) => ({
     id: `TAMIVIR-${recommendation.id}`,
-    title: recommendation.name,
-    description: `${recommendation.action} · 기대효과: ${recommendation.expected_effect.join(", ")} · XAI 근거: ${recommendation.xai.join(", ")}`,
+    title: recommendation.summary ?? recommendation.title.replace(/^[①②③④⑤]\s*/, ""),
+    description: `${recommendation.reason} · 기대효과: ${recommendation.expected_effect.join(", ")} · XAI 근거: ${recommendation.xai_explanation}`,
     projectedTotalInventory: recommendation.after_apply.current_stock,
     projectedStatus: recommendation.after_apply.status,
-    affectedRegions: recommendation.after_apply.affected_regions.map(toRegionId),
+    affectedRegions: recommendation.after_apply.map_monitoring.map((region) => toRegionId(region.region)),
+    projectedRegions: normalizeRegions(recommendation.after_apply.map_monitoring),
     approvalButtonText: recommendation.approval_action.initial_button_text,
   })),
 };
