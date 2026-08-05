@@ -309,7 +309,11 @@ export function DashboardView({ product }: { product: Product }) {
 
   const recommendations: AiRecommendation[] = product.key === "세파졸린"
     ? cefazolinDashboard.recommendationEvaluations
-      .filter((recommendation) => !recommendation.regionId || recommendation.regionId === regionId)
+      .filter((recommendation) => [
+        "CEFAZOLIN-S1-NO-RESPONSE",
+        "CEFAZOLIN-S2-INTERNAL-RESPONSE",
+        "CEFAZOLIN-S3-INTEGRATED-RESPONSE",
+      ].includes(recommendation.id))
       .map((recommendation) => ({
         id: recommendation.id,
         t: recommendation.title,
