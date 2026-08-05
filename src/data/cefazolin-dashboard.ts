@@ -85,7 +85,7 @@ export function getCefazolinIntegrationRecords(regionId: string): SystemRecord[]
       docNo: record.documentNumber,
       status: toIntegrationStatus(record.status),
       qty: Math.round(record.quantity).toLocaleString("ko-KR"),
-      updatedAt: national.policyRisk.asOf,
+      updatedAt: national?.policyRisk.asOf ?? "",
       note: `${record.unit} · 세파졸린 실데이터`,
     }));
 }
