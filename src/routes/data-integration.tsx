@@ -52,20 +52,20 @@ const dataTypeStyle: Record<string, string> = {
 
 type StockStatus = "safe" | "warning" | "danger";
 
-function getStockMeta(ratio: number): { status: StockStatus; label: string } {
-  if (ratio < 70) return { status: "danger", label: "위험" };
-  if (ratio < 100) return { status: "warning", label: "주의" };
-  return { status: "safe", label: "정상" };
-}
-
-function getSimulationStockRatio(productKey: string, regionId: string): number {
+function getSimulationStockMeta(productKey: string, regionId: string): { ratio: number; status: StockStatus; label: string } {
   const dashboard = productKey === "세파졸린"
     ? cefazolinDashboard
     : productKey === "리피로우"
       ? lipilouDashboard
       : tamivirDashboard;
-  const rawRatio = dashboard?.regions[regionId]?.stock_ratio ?? 1;
-  return Math.round(rawRatio <= 10 ? rawRatio * 100 : rawRatio);
+  const region = dashboard?.regions[regionId];
+  const rawRatio = region?.stock_ratio ?? 1;
+  const status = region?.riskLevel ?? "safe";
+  return {
+    ratio: Math.round(rawRatio <= 10 ? rawRatio * 100 : rawRatio),
+    status,
+    label: status === "danger" ? "부족" : status === "warning" ? "과잉" : "적정",
+  };
 }
 
 function getProductIntegrationRecords(regionId: string, productKey: string) {
@@ -189,8 +189,8 @@ function DataIntegrationView({ product }: { product: Product }) {
               </div>
               <div className="warehouse-photo-grid">
                 {markerOrder.map((id) => {
-                  const ratio = getSimulationStockRatio(product.key, id);
-                  const stock = getStockMeta(ratio);
+                  const stock = getSimulationStockMeta(product.key, id);
+                  const ratio = stock.ratio;
                   const isActive = regionId === id;
                   return (
                     <button
@@ -212,10 +212,10 @@ function DataIntegrationView({ product }: { product: Product }) {
                 })}
               </div>
               <div className="warehouse-photo-legend">
-                <b>안전재고 비율 범례</b>
-                <span className="danger"><i /> 위험 (0~70%)</span>
-                <span className="warning"><i /> 주의 (70~100%)</span>
-                <span className="safe"><i /> 정상 (100% 이상)</span>
+                <b>시뮬레이션 재고 판정</b>
+                <span className="danger"><i /> 부족</span>
+                <span className="safe"><i /> 적정</span>
+                <span className="warning"><i /> 과잉</span>
               </div>
             </div>
           ) : (
