@@ -56,7 +56,7 @@ function toPath(points: GraphPoint[]) {
 }
 
 export function createLipilouGraph(region: LipilouGraphRegion): LipilouGraph {
-  const alignedPeriods = ["26 Q2", "26 Q3", "26 Q4", "27 Q1", "27 Q2", "27 Q3"];
+  const alignedPeriods = ["26.08", "26.09", "26.10", "26.11", "26.12", "27.01"];
   const trend = region.monthly_trend.map((point, index) => ({
     ...point,
     period: alignedPeriods[index] ?? point.period,
