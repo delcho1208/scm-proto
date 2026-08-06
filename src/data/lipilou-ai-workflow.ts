@@ -88,11 +88,9 @@ export const lipilouWorkflowSteps: CefazolinWorkflowStep[] = [
     order: 8,
     title: "담당자 검토·승인",
     description: "공급관리책임자가 AI 추천안과 예상 결과를 검토하고 최종 승인합니다.",
-    status: "완료",
+    status: "승인 필요",
     icon: "verified_user",
-    evidence: selectedSolution
-      ? [`${selectedSolution.approval_action.approval_user} 승인`, selectedSolution.approval_action.approved_button_text]
-      : ["Human-in-the-loop 승인 필요"],
+    evidence: ["Human-in-the-loop 승인 필요", "담당자 승인 전 실제 시스템 실행 없음"],
   },
   {
     id: "LIPI-FLOW-09",
