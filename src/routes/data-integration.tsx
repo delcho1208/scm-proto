@@ -52,7 +52,7 @@ const dataTypeStyle: Record<string, string> = {
 
 type StockStatus = "safe" | "warning" | "danger";
 
-function getSimulationStockMeta(productKey: string, regionId: string): { ratio: number; status: StockStatus; label: string } {
+function getSimulationStockMeta(productKey: string, regionId: string): { ratio: number; valueLabel: string; status: StockStatus; label: string; description: string; critical: boolean } {
   const dashboard = productKey === "세파졸린"
     ? cefazolinDashboard
     : productKey === "리피로우"
@@ -60,12 +60,18 @@ function getSimulationStockMeta(productKey: string, regionId: string): { ratio: 
       : tamivirDashboard;
   const region = dashboard?.regions[regionId];
   const rawRatio = region?.stock_ratio ?? 1;
-  const status = region?.riskLevel ?? "safe";
-  return {
-    ratio: Math.round(rawRatio <= 10 ? rawRatio * 100 : rawRatio),
-    status,
-    label: status === "danger" ? "부족" : status === "warning" ? "과잉" : "적정",
-  };
+  if (productKey === "타미비어") {
+    if (rawRatio < 1) return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "danger", label: "부족", description: "안전재고 미달", critical: false };
+    if (rawRatio < 3) return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "safe", label: "적정", description: "정상 운영", critical: false };
+    if (rawRatio < 10) return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "warning", label: "과잉", description: "재고 과다, 모니터링 필요", critical: false };
+    return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "danger", label: "심각한 과잉", description: "생산감축 Trigger 발생", critical: true };
+  }
+
+  const ratio = Math.round(rawRatio);
+  const upperNormal = 120;
+  if (ratio < 100) return { ratio, valueLabel: `${ratio}%`, status: "danger", label: "부족", description: "안전재고 미달", critical: false };
+  if (ratio <= upperNormal) return { ratio, valueLabel: `${ratio}%`, status: "safe", label: "적정", description: "정상 운영", critical: false };
+  return { ratio, valueLabel: `${ratio}%`, status: "warning", label: "과잉", description: "재고 과다", critical: false };
 }
 
 function getProductIntegrationRecords(regionId: string, productKey: string) {
@@ -190,20 +196,20 @@ function DataIntegrationView({ product }: { product: Product }) {
               <div className="warehouse-photo-grid">
                 {markerOrder.map((id) => {
                   const stock = getSimulationStockMeta(product.key, id);
-                  const ratio = stock.ratio;
                   const isActive = regionId === id;
                   return (
                     <button
                       key={id}
                       type="button"
                       data-status={stock.status}
-                      className={`warehouse-photo-zone ${isActive ? "active" : ""}`}
+                      className={`warehouse-photo-zone ${stock.critical ? "critical" : ""} ${isActive ? "active" : ""}`}
                       onClick={() => selectTwinRegion(id)}
-                      aria-label={`${regions[id].name} 시스템 상세 보기`}
+                      aria-label={`${regions[id].name} ${stock.label}, ${stock.description}`}
+                      title={stock.description}
                     >
                       <span className="warehouse-photo-card">
                         <span><i />{regions[id].name}</span>
-                        <strong>안전재고 <b>{ratio}%</b></strong>
+                        <strong>{product.key === "타미비어" ? "재고 비율" : "안전재고"} <b>{stock.valueLabel}</b></strong>
                       </span>
                       <span className="warehouse-photo-outline" aria-hidden="true" />
                       <span className="warehouse-photo-status">{stock.label}</span>
@@ -212,10 +218,17 @@ function DataIntegrationView({ product }: { product: Product }) {
                 })}
               </div>
               <div className="warehouse-photo-legend">
-                <b>시뮬레이션 재고 판정</b>
-                <span className="danger"><i /> 부족</span>
-                <span className="safe"><i /> 적정</span>
-                <span className="warning"><i /> 과잉</span>
+                <b>{product.name} 재고 판정</b>
+                {product.key === "타미비어" ? <>
+                  <span className="danger"><i /> 부족 (&lt;1.0)</span>
+                  <span className="safe"><i /> 적정 (1.0~3.0)</span>
+                  <span className="warning"><i /> 과잉 (3.0~10.0)</span>
+                  <span className="critical"><i /> 심각한 과잉 (≥10.0)</span>
+                </> : <>
+                  <span className="danger"><i /> 부족 (&lt;100%)</span>
+                  <span className="safe"><i /> 적정 (100~120%)</span>
+                  <span className="warning"><i /> 과잉 (&gt;120%{product.key === "리피로우" ? "~170%" : ""})</span>
+                </>}
               </div>
             </div>
           ) : (

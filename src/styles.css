@@ -876,6 +876,17 @@
 }
 .warehouse-photo-zone.active .warehouse-photo-status { background:#2563eb; }
 .warehouse-photo-zone:nth-child(-n+4) .warehouse-photo-status { bottom: 4px; }
+.warehouse-photo-zone.critical .warehouse-photo-outline,
+.warehouse-photo-zone.critical.active .warehouse-photo-outline {
+  border-color:#dc2626;
+  background:rgba(220,38,38,.14);
+  animation:warehouseCriticalPulse 1.35s ease-in-out infinite;
+}
+.warehouse-photo-zone.critical .warehouse-photo-status,
+.warehouse-photo-zone.critical.active .warehouse-photo-status { background:#dc2626; }
+@keyframes warehouseCriticalPulse {
+  50% { box-shadow:0 0 0 4px rgba(254,226,226,.92),0 0 26px rgba(220,38,38,.9),inset 0 0 16px rgba(220,38,38,.3); }
+}
 .warehouse-photo-legend {
   position:absolute;
   z-index:4;
@@ -898,6 +909,7 @@
 .warehouse-photo-legend .danger i { background:#dc2626; }
 .warehouse-photo-legend .warning i { background:#eab308; }
 .warehouse-photo-legend .safe i { background:#16a34a; }
+.warehouse-photo-legend .critical i { background:#dc2626; animation:warehouseCriticalPulse 1.35s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .twin-live-dot,
   .block-label .status-dot {
