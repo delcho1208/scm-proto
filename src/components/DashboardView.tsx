@@ -362,7 +362,7 @@ export function DashboardView({ product }: { product: Product }) {
                   from: recommendation.fromRegion,
                   to: recommendation.toRegion,
                   label: recommendation.transferAmount
-                    ? `${recommendation.transferAmount.toLocaleString()}EA`
+                    ? `${recommendation.transferAmount.toLocaleString()}${lipilouGraphRegion ? "BOX" : "EA"}`
                     : undefined,
                   amount: recommendation.transferAmount,
                 },
