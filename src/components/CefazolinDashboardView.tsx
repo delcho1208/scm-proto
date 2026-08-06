@@ -65,7 +65,7 @@ const workflowStatusMeta: Record<
   },
   available: {
     label: "실행 가능",
-    badge: "bg-primary-container text-scm-primary border-scm-primary/20",
+    badge: "bg-primary-container text-white border-scm-primary/20",
     dot: "bg-scm-primary",
   },
   review_required: {
@@ -95,7 +95,7 @@ const workflowStatusMeta: Record<
   },
   executed: {
     label: "가상 실행 완료",
-    badge: "bg-primary-container text-scm-primary border-scm-primary/20",
+    badge: "bg-primary-container text-white border-scm-primary/20",
     dot: "bg-scm-primary",
   },
 };
@@ -1222,7 +1222,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                   >
                     SCM 의사결정 실행 콘솔
                   </h2>
-                  <span className="rounded-full bg-primary-container px-3 py-1 text-[10px] font-bold text-scm-primary">
+                  <span className="rounded-full bg-primary-container px-3 py-1 text-[10px] font-bold text-white">
                     합성 데이터 기반 Digital Twin PoC
                   </span>
                 </div>
@@ -1515,7 +1515,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                         {cefazolinForecastRiskSummary.riskModel.topFeatures.map((feature) => (
                           <span
                             key={feature.label}
-                            className="rounded bg-primary-container/60 px-2 py-1 text-[10px] font-bold text-scm-primary"
+                            className="rounded bg-primary-container/60 px-2 py-1 text-[10px] font-bold text-white"
                           >
                             {feature.label}
                           </span>
@@ -2035,7 +2035,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                     {selectedWorkflowStep.ruleIds.map((ruleId) => (
                       <code
                         key={ruleId}
-                        className="rounded bg-primary-container/60 px-2 py-1 text-[10px] font-bold text-scm-primary"
+                        className="rounded bg-primary-container/60 px-2 py-1 text-[10px] font-bold text-white"
                       >
                         {ruleId}
                       </code>
