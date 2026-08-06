@@ -1,6 +1,6 @@
 import rawDashboard from "@/data/cefazolin-dashboard.json";
 import type { DashboardRegion, ProductDashboardScenario } from "@/data/dashboard-scenario";
-import type { RiskLevel } from "@/data/scm";
+import type { RiskLevel, SystemKey, SystemRecord } from "@/data/scm";
 import { selectRecommendedScenario } from "@/services/scm-workflow-orchestrator";
 
 export type ScmQuantityType = "demand" | "finishedInventory" | "transfer" | "apiProcurement";
@@ -31,6 +31,12 @@ function toRiskLevel(status: string): RiskLevel {
   if (status === "danger") return "danger";
   if (status === "warning") return "warning";
   return "safe";
+}
+
+function toIntegrationStatus(status: string): SystemRecord["status"] {
+  if (status === "지연") return "지연";
+  if (status === "처리중") return "처리중";
+  return "동기화 완료";
 }
 
 function createChartPath(values: number[], allValues: number[]): string {
@@ -163,6 +169,23 @@ const transferableSummary = transferableRegions
   .map((region) => `${region.name} ${formatScmQuantity(region.transferableQuantity, "transfer")}`)
   .join(" + ");
 
+export function getCefazolinIntegrationRecords(regionId: string): SystemRecord[] {
+  const latestMetric = regionalMonthly[regionId]?.at(-1);
+  return rawDashboard.integration
+    .filter((record) => record.regionId === regionId)
+    .map((record) => ({
+      system: record.system as SystemKey,
+      docNo: record.documentNumber,
+      status: toIntegrationStatus(record.status),
+      qty: Math.round(record.quantity).toLocaleString("ko-KR"),
+      updatedAt: record.updatedAt,
+      note: record.note,
+      dataType: record.dataType,
+      calculationBasis: record.calculationBasis,
+      leadTimeHours: record.system === "WMS" ? latestMetric?.averageLeadTimeHours : undefined,
+    }));
+}
+
 const dashboardScenario: ProductDashboardScenario = {
   date: national.policyRisk.asOf,
   sceneName: rawDashboard.overview.baselineScenario,
@@ -204,6 +227,9 @@ export const cefazolinDashboard = {
   annualForecastDemand: rawDashboard.overview.annualForecastDemand,
   annualForecastDemandByRegion: Object.fromEntries(
     Object.entries(sourceRegions).map(([id, region]) => [id, region.annualForecastDemand]),
+  ) as Record<string, number>,
+  transferableQuantityByRegion: Object.fromEntries(
+    Object.entries(sourceRegions).map(([id, region]) => [id, region.transferableQuantity]),
   ) as Record<string, number>,
   serviceRatePct: rawDashboard.overview.integratedResponse.serviceRatePct,
   unmetDemandRatePct: rawDashboard.overview.integratedResponse.unmetDemandRatePct,
