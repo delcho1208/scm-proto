@@ -57,11 +57,23 @@ function toPath(points: GraphPoint[]) {
 
 export function createLipilouGraph(region: LipilouGraphRegion): LipilouGraph {
   const alignedPeriods = ["26.08", "26.09", "26.10", "26.11", "26.12", "27.01"];
-  const trend = region.monthly_trend.map((point, index) => ({
+  const monthlyTrend = region.monthly_trend.map((point) => ({
     ...point,
-    period: alignedPeriods[index] ?? point.period,
-    type: (index <= 2 ? "actual" : "predicted") as LipilouTrendPoint["type"],
+    value_box: Math.round(point.value_box / 3),
   }));
+  const decemberValue = monthlyTrend.at(-1)?.value_box ?? 0;
+  const trend: LipilouTrendPoint[] = [
+    ...monthlyTrend.map((point, index) => ({
+      ...point,
+      period: alignedPeriods[index] ?? point.period,
+      type: (index <= 2 ? "actual" : "predicted") as LipilouTrendPoint["type"],
+    })),
+    {
+      period: "27.01",
+      value_box: Math.round(decemberValue * 0.95),
+      type: "predicted",
+    },
+  ];
   const values = trend.map((point) => point.value_box);
   const min = Math.min(...values);
   const max = Math.max(...values);
