@@ -15,6 +15,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as SimulationRouteImport } from './routes/simulation'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as ApiDmfRouteImport } from './routes/api/dmf'
 import { Route as ApiNewsRouteImport } from './routes/api/news'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
@@ -50,6 +51,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiDmfRoute = ApiDmfRouteImport.update({
+  id: '/api/dmf',
+  path: '/api/dmf',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiNewsRoute = ApiNewsRouteImport.update({
   id: '/api/news',
   path: '/api/news',
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/simulation': typeof SimulationRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/dmf': typeof ApiDmfRoute
   '/api/news': typeof ApiNewsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -79,6 +86,7 @@ export interface FileRoutesByTo {
   '/simulation': typeof SimulationRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/dmf': typeof ApiDmfRoute
   '/api/news': typeof ApiNewsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/simulation': typeof SimulationRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/dmf': typeof ApiDmfRoute
   '/api/news': typeof ApiNewsRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
     | '/simulation'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/dmf'
     | '/api/news'
     | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
     | '/simulation'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/dmf'
     | '/api/news'
     | '/.mcp/invoke-tool/$tool'
   id:
@@ -122,6 +133,7 @@ export interface FileRouteTypes {
     | '/simulation'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/api/dmf'
     | '/api/news'
     | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
@@ -133,6 +145,7 @@ export interface RootRouteChildren {
   SimulationRoute: typeof SimulationRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiDmfRoute: typeof ApiDmfRoute
   ApiNewsRoute: typeof ApiNewsRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/dmf': {
+      id: '/api/dmf'
+      path: '/api/dmf'
+      fullPath: '/api/dmf'
+      preLoaderRoute: typeof ApiDmfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/news': {
       id: '/api/news'
       path: '/api/news'
@@ -206,6 +226,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiDmfRoute: ApiDmfRoute,
   ApiNewsRoute: ApiNewsRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
