@@ -1097,36 +1097,49 @@ function DmfApiCard() {
 
   const first = items[0];
   return (
-    <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
-      <div className="flex items-start gap-sm">
-        <div className="api-placeholder-icon">
-          <Icon name="medication" className="text-[18px]" />
+    <div className="bento-card relative flex min-h-0 flex-1 flex-col overflow-hidden border-scm-primary/10 bg-gradient-to-br from-white via-white to-primary-container/20 p-md">
+      <div className="pointer-events-none absolute -right-7 -top-8 h-24 w-24 rounded-full bg-scm-primary/5" />
+      <div className="relative flex h-full min-h-0 items-start gap-sm">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-scm-primary text-white shadow-sm shadow-scm-primary/20">
+          <Icon name="medication" className="text-[19px]" filled />
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="flex items-center justify-between gap-xs">
-            <h4 className="truncate text-sm font-bold text-on-surface">식약처 원료의약품 DMF API</h4>
-            <span className="api-ready-badge">
-              {state === "loading" ? "조회 중" : state === "ready" ? "데이터 연결" : "설정 필요"}
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-[0.12em] text-scm-primary">MFDS · DMF</p>
+              <h4 className="truncate text-[13px] font-bold text-on-surface">세파졸린 원료 등록현황</h4>
+            </div>
+            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold ${state === "ready" ? "border-green-200 bg-green-50 text-[#318f19]" : state === "error" ? "border-red-200 bg-red-50 text-error" : "border-blue-200 bg-blue-50 text-scm-primary"}`}>
+              {state === "loading" ? "조회 중" : state === "ready" ? "● LIVE" : "연결 대기"}
             </span>
           </div>
           {state === "ready" ? (
-            <div className="mt-1 space-y-1 text-[10px] leading-tight text-on-surface-variant">
-              <p>세파졸린 검색 결과 {totalCount.toLocaleString("ko-KR")}건</p>
+            <div className="mt-2 flex min-h-0 items-center gap-3">
+              <div className="shrink-0 border-r border-outline-variant/60 pr-3">
+                <div className="flex items-end gap-1">
+                  <strong className="font-data text-[22px] leading-none text-scm-primary">{totalCount.toLocaleString("ko-KR")}</strong>
+                  <span className="mb-0.5 text-[10px] font-bold text-on-surface-variant">건</span>
+                </div>
+                <p className="mt-1 text-[9px] font-bold text-on-surface-variant">DMF 등록</p>
+              </div>
               {first ? (
-                <p className="line-clamp-2">
-                  {first.company || "업체 미상"} · {first.manufacturer || "제조소 미상"}
-                  {first.country ? ` · ${first.country}` : ""}
-                </p>
-              ) : <p>등록된 원료의약품 결과가 없습니다.</p>}
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="truncate text-[11px] font-bold text-on-surface">{first.company || "업체 정보 없음"}</p>
+                  <p className="truncate text-[9px] text-on-surface-variant">{first.manufacturer || "제조소 정보 없음"}</p>
+                  <div className="flex items-center gap-1.5">
+                    {first.country ? <span className="rounded bg-surface-container-low px-1.5 py-0.5 text-[8px] font-bold text-on-surface-variant">{first.country}</span> : null}
+                    {first.permitDate ? <span className="text-[8px] text-on-surface-variant">등록 {first.permitDate}</span> : null}
+                  </div>
+                </div>
+              ) : <p className="text-[10px] text-on-surface-variant">등록 결과 없음</p>}
             </div>
           ) : (
-            <p className={`mt-1 text-[10px] leading-tight ${state === "error" ? "text-error" : "text-on-surface-variant"}`}>
+            <div className="mt-3 rounded-lg bg-surface-container-low/80 px-3 py-2">
+            <p className={`text-[10px] leading-tight ${state === "error" ? "text-error" : "text-on-surface-variant"}`}>
               {state === "error" ? error : "식약처 DMF 등록현황을 조회하고 있습니다."}
             </p>
+            </div>
           )}
-          <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
-            /api/dmf?ingredient=세파졸린
-          </code>
         </div>
       </div>
     </div>
