@@ -225,7 +225,7 @@ function CefazolinNewsApiCard({ productName }: { productName: string }) {
   }, [productName]);
 
   return (
-    <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
+    <div className="bento-card flex min-h-0 flex-[0_0_calc(25%-6px)] flex-col p-md">
       <div className="flex min-h-0 flex-1 items-start gap-sm overflow-hidden">
         <div className="api-placeholder-icon news shrink-0">
           <Icon name="newspaper" className="text-[18px]" />
