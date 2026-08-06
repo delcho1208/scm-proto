@@ -2055,7 +2055,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
 
       {showScenarioComparison && cefazolinData && selectedEvaluation && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto p-2 sm:items-center"
           role="dialog"
           aria-modal="true"
           aria-labelledby="scenario-comparison-title"
@@ -2066,8 +2066,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             onClick={() => setShowScenarioComparison(false)}
             className="absolute inset-0 bg-on-surface/45 backdrop-blur-[2px]"
           />
-          <div className="relative z-10 flex max-h-[92vh] w-[min(1480px,96vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-outline-variant px-6 py-4">
+          <div className="relative z-10 flex h-[min(780px,88dvh)] w-[min(1180px,92vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-outline-variant px-4 py-2">
               <div>
                 <h2
                   id="scenario-comparison-title"
@@ -2089,8 +2089,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               </button>
             </div>
 
-            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[minmax(340px,0.9fr)_minmax(0,1.35fr)]">
-              <div className="min-h-0 space-y-3 overflow-y-auto border-b border-outline-variant bg-surface-container-low/40 p-4 lg:border-b-0 lg:border-r">
+            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[360px_minmax(0,1fr)]">
+              <div className="min-h-0 space-y-2 overflow-y-auto border-b border-outline-variant bg-surface-container-low/40 p-3 lg:border-b-0 lg:border-r">
                 {recommendations.map((recommendation, index) => {
                   const evaluation = recommendation.evaluation;
                   if (!evaluation) return null;
@@ -2100,7 +2100,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                       key={evaluation.scenarioId}
                       type="button"
                       onClick={() => setSelectedRecommendationIndex(index)}
-                      className={`w-full rounded-xl border p-4 text-left transition-colors ${selected ? "border-scm-primary bg-white shadow-sm ring-1 ring-scm-primary/20" : "border-outline-variant bg-white/80 hover:border-scm-primary/40"}`}
+                      className={`w-full rounded-xl border p-3 text-left transition-colors ${selected ? "border-scm-primary bg-white shadow-sm ring-1 ring-scm-primary/20" : "border-outline-variant bg-white/80 hover:border-scm-primary/40"}`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex min-w-0 items-start gap-3">
@@ -2113,7 +2113,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                                 {recommendation.t}
                               </p>
                               <span
-                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${evaluation.recommended ? "bg-primary-container text-scm-primary" : "bg-surface-container-low text-on-surface-variant"}`}
+                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${evaluation.recommended ? "bg-primary-container text-white" : "bg-surface-container-low text-on-surface-variant"}`}
                               >
                                 {evaluation.roleLabel}
                               </span>
@@ -2128,7 +2128,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                           className={`shrink-0 text-[22px] ${selected ? "text-scm-primary" : "text-outline"}`}
                         />
                       </div>
-                      <div className="mt-4 grid grid-cols-3 gap-2">
+                      <div className="mt-3 grid grid-cols-3 gap-2">
                         <div className="rounded-lg bg-surface-container-low p-2.5">
                           <p className="text-[9px] font-bold text-on-surface-variant">
                             {evaluation.costKpi.label}
@@ -2159,7 +2159,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                 })}
               </div>
 
-              <div className="min-h-0 overflow-y-auto p-5 lg:p-7">
+              <div className="min-h-0 overflow-y-auto p-3 lg:p-4">
                 <div className="mb-4 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-scm-primary px-3 py-1 text-xs font-bold text-white">
                     {selectedEvaluation.scenarioId}
@@ -2168,7 +2168,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                     {recommendations[selectedRecommendationIndex]?.t}
                   </h3>
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${selectedEvaluation.recommended ? "bg-primary-container text-scm-primary" : "bg-surface-container-low text-on-surface-variant"}`}
+                    className={`rounded-full px-3 py-1 text-xs font-bold ${selectedEvaluation.recommended ? "bg-primary-container text-white" : "bg-surface-container-low text-on-surface-variant"}`}
                   >
                     {selectedEvaluation.roleLabel}
                   </span>
