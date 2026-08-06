@@ -228,6 +228,9 @@ export const cefazolinDashboard = {
   annualForecastDemandByRegion: Object.fromEntries(
     Object.entries(sourceRegions).map(([id, region]) => [id, region.annualForecastDemand]),
   ) as Record<string, number>,
+  transferableQuantityByRegion: Object.fromEntries(
+    Object.entries(sourceRegions).map(([id, region]) => [id, region.transferableQuantity]),
+  ) as Record<string, number>,
   serviceRatePct: rawDashboard.overview.integratedResponse.serviceRatePct,
   unmetDemandRatePct: rawDashboard.overview.integratedResponse.unmetDemandRatePct,
   policyRiskByRegion: Object.fromEntries(
