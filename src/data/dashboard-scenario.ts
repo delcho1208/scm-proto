@@ -170,7 +170,65 @@ type TamivirRaw = {
   }>;
 };
 
-const tamivirRaw = rawTamivirScenario as TamivirRaw;
+const tamivirSource = rawTamivirScenario as unknown as {
+  scenarios?: Array<{
+    date: string;
+    scene_name: string;
+    summary: {
+      f2a_target: number;
+      ai_target: number;
+      current_stock: number;
+      ratio: number;
+      dead_stock_quantity: number;
+      status: string;
+      risk_score: number;
+    };
+    map_monitoring?: Array<{
+      region: string;
+      current_stock: number;
+      target_stock: number;
+      stock_ratio: number;
+      status: string;
+    }>;
+    regions_stock?: Array<{
+      region: string;
+      current_stock: number;
+      target_stock: number;
+      stock_ratio: number;
+      status: string;
+    }>;
+    xai_cards?: Array<{ title: string; value: string; description: string }>;
+  }>;
+};
+const tamivirLatest = [...(tamivirSource.scenarios ?? [])].sort((a, b) =>
+  b.date.localeCompare(a.date),
+)[0];
+const tamivirRaw: TamivirRaw = tamivirLatest
+  ? {
+      scenario: tamivirLatest.scene_name,
+      f2a_target: tamivirLatest.summary.f2a_target,
+      ai_target: tamivirLatest.summary.ai_target,
+      current_stock: tamivirLatest.summary.current_stock,
+      ratio: tamivirLatest.summary.ratio,
+      dead_stock_quantity: tamivirLatest.summary.dead_stock_quantity,
+      dead_stock_cost_billion_str: "",
+      status: tamivirLatest.summary.status,
+      risk_score: tamivirLatest.summary.risk_score,
+      recommendation: "AI 권고안을 검토해 적정 재고 수준으로 조정합니다.",
+      trace_log: [],
+      xai_cards: tamivirLatest.xai_cards ?? [],
+      zone_details: (tamivirLatest.map_monitoring ?? tamivirLatest.regions_stock ?? []).map(
+        (region) => ({
+          zone_name: region.region,
+          f2a_target: tamivirLatest.summary.f2a_target,
+          ai_target: region.target_stock,
+          current_stock: region.current_stock,
+          ratio: region.stock_ratio,
+          status: region.status,
+        }),
+      ),
+    }
+  : (rawTamivirScenario as TamivirRaw);
 const tamivirRegions = normalizeRegions(
   tamivirRaw.zone_details.map((region) => ({
     region: region.zone_name,
