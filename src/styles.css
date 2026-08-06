@@ -791,6 +791,7 @@
 .warehouse-photo-zone:nth-child(2) { left: 34.1%; top: 15.5%; }
 .warehouse-photo-zone:nth-child(3) { left: 50.6%; top: 15.5%; }
 .warehouse-photo-zone:nth-child(4) { left: 67.0%; top: 15.5%; }
+.warehouse-photo-zone:nth-child(-n+4) { height: 27.5%; }
 .warehouse-photo-zone:nth-child(5) { left: 16.7%; top: 44.5%; }
 .warehouse-photo-zone:nth-child(6) { left: 34.1%; top: 44.5%; }
 .warehouse-photo-zone:nth-child(7) { left: 50.6%; top: 44.5%; }
@@ -874,6 +875,7 @@
   font-weight:900;
 }
 .warehouse-photo-zone.active .warehouse-photo-status { background:#2563eb; }
+.warehouse-photo-zone:nth-child(-n+4) .warehouse-photo-status { bottom: 4px; }
 .warehouse-photo-legend {
   position:absolute;
   z-index:4;

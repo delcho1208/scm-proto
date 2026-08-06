@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { ScmShell, Icon } from "@/components/ScmShell";
 import { getCefazolinIntegrationRecords } from "@/data/cefazolin-dashboard";
+import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
+import { lipilouDashboard, tamivirDashboard } from "@/data/dashboard-scenario";
 import { getLipilouIntegrationRecords } from "@/data/lipilou-integration";
 import { getTamivirIntegrationRecords } from "@/data/tamivir-integration";
 import {
@@ -50,16 +52,20 @@ const dataTypeStyle: Record<string, string> = {
 
 type StockStatus = "safe" | "warning" | "danger";
 
-const safetyStockRatios: Record<string, number[]> = {
-  세파졸린: [58, 82, 105, 110, 70, 125, 130, 115],
-  리피로우: [162, 147, 150, 150, 150, 150, 150, 117],
-  타미비어: [69, 71, 80, 78, 96, 93, 78, 91],
-};
-
 function getStockMeta(ratio: number): { status: StockStatus; label: string } {
   if (ratio < 70) return { status: "danger", label: "위험" };
   if (ratio < 100) return { status: "warning", label: "주의" };
   return { status: "safe", label: "정상" };
+}
+
+function getSimulationStockRatio(productKey: string, regionId: string): number {
+  const dashboard = productKey === "세파졸린"
+    ? cefazolinDashboard
+    : productKey === "리피로우"
+      ? lipilouDashboard
+      : tamivirDashboard;
+  const rawRatio = dashboard?.regions[regionId]?.stock_ratio ?? 1;
+  return Math.round(rawRatio <= 10 ? rawRatio * 100 : rawRatio);
 }
 
 function getProductIntegrationRecords(regionId: string, productKey: string) {
@@ -125,7 +131,7 @@ function DataIntegrationView({ product }: { product: Product }) {
                     <p className="mt-0.5 text-[10px] leading-tight text-on-surface-variant">{meta.desc}</p>
                   </div>
                 </div>
-                <dl className="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain pr-1 text-[12px]">
+                <dl className="min-h-0 flex-1 space-y-1.5 text-[12px]">
                   <Row label="문서번호" value={<span className="font-data">{rec.docNo}</span>} />
                   <Row
                     label="연동 상태"
@@ -137,20 +143,6 @@ function DataIntegrationView({ product }: { product: Product }) {
                   />
                   <Row label="수량 (BOX)" value={<span className="font-data font-semibold text-scm-primary">{rec.qty}</span>} />
                   <Row label="최근 동기화" value={<span className="font-data">{rec.updatedAt}</span>} />
-                  {rec.leadTimeHours !== undefined ? (
-                    <Row
-                      label="평균 리드타임"
-                      value={<span className="font-data font-bold text-scm-primary">{rec.leadTimeHours.toFixed(2)}시간</span>}
-                    />
-                  ) : null}
-                  {rec.dataType ? (
-                    <Row
-                      label="데이터 구분"
-                      value={<span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${dataTypeStyle[rec.dataType] ?? "bg-slate-50 text-slate-700 border-slate-200"}`}>{rec.dataType}</span>}
-                    />
-                  ) : null}
-                  {rec.calculationBasis ? <Row label="산출 기준" value={rec.calculationBasis} /> : null}
-                  <Row label="비고" value={rec.note} />
                 </dl>
                 <div className="mt-xs flex shrink-0 items-center justify-end gap-1 border-t border-outline-variant/30 pt-xs text-[11px] font-bold text-scm-primary">
                   상세 보기 <Icon name="arrow_forward" className="text-[14px] transition-transform group-hover:translate-x-0.5" />
@@ -196,8 +188,8 @@ function DataIntegrationView({ product }: { product: Product }) {
                 <span><Icon name="local_shipping" /> 출고</span>
               </div>
               <div className="warehouse-photo-grid">
-                {markerOrder.map((id, index) => {
-                  const ratio = safetyStockRatios[product.key]?.[index] ?? 100;
+                {markerOrder.map((id) => {
+                  const ratio = getSimulationStockRatio(product.key, id);
                   const stock = getStockMeta(ratio);
                   const isActive = regionId === id;
                   return (
