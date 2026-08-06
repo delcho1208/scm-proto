@@ -29,6 +29,11 @@ export type DashboardRecommendation = {
   projectedStatus?: string;
   affectedRegions?: string[];
   projectedRegions?: Record<string, DashboardRegion>;
+  costReduction?: string;
+  feasibility?: number;
+  executionPeriod?: string;
+  supplyImpact?: string;
+  xai?: { summary: string; evidence: string[]; limitation: string };
   approvalButtonText: string;
 };
 
@@ -269,10 +274,15 @@ type TamivirScenario = {
   ai_solutions: Array<{
     id: string;
     title: string;
-    summary?: string;
-    reason: string;
-    xai_explanation: string;
-    expected_effect: string[];
+    description: string;
+    transferAmount?: number;
+    fromRegion?: string;
+    toRegion?: string;
+    costReduction?: string;
+    feasibility?: number;
+    executionPeriod?: string;
+    supplyImpact?: string;
+    xai: { summary: string; reason: string[]; constraint: string };
     approval_action: { initial_button_text: string };
     after_apply: {
       current_stock: number;
@@ -387,7 +397,7 @@ export const tamivirForecastByRegion: Record<string, TamivirForecast> = {
 export const tamivirAnnualF2aTarget = tamivirLatest.summary.f2a_target;
 
 export const tamivirDashboard: ProductDashboardScenario = {
-  date: "2026-10-01",
+  date: tamivirLatest.date,
   sceneName: tamivirLatest.scene_name,
   regions: tamivirRegions,
   totalInventory: tamivirLatest.summary.current_stock,
@@ -400,8 +410,18 @@ export const tamivirDashboard: ProductDashboardScenario = {
   },
   recommendations: tamivirLatest.ai_solutions.map((recommendation) => ({
     id: `TAMIVIR-${recommendation.id}`,
-    title: recommendation.summary ?? recommendation.title.replace(/^[①②③④⑤]\s*/, ""),
-    description: `${recommendation.reason} · 기대효과: ${recommendation.expected_effect.join(", ")} · XAI 근거: ${recommendation.xai_explanation}`,
+    title: recommendation.title.replace(/^[①②③④⑤]\s*/, ""),
+    description: `${recommendation.description}${recommendation.supplyImpact ? ` · 공급 영향: ${recommendation.supplyImpact}` : ""}`,
+    transferAmount: recommendation.transferAmount,
+    costReduction: recommendation.costReduction,
+    feasibility: recommendation.feasibility,
+    executionPeriod: recommendation.executionPeriod,
+    supplyImpact: recommendation.supplyImpact,
+    xai: {
+      summary: recommendation.xai.summary,
+      evidence: recommendation.xai.reason,
+      limitation: recommendation.xai.constraint,
+    },
     projectedTotalInventory: recommendation.after_apply.current_stock,
     projectedStatus: recommendation.after_apply.status,
     affectedRegions: recommendation.after_apply.map_monitoring.map((region) => toRegionId(region.region)),

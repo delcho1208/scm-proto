@@ -374,15 +374,17 @@ export function DashboardView({ product }: { product: Product }) {
                 },
               ]
             : undefined,
-        costReduction: recommendation.transferAmount ? "8~12%" : undefined,
-        feasibility:
+        costReduction: recommendation.costReduction ?? (recommendation.transferAmount ? "8~12%" : undefined),
+        feasibility: recommendation.feasibility ?? (
           recommendation.fromRegion && recommendation.toRegion && recommendation.transferAmount
             ? 86
-            : undefined,
-        executionPeriod: recommendation.transferAmount ? "1~2주" : undefined,
+            : undefined
+        ),
+        executionPeriod: recommendation.executionPeriod ?? (recommendation.transferAmount ? "1~2주" : undefined),
         projectedTotalInventory: recommendation.projectedTotalInventory,
         affectedRegions: recommendation.affectedRegions,
         projectedRegions: recommendation.projectedRegions,
+        xai: recommendation.xai,
       }))
     : [
         { id: "fallback-1", t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
