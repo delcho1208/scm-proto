@@ -667,10 +667,7 @@
 .timeline-range::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
-  background:
-    linear-gradient(90deg, var(--scm-primary) 0 40%, transparent 40%),
-    repeating-linear-gradient(90deg, transparent 0 5px, #faad14 5px 9px) 40% 0 / 60% 100% no-repeat,
-    #dfe1eb;
+  background: linear-gradient(90deg, var(--scm-primary) 0 40%, #faad14 40% 100%);
 }
 .timeline-range::-moz-range-track {
   height: 4px;
