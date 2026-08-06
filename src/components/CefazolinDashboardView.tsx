@@ -1045,7 +1045,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
 
         {/* Right column */}
         <div className="col-span-3 flex h-full min-h-0 min-w-0 flex-col gap-sm">
-          <div className="bento-card flex min-h-0 flex-[2] flex-col overflow-hidden bg-on-surface-variant/5 p-md">
+          <div className="bento-card flex min-h-0 flex-[3] flex-col overflow-hidden bg-on-surface-variant/5 p-md">
             <div className="mb-sm flex items-center gap-sm">
               <div className="flex h-6 w-6 items-center justify-center rounded bg-scm-primary text-white">
                 <Icon name="auto_awesome" className="text-[16px]" filled />
