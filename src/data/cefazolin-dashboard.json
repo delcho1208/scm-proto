@@ -74,7 +74,7 @@
       "transferableQuantity": 11287.058,
       "averageLeadTimeHours": 5.68,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 66,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -115,7 +115,7 @@
       "transferableQuantity": 0,
       "averageLeadTimeHours": 1.76,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 66,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -156,7 +156,7 @@
       "transferableQuantity": 0,
       "averageLeadTimeHours": 1.36,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 60,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -197,7 +197,7 @@
       "transferableQuantity": 0,
       "averageLeadTimeHours": 1.86,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 60,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -238,7 +238,7 @@
       "transferableQuantity": 0,
       "averageLeadTimeHours": 0.98,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 61,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -279,7 +279,7 @@
       "transferableQuantity": 2828,
       "averageLeadTimeHours": 2.91,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 64,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -320,7 +320,7 @@
       "transferableQuantity": 0,
       "averageLeadTimeHours": 2.76,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 63,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -361,7 +361,7 @@
       "transferableQuantity": 8459.058,
       "averageLeadTimeHours": 3.85,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 63,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -402,7 +402,7 @@
       "transferableQuantity": 0,
       "averageLeadTimeHours": 30,
       "policyRisk": {
-        "asOf": "2025-09-29",
+        "asOf": "2026-10-28",
         "score": 65,
         "grade": "높음 (High Risk)",
         "causes": [
@@ -449,7 +449,7 @@
       "unmetDemandRatePct": 5,
       "totalUnmetDemand": 284354.773,
       "shortageWeeks": 20,
-      "firstShortageWeek": "2025-08-04",
+      "firstShortageWeek": "2026-08-04",
       "maxWeeklyShortage": 42480.537,
       "minimumRegionalServiceRatePct": 60.7,
       "emergencyProcurementQuantity": 0,
@@ -461,7 +461,7 @@
       "unmetDemandRatePct": 4.92,
       "totalUnmetDemand": 279707.452,
       "shortageWeeks": 20,
-      "firstShortageWeek": "2025-08-04",
+      "firstShortageWeek": "2026-08-04",
       "maxWeeklyShortage": 42480.537,
       "minimumRegionalServiceRatePct": 65,
       "emergencyProcurementQuantity": 0,
@@ -482,7 +482,7 @@
   ],
   "monthlyFlow": [
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 570279.024,
       "approvedShipment": 570279.024,
@@ -498,7 +498,7 @@
       "operatingPhase": "Phase 1 정상기준"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 447281.216,
       "approvedShipment": 447281.216,
@@ -514,7 +514,7 @@
       "operatingPhase": "Phase 1 정상기준"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 450695.97,
       "approvedShipment": 504572.17,
@@ -530,7 +530,7 @@
       "operatingPhase": "Phase 1 정상기준 / Phase 2 위험감지·선행대응"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 449508.296,
       "approvedShipment": 451003.801,
@@ -546,7 +546,7 @@
       "operatingPhase": "Phase 2 위험감지·선행대응"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 448337.464,
       "approvedShipment": 291419.352,
@@ -562,7 +562,7 @@
       "operatingPhase": "Phase 3 공급차질"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 452724.555,
       "approvedShipment": 357309.011,
@@ -578,7 +578,7 @@
       "operatingPhase": "Phase 3 공급차질"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 516018.636,
       "approvedShipment": 402578.454,
@@ -594,7 +594,7 @@
       "operatingPhase": "Phase 3 공급차질"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 485491.856,
       "approvedShipment": 378512.436,
@@ -610,7 +610,7 @@
       "operatingPhase": "Phase 3 공급차질"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 473822.6,
       "approvedShipment": 449920.485,
@@ -626,7 +626,7 @@
       "operatingPhase": "Phase 4 공급회복"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 468783.304,
       "approvedShipment": 468548.912,
@@ -642,7 +642,7 @@
       "operatingPhase": "Phase 4 공급회복"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 468288.084,
       "approvedShipment": 468288.084,
@@ -658,7 +658,7 @@
       "operatingPhase": "Phase 5 정상화"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "scenarioId": "S3_통합대응",
       "forecastDemand": 457257.693,
       "approvedShipment": 457257.693,
@@ -676,7 +676,7 @@
   ],
   "regionalMonthly": [
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -688,7 +688,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -700,7 +700,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -712,7 +712,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -724,7 +724,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -736,7 +736,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -748,7 +748,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -760,7 +760,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-01",
+      "month": "2026-01",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -772,7 +772,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -784,7 +784,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -796,7 +796,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -808,7 +808,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -820,7 +820,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -832,7 +832,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -844,7 +844,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -856,7 +856,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-02",
+      "month": "2026-02",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -868,7 +868,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -880,7 +880,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -892,7 +892,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -904,7 +904,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -916,7 +916,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -928,7 +928,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -940,7 +940,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -952,7 +952,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-03",
+      "month": "2026-03",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -964,7 +964,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -976,7 +976,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -988,7 +988,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1000,7 +1000,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1012,7 +1012,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1024,7 +1024,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1036,7 +1036,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1048,7 +1048,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-04",
+      "month": "2026-04",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1060,7 +1060,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -1072,7 +1072,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -1084,7 +1084,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1096,7 +1096,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1108,7 +1108,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1120,7 +1120,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1132,7 +1132,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1144,7 +1144,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-05",
+      "month": "2026-05",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1156,7 +1156,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -1168,7 +1168,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -1180,7 +1180,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1192,7 +1192,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1204,7 +1204,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1216,7 +1216,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1228,7 +1228,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1240,7 +1240,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-06",
+      "month": "2026-06",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1252,7 +1252,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -1264,7 +1264,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -1276,7 +1276,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1288,7 +1288,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1300,7 +1300,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1312,7 +1312,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1324,7 +1324,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1336,7 +1336,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-07",
+      "month": "2026-07",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1348,7 +1348,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -1360,7 +1360,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -1372,7 +1372,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1384,7 +1384,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1396,7 +1396,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1408,7 +1408,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1420,7 +1420,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1432,7 +1432,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-08",
+      "month": "2026-08",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1444,7 +1444,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -1456,7 +1456,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -1468,7 +1468,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1480,7 +1480,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1492,7 +1492,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1504,7 +1504,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1516,7 +1516,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1528,7 +1528,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-09",
+      "month": "2026-09",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1540,7 +1540,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -1552,7 +1552,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -1564,7 +1564,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1576,7 +1576,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1588,7 +1588,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1600,7 +1600,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1612,7 +1612,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1624,7 +1624,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-10",
+      "month": "2026-10",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1636,7 +1636,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -1648,7 +1648,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -1660,7 +1660,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1672,7 +1672,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1684,7 +1684,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1696,7 +1696,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1708,7 +1708,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1720,7 +1720,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-11",
+      "month": "2026-11",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1732,7 +1732,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "regionId": "Seoul",
       "regionCode": "Zone1",
       "regionName": "서울권",
@@ -1744,7 +1744,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "regionId": "Gyeonggi",
       "regionCode": "Zone2",
       "regionName": "경기인천수도권",
@@ -1756,7 +1756,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "regionId": "Gangwon",
       "regionCode": "Zone3",
       "regionName": "강원권",
@@ -1768,7 +1768,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "regionId": "Chungcheong",
       "regionCode": "Zone4",
       "regionName": "대전세종충청권",
@@ -1780,7 +1780,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "regionId": "Honam",
       "regionCode": "Zone5",
       "regionName": "광주전북전남권",
@@ -1792,7 +1792,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "regionId": "Daegu",
       "regionCode": "Zone6",
       "regionName": "대구경북권",
@@ -1804,7 +1804,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "regionId": "Busan",
       "regionCode": "Zone7",
       "regionName": "부산울산경남권",
@@ -1816,7 +1816,7 @@
       "dataType": "Option C 보정반영"
     },
     {
-      "month": "2025-12",
+      "month": "2026-12",
       "regionId": "Jeju",
       "regionCode": "Zone8",
       "regionName": "제주권",
@@ -1840,7 +1840,7 @@
       "status": "동기화 완료",
       "dataType": "ERP 확정공급 배분",
       "calculationBasis": "02_ERP 확정공급량 × 09월 권역수요 비중 26.6055%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "서울권 세파졸린 우선 공급배분 승인 · EVT-003 부분회복 반영 · 공급이행률 79.0%"
     },
     {
@@ -1854,7 +1854,7 @@
       "status": "동기화 완료",
       "dataType": "MES 승인생산 배분",
       "calculationBasis": "04_MES 사용가능수량 × 09월 권역수요 비중 26.6055%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "서울권 세파졸린 우선 출하배분 승인 · LOT CEFA-39-L1"
     },
     {
@@ -1868,7 +1868,7 @@
       "status": "동기화 완료",
       "dataType": "WMS 재고 원천",
       "calculationBasis": "05_WMS 권역 현재고량",
-      "updatedAt": "2025-01-01",
+      "updatedAt": "2026-10-28",
       "note": "서울권 세파졸린 긴급 출고 피킹 완료"
     },
     {
@@ -1882,7 +1882,7 @@
       "status": "동기화 완료",
       "dataType": "ERP 확정공급 배분",
       "calculationBasis": "02_ERP 확정공급량 × 09월 권역수요 비중 33.4677%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "경기인천수도권 세파졸린 우선 공급배분 승인 · EVT-003 부분회복 반영 · 공급이행률 79.0%"
     },
     {
@@ -1896,7 +1896,7 @@
       "status": "동기화 완료",
       "dataType": "MES 승인생산 배분",
       "calculationBasis": "04_MES 사용가능수량 × 09월 권역수요 비중 33.4677%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "경기인천수도권 세파졸린 우선 출하배분 승인 · LOT CEFA-39-L1"
     },
     {
@@ -1910,7 +1910,7 @@
       "status": "동기화 완료",
       "dataType": "WMS 재고 원천",
       "calculationBasis": "05_WMS 권역 현재고량",
-      "updatedAt": "2025-01-01",
+      "updatedAt": "2026-10-28",
       "note": "경기인천수도권 세파졸린 긴급 출고 피킹 완료"
     },
     {
@@ -1924,7 +1924,7 @@
       "status": "동기화 완료",
       "dataType": "ERP 확정공급 배분",
       "calculationBasis": "02_ERP 확정공급량 × 09월 권역수요 비중 1.8484%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "강원권 세파졸린 정규 공급배분 승인 · EVT-003 부분회복 반영 · 공급이행률 79.0%"
     },
     {
@@ -1938,7 +1938,7 @@
       "status": "동기화 완료",
       "dataType": "MES 승인생산 배분",
       "calculationBasis": "04_MES 사용가능수량 × 09월 권역수요 비중 1.8484%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "강원권 세파졸린 정규 출하배분 승인 · LOT CEFA-39-L1"
     },
     {
@@ -1952,7 +1952,7 @@
       "status": "동기화 완료",
       "dataType": "WMS 재고 원천",
       "calculationBasis": "05_WMS 권역 현재고량",
-      "updatedAt": "2025-01-01",
+      "updatedAt": "2026-10-28",
       "note": "강원권 세파졸린 안전재고 보충 입고 검수 완료"
     },
     {
@@ -1966,7 +1966,7 @@
       "status": "동기화 완료",
       "dataType": "ERP 확정공급 배분",
       "calculationBasis": "02_ERP 확정공급량 × 09월 권역수요 비중 8.1538%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "대전세종충청권 세파졸린 정규 공급배분 승인 · EVT-003 부분회복 반영 · 공급이행률 79.0%"
     },
     {
@@ -1980,7 +1980,7 @@
       "status": "동기화 완료",
       "dataType": "MES 승인생산 배분",
       "calculationBasis": "04_MES 사용가능수량 × 09월 권역수요 비중 8.1538%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "대전세종충청권 세파졸린 정규 출하배분 승인 · LOT CEFA-39-L1"
     },
     {
@@ -1994,7 +1994,7 @@
       "status": "동기화 완료",
       "dataType": "WMS 재고 원천",
       "calculationBasis": "05_WMS 권역 현재고량",
-      "updatedAt": "2025-01-01",
+      "updatedAt": "2026-10-28",
       "note": "대전세종충청권 세파졸린 안전재고 보충 입고 검수 완료"
     },
     {
@@ -2008,7 +2008,7 @@
       "status": "동기화 완료",
       "dataType": "ERP 확정공급 배분",
       "calculationBasis": "02_ERP 확정공급량 × 09월 권역수요 비중 9.5274%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "광주전북전남권 세파졸린 차기 발주량 조정 검토 · EVT-003 부분회복 반영 · 공급이행률 79.0%"
     },
     {
@@ -2022,7 +2022,7 @@
       "status": "동기화 완료",
       "dataType": "MES 승인생산 배분",
       "calculationBasis": "04_MES 사용가능수량 × 09월 권역수요 비중 9.5274%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "광주전북전남권 세파졸린 권역간 재배분 대기 · LOT CEFA-39-L1"
     },
     {
@@ -2036,7 +2036,7 @@
       "status": "동기화 완료",
       "dataType": "WMS 재고 원천",
       "calculationBasis": "05_WMS 권역 현재고량",
-      "updatedAt": "2025-01-01",
+      "updatedAt": "2026-10-28",
       "note": "광주전북전남권 세파졸린 권역간 재고 이송 피킹 예정"
     },
     {
@@ -2050,7 +2050,7 @@
       "status": "동기화 완료",
       "dataType": "ERP 확정공급 배분",
       "calculationBasis": "02_ERP 확정공급량 × 09월 권역수요 비중 4.7920%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "대구경북권 세파졸린 우선 공급배분 승인 · EVT-003 부분회복 반영 · 공급이행률 79.0%"
     },
     {
@@ -2064,7 +2064,7 @@
       "status": "동기화 완료",
       "dataType": "MES 승인생산 배분",
       "calculationBasis": "04_MES 사용가능수량 × 09월 권역수요 비중 4.7920%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "대구경북권 세파졸린 우선 출하배분 승인 · LOT CEFA-39-L1"
     },
     {
@@ -2078,7 +2078,7 @@
       "status": "동기화 완료",
       "dataType": "WMS 재고 원천",
       "calculationBasis": "05_WMS 권역 현재고량",
-      "updatedAt": "2025-01-01",
+      "updatedAt": "2026-10-28",
       "note": "대구경북권 세파졸린 긴급 출고 피킹 완료"
     },
     {
@@ -2092,7 +2092,7 @@
       "status": "동기화 완료",
       "dataType": "ERP 확정공급 배분",
       "calculationBasis": "02_ERP 확정공급량 × 09월 권역수요 비중 14.0105%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "부산울산경남권 세파졸린 차기 발주량 조정 검토 · EVT-003 부분회복 반영 · 공급이행률 79.0%"
     },
     {
@@ -2106,7 +2106,7 @@
       "status": "동기화 완료",
       "dataType": "MES 승인생산 배분",
       "calculationBasis": "04_MES 사용가능수량 × 09월 권역수요 비중 14.0105%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "부산울산경남권 세파졸린 권역간 재배분 대기 · LOT CEFA-39-L1"
     },
     {
@@ -2120,7 +2120,7 @@
       "status": "동기화 완료",
       "dataType": "WMS 재고 원천",
       "calculationBasis": "05_WMS 권역 현재고량",
-      "updatedAt": "2025-01-01",
+      "updatedAt": "2026-10-28",
       "note": "부산울산경남권 세파졸린 권역간 재고 이송 피킹 예정"
     },
     {
@@ -2134,7 +2134,7 @@
       "status": "동기화 완료",
       "dataType": "ERP 확정공급 배분",
       "calculationBasis": "02_ERP 확정공급량 × 09월 권역수요 비중 1.5947%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "제주권 세파졸린 정규 공급배분 승인 · EVT-003 부분회복 반영 · 공급이행률 79.0%"
     },
     {
@@ -2148,7 +2148,7 @@
       "status": "동기화 완료",
       "dataType": "MES 승인생산 배분",
       "calculationBasis": "04_MES 사용가능수량 × 09월 권역수요 비중 1.5947%",
-      "updatedAt": "2025-09-29",
+      "updatedAt": "2026-10-28",
       "note": "제주권 세파졸린 정규 출하배분 승인 · LOT CEFA-39-L1"
     },
     {
@@ -2162,7 +2162,7 @@
       "status": "동기화 완료",
       "dataType": "WMS 재고 원천",
       "calculationBasis": "05_WMS 권역 현재고량",
-      "updatedAt": "2025-01-01",
+      "updatedAt": "2026-10-28",
       "note": "제주권 세파졸린 안전재고 보충 입고 검수 완료"
     }
   ],
@@ -2174,8 +2174,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 4191517.985,
       "totalProcurementCostKrw": 29340625895,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S0_정상",
@@ -2184,8 +2184,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 1197576.567,
       "totalProcurementCostKrw": 9389000285.28,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S0_정상",
@@ -2194,8 +2194,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 598788.283,
       "totalProcurementCostKrw": 4945991217.58,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S1_무대응",
@@ -2204,8 +2204,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 3285045.231,
       "totalProcurementCostKrw": 22995316618.4,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S1_무대응",
@@ -2214,8 +2214,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 1197576.567,
       "totalProcurementCostKrw": 9389000285.28,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S1_무대응",
@@ -2224,8 +2224,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 598788.283,
       "totalProcurementCostKrw": 4945991217.58,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S2_내부대응",
@@ -2234,8 +2234,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 3285045.231,
       "totalProcurementCostKrw": 22995316618.4,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S2_내부대응",
@@ -2244,8 +2244,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 1197576.567,
       "totalProcurementCostKrw": 9389000285.28,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S2_내부대응",
@@ -2254,8 +2254,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 598788.283,
       "totalProcurementCostKrw": 4945991217.58,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S3_통합대응",
@@ -2264,8 +2264,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 3285045.231,
       "totalProcurementCostKrw": 22995316618.4,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S3_통합대응",
@@ -2274,8 +2274,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 1197576.567,
       "totalProcurementCostKrw": 9389000285.28,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S3_통합대응",
@@ -2284,8 +2284,8 @@
       "receiptCount": 24,
       "totalReceiptQuantity": 276052.462,
       "totalProcurementCostKrw": 2337391405.53,
-      "firstReceiptWeek": "2025-06-02",
-      "lastReceiptWeek": "2025-11-10"
+      "firstReceiptWeek": "2026-06-02",
+      "lastReceiptWeek": "2026-11-10"
     },
     {
       "scenarioId": "S3_통합대응",
@@ -2294,8 +2294,8 @@
       "receiptCount": 50,
       "totalReceiptQuantity": 598788.283,
       "totalProcurementCostKrw": 4945991217.58,
-      "firstReceiptWeek": "2025-01-06",
-      "lastReceiptWeek": "2025-12-15"
+      "firstReceiptWeek": "2026-01-06",
+      "lastReceiptWeek": "2026-12-15"
     },
     {
       "scenarioId": "S3_통합대응",
@@ -2304,8 +2304,8 @@
       "receiptCount": 24,
       "totalReceiptQuantity": 138026.231,
       "totalProcurementCostKrw": 1276908267.84,
-      "firstReceiptWeek": "2025-06-16",
-      "lastReceiptWeek": "2025-11-24"
+      "firstReceiptWeek": "2026-06-16",
+      "lastReceiptWeek": "2026-11-24"
     }
   ],
   "modelValidation": {

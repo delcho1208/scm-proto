@@ -753,7 +753,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                 >
                   {cefazolinData
                     ? cefazolinData.regionalMonthly[regionId].map((metric) => (
-                        <span key={metric.month}>{metric.month.replace("2025-", "25.")}</span>
+                        <span key={metric.month}>{metric.month.replace("2026-", "26.")}</span>
                       ))
                     : timelineKeys.map((key, index) => (
                         <span
