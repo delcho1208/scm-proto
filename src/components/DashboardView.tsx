@@ -312,12 +312,10 @@ export function DashboardView({ product }: { product: Product }) {
   const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
   const nationalRisk = riskStyles[nationalRiskLevel];
-  const forecastRiskLevel: RiskLevel = lipilouGraphRegion
-    ? lipilouGraphRegion.stock_status === "부족"
-      ? "danger"
-      : lipilouGraphRegion.stock_status === "과잉"
-        ? "warning"
-        : "safe"
+  const forecastRiskLevel: RiskLevel = product.key === "리피로우"
+    ? regionId === "National"
+      ? nationalRiskLevel
+      : regionRiskLevel
     : nationalRiskLevel;
   const forecastRisk = riskStyles[forecastRiskLevel];
   const forecastRiskText = forecastRiskLevel === "danger" ? "부족" : forecastRiskLevel === "warning" ? "과잉" : "적정";
