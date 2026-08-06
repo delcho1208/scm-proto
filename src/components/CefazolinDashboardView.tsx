@@ -163,30 +163,6 @@ type AiRecommendation = {
   };
 };
 
-const productApiMeta: Record<
-  string,
-  { title: string; description: string; endpoint: string; icon: string }
-> = {
-  리피로우: {
-    title: "건강검진 데이터 API",
-    description: "이상지질혈증 검사·처방 수요 신호 연동 영역",
-    endpoint: "/api/health-screening",
-    icon: "health_metrics",
-  },
-  타미비어: {
-    title: "감염병 환자 API",
-    description: "지역별 독감·호흡기 감염 환자 추이 연동 영역",
-    endpoint: "/api/infectious-disease",
-    icon: "coronavirus",
-  },
-  세파졸린: {
-    title: "원료 중단 데이터 스냅샷",
-    description: "합성 원료 공급 중단·납기 지연 시나리오 데이터",
-    endpoint: "정적 시나리오 데이터",
-    icon: "factory",
-  },
-};
-
 function getMarkerCenter(regionId: string) {
   const box = regions[regionId]?.box;
   if (!box) return null;
@@ -559,7 +535,6 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
     const checkKey = `${product.key}-${index}`;
     return (recommendationChecks[checkKey] ?? true) ? (recommendation.routes ?? []) : [];
   });
-  const productApi = productApiMeta[product.key] ?? productApiMeta.리피로우;
 
   const selectedWorkflowStep =
     cefazolinWorkflowSteps[selectedWorkflowStepIndex] ?? cefazolinWorkflowSteps[0];
@@ -1235,34 +1210,6 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                 ? "S1·S2·S3 비교 및 실행안 검토"
                 : (scenario?.recommendations[0]?.approvalButtonText ?? "실행 계획 적용")}
             </button>
-          </div>
-
-          <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
-            <div className="flex items-start gap-sm">
-              <div className="api-placeholder-icon">
-                <Icon name={productApi.icon} className="text-[18px]" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-xs">
-                  <h4 className="truncate text-sm font-bold text-on-surface">{productApi.title}</h4>
-                  <span className="api-ready-badge">
-                    {cefazolinData
-                      ? "합성 PoC"
-                      : scenario?.externalSignal
-                        ? "데이터 연결"
-                        : "연결 대기"}
-                  </span>
-                </div>
-                <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
-                  {scenario?.externalSignal
-                    ? `${scenario.externalSignal.title} · ${scenario.externalSignal.value} · ${scenario.externalSignal.detail}`
-                    : productApi.description}
-                </p>
-                <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
-                  {productApi.endpoint}
-                </code>
-              </div>
-            </div>
           </div>
 
           <CefazolinNewsApiCard productName={product.name} />
