@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { brandLogo, products, userAvatar, type Product } from "@/data/scm";
 import { useSelectedProductKey, setSelectedProductKey } from "@/data/product-store";
+import { cefazolinDashboard } from "@/data/dashboard-scenario";
 
 export function Icon({
   name,
@@ -26,6 +27,8 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const product = products.find((p) => p.key === productKey)!;
+  const dataDate =
+    product.key === cefazolinDashboard.productKey ? cefazolinDashboard.date : "2025-07-15";
   const filteredProducts = products.filter(
     (p) => p.name.includes(search) || p.subtitle.includes(search),
   );
@@ -39,7 +42,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
     <div className="scm-root text-body-md">
       {/* Main */}
       <main className="flex min-h-screen flex-1 flex-col">
-        <header className="fixed left-0 right-0 top-0 z-[200] flex h-16 w-full min-w-[1440px] items-center justify-between border-b border-outline-variant bg-surface-container px-xl">
+        <header className="fixed left-0 right-0 top-0 z-40 flex h-16 w-full min-w-[1440px] items-center justify-between border-b border-outline-variant bg-surface-container px-xl">
           <div className="flex min-w-0 items-center gap-lg">
             <Link to="/simulation" className="flex shrink-0 items-center gap-xs">
               <img
@@ -57,6 +60,9 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
               </div>
             </Link>
             <span className="block h-7 w-px bg-outline-variant" />
+            <h2 className="font-display text-headline-sm font-black uppercase tracking-tight text-scm-primary">
+              Digital Twin SCM Portal
+            </h2>
             <nav className="flex items-center gap-lg">
               {topNav.map((item) => (
                 <Link
@@ -86,7 +92,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
                   <Icon name="expand_more" className="ml-auto text-[20px] text-outline" />
                 </button>
                 {dropdownOpen && (
-                  <div className="absolute left-0 top-full z-[210] mt-2 w-72 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl">
+                  <div className="absolute left-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl">
                     <div className="border-b border-outline-variant bg-surface-container-lowest p-3">
                       <div className="relative">
                         <Icon
@@ -117,10 +123,15 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
                           <Icon name={p.icon} className="text-[20px] text-scm-primary" />
                           <div className="flex flex-col">
                             <span className="text-sm font-bold text-on-surface">{p.name}</span>
-                            <span className="text-[10px] text-on-surface-variant">{p.subtitle}</span>
+                            <span className="text-[10px] text-on-surface-variant">
+                              {p.subtitle}
+                            </span>
                           </div>
                           {p.key === productKey && (
-                            <Icon name="check_circle" className="ml-auto text-[20px] text-scm-primary" />
+                            <Icon
+                              name="check_circle"
+                              className="ml-auto text-[20px] text-scm-primary"
+                            />
                           )}
                         </button>
                       ))}
@@ -133,7 +144,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
           <div className="flex items-center gap-md">
             <div className="flex items-center gap-xs text-on-surface-variant">
               <Icon name="schedule" />
-              <span className="font-data text-data-sm">2026-10-28</span>
+              <span className="font-data text-data-sm">{dataDate}</span>
             </div>
             <button className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant">
               <Icon name="notifications" />
@@ -151,7 +162,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
 
         <footer className="fixed bottom-0 left-0 right-0 z-40 flex w-full min-w-[1440px] items-center justify-between border-t border-outline-variant bg-surface-container-lowest px-xl py-xs">
           <p className="text-[10px] font-bold text-on-surface-variant">
-            © 2026 SCM Logistics Intelligence. LG CNS x Chong Kun Dang Integrated System.
+            © 2025 SCM Logistics Intelligence. LG CNS x Chong Kun Dang Integrated System.
           </p>
           <div className="flex gap-lg">
             {["Privacy Policy", "Terms of Service", "API Documentation"].map((l) => (

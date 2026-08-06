@@ -1,7 +1,10 @@
 import { useSyncExternalStore } from "react";
 import { products } from "@/data/scm";
 
-let selectedKey = products[0].key;
+const defaultProductKey =
+  products.find((product) => product.key === "세파졸린")?.key ?? products[0].key;
+
+let selectedKey = defaultProductKey;
 const listeners = new Set<() => void>();
 
 function subscribe(cb: () => void) {
@@ -19,6 +22,6 @@ export function useSelectedProductKey() {
   return useSyncExternalStore(
     subscribe,
     () => selectedKey,
-    () => products[0].key,
+    () => defaultProductKey,
   );
 }
