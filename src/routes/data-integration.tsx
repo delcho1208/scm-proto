@@ -188,22 +188,14 @@ function DataIntegrationView({ product }: { product: Product }) {
             </div>
           </div>
           {viewMode === "twin" ? (
-            <div className="twin-section min-h-0 flex-1 overflow-auto">
-              <div className="warehouse-frame" aria-hidden="true">
-                <span className="frame-roof-left" />
-                <span className="frame-roof-right" />
-                <span className="frame-beam" />
-                <span className="frame-column frame-column-left" />
-                <span className="frame-column frame-column-center" />
-                <span className="frame-column frame-column-right" />
-              </div>
+            <div className="warehouse-photo-stage min-h-0 flex-1 overflow-hidden">
               <div className="warehouse-zone-tags" aria-label="창고 작업 구역">
                 <span><Icon name="move_to_inbox" /> 입고</span>
                 <span><Icon name="inventory_2" /> 보관</span>
                 <span><Icon name="shopping_cart" /> 피킹</span>
                 <span><Icon name="local_shipping" /> 출고</span>
               </div>
-              <div className="twin-grid">
+              <div className="warehouse-photo-grid">
                 {markerOrder.map((id, index) => {
                   const ratio = safetyStockRatios[product.key]?.[index] ?? 100;
                   const stock = getStockMeta(ratio);
@@ -213,28 +205,25 @@ function DataIntegrationView({ product }: { product: Product }) {
                       key={id}
                       type="button"
                       data-status={stock.status}
-                      className={`twin-block ${isActive ? "active" : ""}`}
+                      className={`warehouse-photo-zone ${isActive ? "active" : ""}`}
                       onClick={() => selectTwinRegion(id)}
                       aria-label={`${regions[id].name} 시스템 상세 보기`}
                     >
-                      <span className="rack-info-card">
-                        <span>{regions[id].name}</span>
-                        <strong>안전재고 {ratio}%</strong>
+                      <span className="warehouse-photo-card">
+                        <span><i />{regions[id].name}</span>
+                        <strong>안전재고 <b>{ratio}%</b></strong>
                       </span>
-                      <span className="cube" aria-hidden="true">
-                        <span className="cube-face cube-top" />
-                        <span className="cube-face cube-front">
-                          <i /><i /><i />
-                        </span>
-                        <span className="cube-face cube-side"><i /><i /><i /></span>
-                      </span>
-                      <span className="block-label">
-                        <span className="status-dot" />
-                        <span>{stock.label}</span>
-                      </span>
+                      <span className="warehouse-photo-outline" aria-hidden="true" />
+                      <span className="warehouse-photo-status">{stock.label}</span>
                     </button>
                   );
                 })}
+              </div>
+              <div className="warehouse-photo-legend">
+                <b>안전재고 비율 범례</b>
+                <span className="danger"><i /> 위험 (0~70%)</span>
+                <span className="warning"><i /> 주의 (70~100%)</span>
+                <span className="safe"><i /> 정상 (100% 이상)</span>
               </div>
             </div>
           ) : (
