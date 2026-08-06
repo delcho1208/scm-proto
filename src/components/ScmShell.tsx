@@ -42,35 +42,23 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
         <header className="fixed left-0 right-0 top-0 z-[200] flex h-16 w-full min-w-[1440px] items-center justify-between border-b border-outline-variant bg-surface-container px-xl">
           <div className="flex min-w-0 items-center gap-lg">
             <Link to="/simulation" className="flex shrink-0 items-center gap-xs">
-              {pathname === "/data-integration" ? (
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-700 text-white shadow-md">
-                  <Icon name="hub" className="text-[23px]" />
-                </span>
-              ) : (
-                <img alt="Chong Kun Dang Logo" className="h-9 w-auto rounded-lg object-contain" src={brandLogo} />
-              )}
+              <img
+                alt="Chong Kun Dang Logo"
+                className="h-9 w-auto rounded-lg object-contain"
+                src={brandLogo}
+              />
               <div className="block">
                 <h1 className="font-display text-sm font-bold leading-tight text-on-surface">
-                  {pathname === "/data-integration" ? "제약 SCM 디지털 트윈" : "SCM Dashboard"}
+                  SCM Dashboard
                 </h1>
                 <p className="text-[9px] font-bold uppercase tracking-wide text-on-surface-variant">
-                  {pathname === "/data-integration" ? "Warehouse Control Center" : "Logistics Intelligence"}
+                  Logistics Intelligence
                 </p>
               </div>
             </Link>
             <span className="block h-7 w-px bg-outline-variant" />
             <nav className="flex items-center gap-lg">
-              {pathname === "/data-integration" ? (
-                ["홈", "대시보드", "재고 현황", "수요 예측", "공급 위험", "시뮬레이션", "알림"].map((label) => (
-                  <button
-                    key={label}
-                    type="button"
-                    className={`relative whitespace-nowrap py-5 text-[13px] font-bold transition-colors ${label === "재고 현황" ? "text-blue-600 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-blue-600" : "text-slate-500 hover:text-blue-600"}`}
-                  >
-                    {label}
-                  </button>
-                ))
-              ) : topNav.map((item) => (
+              {topNav.map((item) => (
                 <Link
                   key={item.to}
                   to={item.to}
@@ -143,17 +131,6 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
             </nav>
           </div>
           <div className="flex items-center gap-md">
-            {pathname === "/data-integration" ? (
-              <>
-                {[["notifications", "알림"], ["help", "도움말"], ["settings", "설정"]].map(([icon, label]) => (
-                  <button key={icon} type="button" aria-label={label} className="rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-blue-600">
-                    <Icon name={icon} className="text-[21px]" />
-                  </button>
-                ))}
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-800 text-[10px] font-black text-white shadow">SCM</span>
-              </>
-            ) : (
-              <>
             <div className="flex items-center gap-xs text-on-surface-variant">
               <Icon name="schedule" />
               <span className="font-data text-data-sm">2026-10-28</span>
@@ -167,8 +144,6 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
             <div className="h-8 w-8 overflow-hidden rounded-full bg-outline-variant">
               <img className="h-full w-full object-cover" src={userAvatar} alt="User avatar" />
             </div>
-              </>
-            )}
           </div>
         </header>
 

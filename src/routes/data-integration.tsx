@@ -1,53 +1,60 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useRef, useState } from "react";
 import { ScmShell, Icon } from "@/components/ScmShell";
 import { getCefazolinIntegrationRecords } from "@/data/cefazolin-dashboard";
 import { getLipilouIntegrationRecords } from "@/data/lipilou-integration";
 import { getTamivirIntegrationRecords } from "@/data/tamivir-integration";
-import { getIntegrationRecords, markerOrder, regions, type Product, type SystemKey } from "@/data/scm";
+import {
+  getIntegrationRecords,
+  markerOrder,
+  regions,
+  systemColumns,
+  type Product,
+  type SystemKey,
+} from "@/data/scm";
 
 export const Route = createFileRoute("/data-integration")({
   head: () => ({
     meta: [
-      { title: "실시간 창고 관제 — 제약 SCM 디지털 트윈" },
-      { name: "description", content: "8개 권역의 ERP·MES·WMS 연동과 안전재고를 실시간으로 관제합니다." },
+      { title: "데이터 통합 — Digital Twin SCM Portal" },
+      {
+        name: "description",
+        content:
+          "권역별·의약품별 ERP, MES, WMS 연동 데이터를 한 화면에서 조회하는 SCM 데이터 통합 뷰입니다.",
+      },
+      { property: "og:title", content: "데이터 통합 — Digital Twin SCM Portal" },
+      {
+        property: "og:description",
+        content: "권역별 의약품의 ERP · MES · WMS 연동 현황을 통합 조회합니다.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: () => <ScmShell>{(product) => <DataIntegrationView product={product} />}</ScmShell>,
 });
 
-type StockStatus = "danger" | "warning" | "safe";
-type WarehouseZone = {
-  id: string;
-  name: string;
-  safetyStockRatio: number;
-  inventory: number;
-  leadTime: number;
-  lastUpdated: string;
+const statusStyle: Record<string, string> = {
+  "동기화 완료": "bg-green-50 text-[#52c41a] border-[#52c41a]/20",
+  처리중: "bg-orange-50 text-[#faad14] border-[#faad14]/20",
+  지연: "bg-error-container/30 text-error border-error/20",
 };
 
-const systemCards: Array<{
-  key: SystemKey;
-  color: string;
-  description: string;
-  count: string;
-  icon: string;
-}> = [
-  { key: "ERP", color: "blue", description: "주문, 생산계획", count: "1,245", icon: "account_tree" },
-  { key: "MES", color: "green", description: "생산실적, 재고", count: "3,578", icon: "precision_manufacturing" },
-  { key: "WMS", color: "orange", description: "입출고, 재고위치", count: "8,923", icon: "warehouse" },
-];
-
-const baseRatios: Record<string, number[]> = {
-  세파졸린: [58, 82, 105, 110, 70, 125, 130, 115],
-  리피로우: [118, 106, 92, 101, 84, 112, 96, 68],
-  타미비어: [245, 182, 94, 108, 97, 102, 128, 88],
+const dataTypeStyle: Record<string, string> = {
+  "ERP 확정공급 배분": "bg-blue-50 text-blue-700 border-blue-200",
+  "MES 생산·품질 실적": "bg-violet-50 text-violet-700 border-violet-200",
+  "WMS 재고·출하 실적": "bg-amber-50 text-amber-700 border-amber-200",
+  "ERP 원료·구매 실적": "bg-blue-50 text-blue-700 border-blue-200",
+  "WMS 일별 재고 실적": "bg-amber-50 text-amber-700 border-amber-200",
 };
 
-function getStockMeta(ratio: number): { status: StockStatus; label: string; color: string } {
-  if (ratio < 70) return { status: "danger", label: "위험", color: "#dc2626" };
-  if (ratio < 100) return { status: "warning", label: "주의", color: "#eab308" };
-  return { status: "safe", label: "정상", color: "#16a34a" };
+type TwinStatus = "safe" | "warning" | "danger";
+
+function getTwinStatus(records: ReturnType<typeof getIntegrationRecords>): TwinStatus {
+  const delayedCount = records.filter((record) => record.status === "지연").length;
+  if (delayedCount >= 2) return "danger";
+  if (delayedCount === 1) return "warning";
+  return "safe";
 }
 
 function getProductIntegrationRecords(regionId: string, productKey: string) {
@@ -57,228 +64,294 @@ function getProductIntegrationRecords(regionId: string, productKey: string) {
   return getIntegrationRecords(regionId, productKey);
 }
 
-function createZones(product: Product, time: Date): WarehouseZone[] {
-  const ratios = baseRatios[product.key] ?? baseRatios.세파졸린;
-  return markerOrder.map((id, index) => {
-    const records = getProductIntegrationRecords(id, product.key);
-    const rawQty = Number((records.find((record) => record.system === "WMS")?.qty ?? "0").replaceAll(",", ""));
-    return {
-      id,
-      name: regions[id].name.replace("인천", "·인천").replace("울산", "·울산").replace("경남", "·경남"),
-      safetyStockRatio: ratios[index],
-      inventory: rawQty || 8_400 + index * 1_270,
-      leadTime: Number((18 + index * 1.7).toFixed(1)),
-      lastUpdated: time.toLocaleTimeString("ko-KR", { hour12: false }),
-    };
-  });
-}
-
 function DataIntegrationView({ product }: { product: Product }) {
-  const [now, setNow] = useState(() => new Date());
   const [regionId, setRegionId] = useState("Seoul");
-  const [viewMode, setViewMode] = useState<"3d" | "2d" | "table">("3d");
-  const [drawer, setDrawer] = useState<{ type: "zone" | "system"; id: string } | null>(null);
-  const [refreshPulse, setRefreshPulse] = useState(0);
+  const [viewMode, setViewMode] = useState<"twin" | "table">("twin");
+  const [selectedSystem, setSelectedSystem] = useState<SystemKey | null>(null);
+  const detailSectionRef = useRef<HTMLDivElement>(null);
+  const region = regions[regionId];
+  const records = getProductIntegrationRecords(regionId, product.key);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const zones = useMemo(() => createZones(product, now), [product, refreshPulse, now.getSeconds()]);
-  const activeZone = zones.find((zone) => zone.id === regionId) ?? zones[0];
-
-  const openZone = (id: string) => {
+  const selectTwinRegion = (id: string) => {
     setRegionId(id);
-    setDrawer({ type: "zone", id });
+    window.requestAnimationFrame(() => {
+      detailSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   return (
-    <div className="warehouse-page min-h-screen flex-1 bg-[#f8fafc] px-6 pb-10 pt-20 text-slate-900">
-      <header className="mx-auto flex max-w-[1760px] items-end justify-between gap-6 py-6">
-        <div>
-          <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" /> Live warehouse control
+    <div className="dashboard-fixed-layout flex-1 bg-surface px-lg pb-16 pt-16">
+      <div className="flex w-full flex-row items-end justify-between gap-md py-lg text-left">
+        <div className="w-full text-left">
+          <h3 className="mb-xs font-display text-headline-md text-on-surface">
+            데이터 통합 · {region.name} / {product.name}
+          </h3>
+          <p className="text-on-surface-variant">
+            권역별 의약품의 ERP · MES · WMS 시스템 연동 데이터를 확인합니다.
           </p>
-          <h1 className="text-3xl font-black tracking-tight">데이터 통합 · {activeZone.name} / {product.name}</h1>
-          <p className="mt-2 text-sm text-slate-500">실시간 시스템 연동 현황 및 8개 권역 안전재고 모니터링</p>
         </div>
-        <div className="flex items-center gap-3">
-          <time className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-mono text-sm font-bold tabular-nums shadow-sm">
-            {now.toLocaleString("sv-SE").replace("T", " ")}
-          </time>
-          <button
-            type="button"
-            onClick={() => { setNow(new Date()); setRefreshPulse((value) => value + 1); }}
-            className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-700 active:scale-95"
-          >
-            <Icon name="refresh" className="text-[18px]" /> 새로고침
-          </button>
-        </div>
-      </header>
+      </div>
 
-      <main className="mx-auto grid max-w-[1760px] grid-cols-[310px_minmax(0,1fr)] gap-6">
-        <aside className="flex flex-col">
-          <div className="mb-4">
-            <h2 className="text-lg font-black">시스템 데이터 흐름</h2>
-            <p className="mt-1 text-xs text-slate-500">End-to-end integration pipeline</p>
-          </div>
-          {systemCards.map((system, index) => (
-            <div key={system.key} className="contents">
-              <SystemFlowCard
-                {...system}
-                time={now}
-                onClick={() => setDrawer({ type: "system", id: system.key })}
-              />
-              {index < systemCards.length - 1 ? (
-                <div className="warehouse-flow-connector" aria-hidden="true">
-                  <span><Icon name="check" className="text-[12px]" /></span>
-                  <Icon name="south" className="text-[18px]" />
+      <div className="grid h-[650px] grid-cols-12 grid-rows-[minmax(0,650px)] items-start gap-lg">
+        {/* System cards */}
+        <div ref={detailSectionRef} className="col-span-4 flex h-full min-h-0 scroll-mt-20 flex-col gap-sm">
+          {records.map((rec) => {
+            const meta = systemColumns[rec.system as SystemKey];
+            return (
+              <div
+                key={rec.system}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedSystem(rec.system as SystemKey)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedSystem(rec.system as SystemKey);
+                  }
+                }}
+                className="bento-card group flex min-h-0 flex-1 cursor-pointer flex-col overflow-hidden p-sm transition hover:border-scm-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-scm-primary"
+              >
+                <div className="mb-xs flex shrink-0 items-start gap-sm border-b border-outline-variant/40 pb-xs">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
+                    <Icon name={meta.icon} className="text-[20px]" />
+                  </div>
+                  <div>
+                    <h4 className="font-display text-[16px] font-bold leading-tight text-on-surface">{meta.title}</h4>
+                    <p className="mt-0.5 text-[10px] leading-tight text-on-surface-variant">{meta.desc}</p>
+                  </div>
                 </div>
-              ) : null}
-            </div>
-          ))}
-          <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-            <div className="flex items-center gap-2 text-sm font-black text-blue-700">
-              <Icon name="verified" className="text-[18px]" /> 데이터 무결성 99.8%
-            </div>
-            <p className="mt-2 text-xs leading-5 text-blue-700/70">3개 시스템의 마지막 스냅샷이 정상 검증되었습니다.</p>
-          </div>
-        </aside>
+                <dl className="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain pr-1 text-[12px]">
+                  <Row label="문서번호" value={<span className="font-data">{rec.docNo}</span>} />
+                  <Row
+                    label="연동 상태"
+                    value={
+                      <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${statusStyle[rec.status]}`}>
+                        {rec.status}
+                      </span>
+                    }
+                  />
+                  <Row label="수량 (BOX)" value={<span className="font-data font-semibold text-scm-primary">{rec.qty}</span>} />
+                  <Row label="최근 동기화" value={<span className="font-data">{rec.updatedAt}</span>} />
+                  {rec.leadTimeHours !== undefined ? (
+                    <Row
+                      label="평균 리드타임"
+                      value={<span className="font-data font-bold text-scm-primary">{rec.leadTimeHours.toFixed(2)}시간</span>}
+                    />
+                  ) : null}
+                  {rec.dataType ? (
+                    <Row
+                      label="데이터 구분"
+                      value={<span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${dataTypeStyle[rec.dataType] ?? "bg-slate-50 text-slate-700 border-slate-200"}`}>{rec.dataType}</span>}
+                    />
+                  ) : null}
+                  {rec.calculationBasis ? <Row label="산출 기준" value={rec.calculationBasis} /> : null}
+                  <Row label="비고" value={rec.note} />
+                </dl>
+                <div className="mt-xs flex shrink-0 items-center justify-end gap-1 border-t border-outline-variant/30 pt-xs text-[11px] font-bold text-scm-primary">
+                  상세 보기 <Icon name="arrow_forward" className="text-[14px] transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md">
-          <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-            <div>
-              <h2 className="text-xl font-black">전체 권역 · {product.name} 시스템 연동 현황</h2>
-              <p className="mt-2 flex items-center gap-2 text-xs font-black tracking-wide text-green-600">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" /> ERP · MES · WMS LIVE DIGITALIZATION
-              </p>
-            </div>
-            <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1">
-              {(["3d", "2d", "table"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  title={mode === "3d" ? "3D 보기" : mode === "2d" ? "2D 보기" : "테이블 보기"}
-                  onClick={() => setViewMode(mode)}
-                  className={`flex h-9 w-10 items-center justify-center rounded-lg transition ${viewMode === mode ? "bg-blue-600 text-white shadow" : "text-slate-500 hover:bg-white"}`}
-                >
-                  <Icon name={mode === "3d" ? "view_in_ar" : mode === "2d" ? "grid_view" : "table_view"} className="text-[19px]" />
-                </button>
-              ))}
+        {/* Cross-region summary */}
+        <div className="bento-card col-span-8 flex h-full min-h-0 flex-col overflow-hidden">
+          <div className="flex items-center justify-between border-b border-outline-variant/40 p-md">
+            <h4 className="font-display text-headline-sm">
+              전체 권역 · {product.name} 시스템 연동 현황
+            </h4>
+            <div className="integration-view-toggle" aria-label="연동 현황 보기 방식">
+              <button
+                type="button"
+                aria-pressed={viewMode === "twin"}
+                className={viewMode === "twin" ? "active" : ""}
+                onClick={() => setViewMode("twin")}
+                title="디지털 트윈 보기"
+              >
+                <Icon name="view_in_ar" className="text-[18px]" />
+              </button>
+              <button
+                type="button"
+                aria-pressed={viewMode === "table"}
+                className={viewMode === "table" ? "active" : ""}
+                onClick={() => setViewMode("table")}
+                title="테이블 보기"
+              >
+                <Icon name="table_view" className="text-[18px]" />
+              </button>
             </div>
           </div>
-
-          {viewMode === "table" ? (
-            <WarehouseTable zones={zones} onSelect={openZone} />
+          {viewMode === "twin" ? (
+            <div className="twin-section min-h-0 flex-1 overflow-auto">
+              <div className="twin-section-heading">
+                <span className="twin-live-dot" />
+                ERP · MES · WMS LIVE DIGITALIZATION
+              </div>
+              <div className="twin-grid">
+                {markerOrder.map((id) => {
+                  const rows = getProductIntegrationRecords(id, product.key);
+                  const twinStatus = getTwinStatus(rows);
+                  const isActive = regionId === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      data-status={twinStatus}
+                      className={`twin-block ${isActive ? "active" : ""}`}
+                      onClick={() => selectTwinRegion(id)}
+                      aria-label={`${regions[id].name} 시스템 상세 보기`}
+                    >
+                      <span className="cube" aria-hidden="true">
+                        <span className="cube-face cube-top" />
+                        <span className="cube-face cube-front">
+                          <span className="cube-systems">
+                            {rows.map((row) => (
+                              <span key={row.system} className={row.status === "지연" ? "delayed" : ""}>
+                                {row.system}
+                              </span>
+                            ))}
+                          </span>
+                        </span>
+                        <span className="cube-face cube-side" />
+                      </span>
+                      <span className="block-label">
+                        <span className="status-dot" />
+                        <span>{regions[id].name}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
-            <WarehouseTwin zones={zones} product={product} mode={viewMode} onSelect={openZone} />
+            <div className="min-h-0 flex-1 overflow-auto">
+              <table className="w-full min-w-[720px] text-left text-[13px]">
+                <thead className="bg-surface-container-low text-[11px] uppercase text-on-surface-variant">
+                  <tr>
+                    <th className="px-md py-sm font-bold">권역</th>
+                    {(["ERP", "MES", "WMS"] as SystemKey[]).map((s) => (
+                      <th key={s} className="px-md py-sm font-bold">{s}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {markerOrder.map((id) => {
+                    const rows = getProductIntegrationRecords(id, product.key);
+                    return (
+                      <tr
+                        key={id}
+                        onClick={() => setRegionId(id)}
+                        className={`cursor-pointer border-t border-outline-variant/30 transition-colors hover:bg-surface-container-low ${regionId === id ? "bg-primary-container/10" : ""}`}
+                      >
+                        <td className="px-md py-sm font-bold text-on-surface">{regions[id].name}</td>
+                        {rows.map((row) => (
+                          <td key={row.system} className="px-md py-sm">
+                            <div className="flex flex-col">
+                              <span className="font-data text-[12px] text-on-surface">{row.qty} BOX</span>
+                              <span className={`mt-1 w-fit rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusStyle[row.status]}`}>
+                                {row.status}
+                              </span>
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
-        </section>
-      </main>
-
-      {drawer ? (
-        <DetailDrawer
-          drawer={drawer}
-          zone={zones.find((zone) => zone.id === drawer.id)}
-          records={getProductIntegrationRecords(regionId, product.key)}
-          onClose={() => setDrawer(null)}
+        </div>
+      </div>
+      {selectedSystem ? (
+        <SystemDetailPanel
+          system={selectedSystem}
+          record={records.find((record) => record.system === selectedSystem)}
+          regionName={region.name}
+          productName={product.name}
+          onClose={() => setSelectedSystem(null)}
         />
       ) : null}
     </div>
   );
 }
 
-function SystemFlowCard({ key: systemKey, color, description, count, icon, time, onClick }: (typeof systemCards)[number] & { time: Date; onClick: () => void }) {
-  return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <span className={`warehouse-system-icon ${color}`}><Icon name={icon} className="text-[22px]" /></span>
-          <div><p className="text-lg font-black">{systemKey}</p><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">System</p></div>
-        </div>
-        <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[10px] font-black text-green-600"><span className="h-1.5 w-1.5 rounded-full bg-green-500" /> 연동 정상</span>
-      </div>
-      <dl className="mt-4 space-y-2 text-xs">
-        <InfoRow label="마지막 연동" value={time.toLocaleTimeString("ko-KR", { hour12: false })} mono />
-        <InfoRow label="연동 데이터" value={description} />
-        <InfoRow label="데이터 건수" value={`${count} 건`} mono />
-      </dl>
-      <button type="button" onClick={onClick} className="mt-4 flex items-center gap-1 text-xs font-black text-blue-600 hover:gap-2">상세 보기 <Icon name="arrow_forward" className="text-[15px]" /></button>
-    </article>
-  );
-}
+function SystemDetailPanel({
+  system,
+  record,
+  regionName,
+  productName,
+  onClose,
+}: {
+  system: SystemKey;
+  record: ReturnType<typeof getIntegrationRecords>[number] | undefined;
+  regionName: string;
+  productName: string;
+  onClose: () => void;
+}) {
+  const meta = systemColumns[system];
 
-function InfoRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
-  return <div className="flex justify-between gap-4"><dt className="text-slate-500">{label}</dt><dd className={`${mono ? "font-mono tabular-nums" : ""} text-right font-bold text-slate-800`}>{value}</dd></div>;
-}
-
-function WarehouseTwin({ zones, product, mode, onSelect }: { zones: WarehouseZone[]; product: Product; mode: "3d" | "2d"; onSelect: (id: string) => void }) {
   return (
-    <div className={`warehouse-stage ${mode === "2d" ? "flat" : ""}`}>
-      <div className="warehouse-zone-badges">
-        {[ ["local_shipping", "입고", "RECEIVING"], ["inventory_2", "보관", "STORAGE"], ["shopping_cart", "피킹", "PICKING"], ["fire_truck", "출고", "SHIPPING"] ].map(([icon, ko, en]) => (
-          <div key={en}><Icon name={icon} className="text-[18px] text-blue-600" /><span><b>{ko}</b><small>{en}</small></span></div>
-        ))}
-      </div>
-      <div className="warehouse-yard">
-        <div className="yard-markings" />
-        <div className="warehouse-truck left"><span /><i /><i /></div>
-        <div className="warehouse-truck right"><span /><i /><i /></div>
-        <div className="warehouse-forklift"><Icon name="forklift" className="text-[28px]" /></div>
-        <div className="warehouse-rack-grid">
-          {zones.map((zone) => <WarehouseRack key={zone.id} zone={zone} onClick={() => onSelect(zone.id)} />)}
+    <div className="fixed inset-0 z-[600] bg-slate-950/25" onMouseDown={onClose}>
+      <aside
+        className="absolute right-0 top-0 flex h-full w-[440px] flex-col bg-white shadow-2xl"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="flex items-start justify-between border-b border-outline-variant p-lg">
+          <div className="flex items-center gap-sm">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-container text-on-primary-container">
+              <Icon name={meta.icon} className="text-[24px]" />
+            </span>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-scm-primary">System detail</p>
+              <h2 className="font-display text-headline-sm text-on-surface">{meta.title}</h2>
+              <p className="mt-0.5 text-xs text-on-surface-variant">{regionName} · {productName}</p>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} aria-label="닫기" className="rounded-full p-2 text-on-surface-variant hover:bg-surface-container">
+            <Icon name="close" className="text-[22px]" />
+          </button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-lg">
+          <p className="mb-md text-sm leading-6 text-on-surface-variant">{meta.desc}</p>
+          {record ? (
+            <dl className="space-y-sm rounded-2xl border border-outline-variant bg-surface-container-lowest p-md">
+              <DetailRow label="문서번호" value={record.docNo} mono />
+              <DetailRow label="연동 상태" value={record.status} />
+              <DetailRow label="수량" value={`${record.qty} BOX`} mono />
+              <DetailRow label="최근 동기화" value={record.updatedAt} mono />
+              {record.leadTimeHours !== undefined ? <DetailRow label="평균 리드타임" value={`${record.leadTimeHours.toFixed(2)}시간`} mono /> : null}
+              {record.dataType ? <DetailRow label="데이터 구분" value={record.dataType} /> : null}
+              {record.calculationBasis ? <DetailRow label="산출 기준" value={record.calculationBasis} /> : null}
+              <DetailRow label="비고" value={record.note} />
+            </dl>
+          ) : (
+            <p className="rounded-xl bg-surface-container p-md text-sm text-on-surface-variant">표시할 연동 데이터가 없습니다.</p>
+          )}
         </div>
-        <div className="warehouse-control-room">
-          <div className="control-room-title"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" /> 실시간 관제실</div>
-          <div className="control-monitors"><i /><i /><i /><i /></div>
-        </div>
-      </div>
-      <div className="warehouse-resource-bar">
-        <div className="flex flex-wrap items-center gap-5">
-          <b>안전재고 비율 범례</b>
-          <Legend color="#dc2626" label="위험 (0~70%)" />
-          <Legend color="#eab308" label="주의 (70~100%)" />
-          <Legend color="#16a34a" label="정상 (100% 이상)" />
-        </div>
-        <div className="flex items-center gap-5 text-xs font-bold text-slate-600">
-          <span>🚜 지게차</span><span>🤖 AGV</span><span>👷 작업자</span><span>📦 팔레트</span>
-        </div>
-      </div>
-      <span className="sr-only">{product.name} 8개 권역 아이소메트릭 창고</span>
+      </aside>
     </div>
   );
 }
 
-function WarehouseRack({ zone, onClick }: { zone: WarehouseZone; onClick: () => void }) {
-  const meta = getStockMeta(zone.safetyStockRatio);
+function DetailRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
   return (
-    <button type="button" onClick={onClick} className={`warehouse-rack status-${meta.status} ${zone.safetyStockRatio <= 60 ? "critical" : ""}`} style={{ "--stock-color": meta.color } as React.CSSProperties}>
-      <span className="rack-tooltip"><b>{zone.name} 구역</b><span>재고 {zone.inventory.toLocaleString()} BOX</span><span>리드타임 {zone.leadTime}시간</span><span>갱신 {zone.lastUpdated}</span></span>
-      <span className="rack-info"><span><i /> {zone.name} 구역</span><strong className="tabular-nums">안전재고 {zone.safetyStockRatio}%</strong><em>{meta.label}</em></span>
-      <span className="rack-object" aria-hidden="true"><span className="rack-top" /><span className="rack-side" /><span className="rack-front">{[0,1,2].map((shelf) => <i key={shelf}>{[0,1,2,3].map((box) => <b key={box} />)}</i>)}</span></span>
-    </button>
+    <div className="border-b border-outline-variant/50 pb-sm last:border-0 last:pb-0">
+      <dt className="text-[11px] font-bold uppercase text-on-surface-variant">{label}</dt>
+      <dd className={`mt-1 break-words text-sm font-semibold text-on-surface ${mono ? "font-data" : ""}`}>{value}</dd>
+    </div>
   );
 }
 
-function Legend({ color, label }: { color: string; label: string }) {
-  return <span className="flex items-center gap-2 text-xs font-bold text-slate-600"><i className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />{label}</span>;
-}
-
-function WarehouseTable({ zones, onSelect }: { zones: WarehouseZone[]; onSelect: (id: string) => void }) {
-  return <div className="min-h-[680px] overflow-auto p-6"><table className="w-full text-left text-sm"><thead><tr className="border-b border-slate-200 text-xs text-slate-500"><th className="p-4">권역</th><th>안전재고</th><th>상태</th><th>재고량</th><th>리드타임</th><th>최근 갱신</th></tr></thead><tbody>{zones.map((zone) => { const meta = getStockMeta(zone.safetyStockRatio); return <tr key={zone.id} onClick={() => onSelect(zone.id)} className="cursor-pointer border-b border-slate-100 hover:bg-blue-50"><td className="p-4 font-black">{zone.name}</td><td className="font-mono font-black">{zone.safetyStockRatio}%</td><td><span className={`warehouse-table-status ${meta.status}`}>{meta.label}</span></td><td className="font-mono">{zone.inventory.toLocaleString()} BOX</td><td>{zone.leadTime}시간</td><td className="font-mono">{zone.lastUpdated}</td></tr>; })}</tbody></table></div>;
-}
-
-function DetailDrawer({ drawer, zone, records, onClose }: { drawer: { type: "zone" | "system"; id: string }; zone?: WarehouseZone; records: ReturnType<typeof getIntegrationRecords>; onClose: () => void }) {
-  const isZone = drawer.type === "zone" && zone;
-  return <div className="fixed inset-0 z-[600] bg-slate-950/20" onMouseDown={onClose}><aside onMouseDown={(event) => event.stopPropagation()} className="warehouse-drawer">
-    <header className="flex items-center justify-between border-b border-slate-200 p-6"><div><p className="text-xs font-black uppercase tracking-widest text-blue-600">{isZone ? "Region detail" : "System detail"}</p><h2 className="mt-1 text-2xl font-black">{isZone ? `${zone.name} 구역` : `${drawer.id} 연동 상세`}</h2></div><button type="button" onClick={onClose} className="rounded-full p-2 hover:bg-slate-100"><Icon name="close" className="text-[22px]" /></button></header>
-    <div className="space-y-5 overflow-y-auto p-6">
-      {isZone ? <><div className="grid grid-cols-2 gap-3"><DrawerMetric label="안전재고" value={`${zone.safetyStockRatio}%`} /><DrawerMetric label="현재 재고" value={`${zone.inventory.toLocaleString()} BOX`} /><DrawerMetric label="리드타임" value={`${zone.leadTime}시간`} /><DrawerMetric label="최근 갱신" value={zone.lastUpdated} /></div><MiniInventoryChart /></> : null}
-      <section><h3 className="mb-3 font-black">ERP · MES · WMS 스냅샷</h3>{records.filter((record) => isZone || record.system === drawer.id).map((record) => <div key={record.system} className="mb-2 rounded-xl border border-slate-200 p-4"><div className="flex justify-between"><b>{record.system}</b><span className="text-xs font-bold text-green-600">● {record.status}</span></div><p className="mt-2 font-mono text-sm">{record.qty} BOX</p><p className="mt-1 text-xs text-slate-500">{record.note}</p></div>)}</section>
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex min-w-0 items-start justify-between gap-sm">
+      <dt className="shrink-0 pt-0.5 text-[11px] font-bold uppercase leading-tight text-on-surface-variant">
+        {label}
+      </dt>
+      <dd className="min-w-0 max-w-[72%] break-words text-right text-[11px] leading-snug text-on-surface">{value}</dd>
     </div>
-  </aside></div>;
+  );
 }
-
-function DrawerMetric({ label, value }: { label: string; value: string }) { return <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">{label}</p><p className="mt-1 font-mono text-sm font-black tabular-nums">{value}</p></div>; }
-function MiniInventoryChart() { return <section className="rounded-2xl border border-slate-200 p-5"><div className="flex justify-between"><b>일별 재고 추이</b><span className="text-xs text-green-600">최근 7일</span></div><svg className="mt-4 h-32 w-full" viewBox="0 0 360 120" preserveAspectRatio="none"><defs><linearGradient id="miniFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#2563eb" stopOpacity=".28"/><stop offset="1" stopColor="#2563eb" stopOpacity="0"/></linearGradient></defs><path d="M0 88 L60 76 L120 82 L180 54 L240 62 L300 35 L360 28 L360 120 L0 120Z" fill="url(#miniFill)"/><path d="M0 88 L60 76 L120 82 L180 54 L240 62 L300 35 L360 28" fill="none" stroke="#2563eb" strokeWidth="3"/></svg></section>; }
