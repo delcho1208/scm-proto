@@ -787,14 +787,14 @@
   background: transparent;
   cursor: pointer;
 }
-.warehouse-photo-zone:nth-child(1) { left: 18.5%; top: 20.5%; }
-.warehouse-photo-zone:nth-child(2) { left: 34.1%; top: 20.5%; }
-.warehouse-photo-zone:nth-child(3) { left: 50.6%; top: 20.5%; }
-.warehouse-photo-zone:nth-child(4) { left: 67.0%; top: 20.5%; }
-.warehouse-photo-zone:nth-child(5) { left: 16.7%; top: 51.0%; }
-.warehouse-photo-zone:nth-child(6) { left: 34.1%; top: 51.0%; }
-.warehouse-photo-zone:nth-child(7) { left: 50.6%; top: 51.0%; }
-.warehouse-photo-zone:nth-child(8) { left: 67.0%; top: 51.0%; }
+.warehouse-photo-zone:nth-child(1) { left: 18.5%; top: 15.5%; }
+.warehouse-photo-zone:nth-child(2) { left: 34.1%; top: 15.5%; }
+.warehouse-photo-zone:nth-child(3) { left: 50.6%; top: 15.5%; }
+.warehouse-photo-zone:nth-child(4) { left: 67.0%; top: 15.5%; }
+.warehouse-photo-zone:nth-child(5) { left: 16.7%; top: 44.5%; }
+.warehouse-photo-zone:nth-child(6) { left: 34.1%; top: 44.5%; }
+.warehouse-photo-zone:nth-child(7) { left: 50.6%; top: 44.5%; }
+.warehouse-photo-zone:nth-child(8) { left: 67.0%; top: 44.5%; }
 .warehouse-photo-zone[data-status="warning"] { --zone-color: #eab308; }
 .warehouse-photo-zone[data-status="danger"] { --zone-color: #dc2626; }
 .warehouse-photo-outline {
