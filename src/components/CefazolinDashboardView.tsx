@@ -1212,7 +1212,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             onClick={() => setShowAiWorkflow(false)}
             className="absolute inset-0 bg-on-surface/50 backdrop-blur-[2px]"
           />
-          <div className="relative z-10 flex h-[min(780px,88dvh)] w-[min(1180px,92vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
+          <div className="relative z-10 flex h-[min(780px,88dvh)] w-[min(1180px,92vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl [word-break:keep-all]">
             <div className="flex items-center justify-between gap-4 border-b border-outline-variant px-4 py-2">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -2066,7 +2066,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             onClick={() => setShowScenarioComparison(false)}
             className="absolute inset-0 bg-on-surface/45 backdrop-blur-[2px]"
           />
-          <div className="relative z-10 flex h-[min(780px,88dvh)] w-[min(1180px,92vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
+          <div className="relative z-10 flex h-[min(780px,88dvh)] w-[min(1180px,92vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl [word-break:keep-all]">
             <div className="flex items-center justify-between border-b border-outline-variant px-4 py-2">
               <div>
                 <h2
@@ -2089,7 +2089,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               </button>
             </div>
 
-            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[360px_minmax(0,1fr)]">
+            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[390px_minmax(0,1fr)]">
               <div className="min-h-0 space-y-2 overflow-y-auto border-b border-outline-variant bg-surface-container-low/40 p-3 lg:border-b-0 lg:border-r">
                 {recommendations.map((recommendation, index) => {
                   const evaluation = recommendation.evaluation;

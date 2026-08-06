@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
-import { lipilouDashboard, lipilouMonthlyForecastByTimelineKey, tamivirAnnualF2aTarget, tamivirDashboard, tamivirForecastByRegion } from "@/data/dashboard-scenario";
+import { lipilouDashboard, lipilouMonthlyForecastByTimelineKey, tamivirAnnualF2aTarget, tamivirDashboard, tamivirForecastByRegion, tamivirMonthlyForecastByTimelineKey } from "@/data/dashboard-scenario";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
 import { cefazolinWorkflowSteps } from "@/data/cefazolin-ai-workflow";
 import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
@@ -225,6 +225,9 @@ function StandardDashboardView({ product }: { product: Product }) {
   const lipilouMonthlyForecast = product.key === "리피로우"
     ? lipilouMonthlyForecastByTimelineKey[timelineKey]
     : undefined;
+  const tamivirMonthlyForecast = scenario === tamivirDashboard
+    ? tamivirMonthlyForecastByTimelineKey[timelineKey]
+    : undefined;
   const appliedCefazolinScenarioId = isRecommendationApplied && product.key === "세파졸린"
     ? ({
         "CEFAZOLIN-S1-NO-RESPONSE": "S1_무대응",
@@ -271,7 +274,7 @@ function StandardDashboardView({ product }: { product: Product }) {
   const getScenarioRegion = (id: string) => {
     const baseRegion = isCurrentTimeline
       ? scenario?.regions[id]
-      : timelineProjectedRegions?.[id] ?? lipilouMonthlyForecast?.regions[id];
+      : timelineProjectedRegions?.[id] ?? lipilouMonthlyForecast?.regions[id] ?? tamivirMonthlyForecast?.regions[id];
     if (!baseRegion || !isRecommendationApplied) return baseRegion;
     const exactProjectedRegion =
       timelineProjectedRegions?.[id] ?? appliedProjectedRecommendation?.projectedRegions?.[id];
@@ -324,7 +327,7 @@ function StandardDashboardView({ product }: { product: Product }) {
   const nationalRiskLevel: RiskLevel =
     (appliedCefazolinScenario
       ? appliedCefazolinScenario.unmetDemandRatePct > 0 ? "danger" : "safe"
-      : isCurrentTimeline ? scenario?.inventoryLevel : lipilouMonthlyForecast?.inventoryLevel) ??
+      : isCurrentTimeline ? scenario?.inventoryLevel : lipilouMonthlyForecast?.inventoryLevel ?? tamivirMonthlyForecast?.inventoryLevel) ??
     (timeline.stockoutRisk >= 15 ? "danger" : timeline.stockoutRisk >= 8 ? "warning" : "safe");
   const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
@@ -341,7 +344,7 @@ function StandardDashboardView({ product }: { product: Product }) {
     ? timelineProjectedTotalInventory ?? appliedProjectedRecommendation.projectedTotalInventory!
     : appliedCefazolinScenario
     ? Math.max(0, (cefazolinDashboard.totalInventory ?? 0) + cefazolinScenarioInventoryDelta)
-    : (isCurrentTimeline ? scenario?.totalInventory : lipilouMonthlyForecast?.totalInventory) ?? timeline.totalInventory;
+    : (isCurrentTimeline ? scenario?.totalInventory : lipilouMonthlyForecast?.totalInventory ?? tamivirMonthlyForecast?.totalInventory) ?? timeline.totalInventory;
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
   const forecastInventory = lipilouGraphRegion?.current_stock_box ?? tamivirForecastRegion?.currentStock ?? displayedTotalInventory;

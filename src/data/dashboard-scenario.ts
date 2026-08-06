@@ -357,6 +357,64 @@ const tamivirRegions: Record<string, DashboardRegion> = {
   },
   ...tamivirZoneRegions,
 };
+
+function createTamivirMonthlySnapshot(
+  totalInventory: number,
+  sourceScenario: TamivirScenario,
+): LipilouMonthlyForecast {
+  const sourceRegions = sourceScenario.map_monitoring ?? sourceScenario.regions_stock ?? [];
+  const sourceTotal = sourceRegions.reduce((sum, region) => sum + region.current_stock, 0) || 1;
+  const scale = totalInventory / sourceTotal;
+  const zoneRegions = normalizeRegions(
+    sourceRegions.map((region) => ({
+      region: region.region,
+      current_stock: Math.round(region.current_stock * scale),
+      target_stock: region.target_stock,
+      stock_ratio: (region.current_stock * scale) / Math.max(region.target_stock, 1),
+      status: region.status,
+    })),
+  );
+  const nationalRisk: RiskLevel = totalInventory > sourceScenario.summary.ai_target * 3
+    ? "warning"
+    : totalInventory < sourceScenario.summary.ai_target
+      ? "danger"
+      : "safe";
+  zoneRegions.National = {
+    id: "National",
+    region: "National_전국 통합",
+    current_stock: totalInventory,
+    target_stock: sourceScenario.summary.ai_target,
+    stock_ratio: totalInventory / Math.max(sourceScenario.summary.ai_target, 1),
+    stockRatioLabel: `${(totalInventory / Math.max(sourceScenario.summary.ai_target, 1)).toFixed(1)}배`,
+    status: nationalRisk === "warning" ? "과잉" : nationalRisk === "danger" ? "부족" : "적정",
+    riskLevel: nationalRisk,
+    riskText: nationalRisk === "warning" ? "과잉" : nationalRisk === "danger" ? "부족" : "적정",
+  };
+  return { month: "", regions: zoneRegions, totalInventory, inventoryLevel: nationalRisk };
+}
+
+const normalTamivirScenario = [...tamivirRaw.scenarios].sort((a, b) => a.date.localeCompare(b.date))[0];
+const tamivirBaselineTotals: Record<string, number> = {
+  "26M08": 1_440_000,
+  "26M09": normalTamivirScenario.summary.current_stock,
+  PRES: 1_340_000,
+  "26M11": tamivirLatest.summary.current_stock,
+  "26M12": 1_215_000,
+  "27M01": 1_145_000,
+};
+
+export const tamivirMonthlyForecastByTimelineKey = Object.fromEntries(
+  Object.entries(tamivirBaselineTotals).map(([key, total]) => [
+    key,
+    {
+      ...createTamivirMonthlySnapshot(
+        total,
+        key === "26M08" || key === "26M09" ? normalTamivirScenario : tamivirLatest,
+      ),
+      month: ({ "26M08": "2026.08", "26M09": "2026.09", PRES: "2026.10", "26M11": "2026.11", "26M12": "2026.12", "27M01": "2027.01" } as Record<string, string>)[key],
+    },
+  ]),
+) as Record<string, LipilouMonthlyForecast>;
 const operationRateText = tamivirLatest.xai_cards.find((card) =>
   card.title.includes("생산 관성"),
 )?.value;
@@ -402,7 +460,6 @@ const tamivirForecastEntries = tamivirLatestRegions.map((region) => {
   } satisfies TamivirForecast] as const;
 }).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
 
-const normalTamivirScenario = [...tamivirRaw.scenarios].sort((a, b) => a.date.localeCompare(b.date))[0];
 const nationalActualTrend = [0, 1, 2].map((index) => tamivirLatestRegions.reduce((sum, region) => {
   const card = (region as typeof region & { forecast_card?: { actual_trend: number[] } }).forecast_card;
   return sum + (card?.actual_trend[index] ?? 0);
