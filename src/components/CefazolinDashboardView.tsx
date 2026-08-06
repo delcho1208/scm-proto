@@ -225,6 +225,105 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
   );
 }
 
+type CefazolinNewsItem = { title: string; url: string; publishedAt: string };
+
+function CefazolinNewsApiCard({ productName }: { productName: string }) {
+  const [news, setNews] = useState<CefazolinNewsItem[]>([]);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setState("loading");
+    fetch(`/api/news?query=${encodeURIComponent(productName)}`, { signal: controller.signal })
+      .then(async (response) => {
+        const payload = (await response.json()) as { items?: CefazolinNewsItem[] };
+        if (!response.ok) throw new Error("뉴스 조회 실패");
+        setNews(payload.items ?? []);
+        setState("ready");
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setState("error");
+      });
+    return () => controller.abort();
+  }, [productName]);
+
+  return (
+    <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
+      <div className="flex min-h-0 flex-1 items-start gap-sm overflow-hidden">
+        <div className="api-placeholder-icon news shrink-0">
+          <Icon name="newspaper" className="text-[18px]" />
+        </div>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="flex items-center justify-between gap-xs">
+            <h4 className="truncate text-sm font-bold text-on-surface">{productName} 뉴스</h4>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="api-ready-badge">
+                {state === "loading" ? "검색 중" : state === "ready" ? "연결됨" : "설정 필요"}
+              </span>
+              <button
+                type="button"
+                aria-label={`${productName} 뉴스 전체 보기`}
+                disabled={news.length === 0}
+                onClick={() => setIsOpen(true)}
+                className="flex h-6 w-6 items-center justify-center rounded-full border border-outline-variant bg-white text-scm-primary hover:bg-primary-container disabled:opacity-40"
+              >
+                <Icon name="add" className="text-[16px]" />
+              </button>
+            </div>
+          </div>
+          <p className="mt-1 text-[10px] font-bold text-scm-primary">최신 뉴스</p>
+          <div className="mt-2 min-h-0 flex-1 overflow-hidden">
+            {state === "loading" ? (
+              <p className="text-[10px] text-on-surface-variant">뉴스를 불러오는 중입니다.</p>
+            ) : state === "error" ? (
+              <p className="text-[10px] text-error">뉴스 연결을 확인해 주세요.</p>
+            ) : news.length ? (
+              <ul className="space-y-1.5">
+                {news.slice(0, 2).map((item) => (
+                  <li key={`${item.url}-${item.publishedAt}`}>
+                    <a href={item.url} target="_blank" rel="noreferrer" className="line-clamp-1 text-[10px] font-semibold text-on-surface hover:text-scm-primary hover:underline">
+                      {item.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-[10px] text-on-surface-variant">검색된 뉴스가 없습니다.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {isOpen ? (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/45 p-6 backdrop-blur-[2px]" onMouseDown={() => setIsOpen(false)}>
+          <section role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
+            <header className="flex items-center justify-between border-b border-outline-variant px-6 py-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-scm-primary">NAVER NEWS</p>
+                <h3 className="font-display text-lg font-bold text-on-surface">{productName} 최신 뉴스</h3>
+              </div>
+              <button type="button" aria-label="닫기" onClick={() => setIsOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low">
+                <Icon name="close" className="text-[20px]" />
+              </button>
+            </header>
+            <ul className="max-h-[60vh] divide-y divide-outline-variant/50 overflow-y-auto px-6">
+              {news.map((item) => (
+                <li key={`${item.url}-${item.publishedAt}`} className="py-4">
+                  <a href={item.url} target="_blank" rel="noreferrer" className="group block">
+                    <span className="text-sm font-bold leading-6 text-on-surface group-hover:text-scm-primary group-hover:underline">{item.title}</span>
+                    <span className="mt-1 block text-[10px] text-on-surface-variant">{new Date(item.publishedAt).toLocaleDateString("ko-KR")}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function CefazolinDashboardView({ product }: { product: Product }) {
   const [regionId, setRegionId] = useState("National");
   const [panelPos, setPanelPos] = useState<{
@@ -1166,36 +1265,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             </div>
           </div>
 
-          <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
-            <div className="flex items-start gap-sm">
-              <div className="api-placeholder-icon news">
-                <Icon
-                  name={cefazolinData ? "model_training" : "newspaper"}
-                  className="text-[18px]"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-xs">
-                  <h4 className="truncate text-sm font-bold text-on-surface">
-                    {cefazolinData ? "XGBoost + TreeSHAP 검증" : "뉴스 크롤링 API"}
-                  </h4>
-                  <span className="api-ready-badge">
-                    {cefazolinData ? "검증 완료" : "연결 대기"}
-                  </span>
-                </div>
-                <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
-                  {cefazolinData
-                    ? `ROC-AUC ${cefazolinData.modelValidation.rocAuc.toFixed(3)} · F1 ${cefazolinData.modelValidation.f1.toFixed(3)} · 학습 ${cefazolinData.modelValidation.trainingRows.toLocaleString("ko-KR")}행`
-                    : "공급망·의약품 이슈 뉴스 신호 연동 예정 영역"}
-                </p>
-                <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
-                  {cefazolinData
-                    ? cefazolinData.modelValidation.topFeatures[0]?.label
-                    : "/api/news-crawling"}
-                </code>
-              </div>
-            </div>
-          </div>
+          <CefazolinNewsApiCard productName={product.name} />
         </div>
       </div>
 
