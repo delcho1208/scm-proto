@@ -1212,8 +1212,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             onClick={() => setShowAiWorkflow(false)}
             className="absolute inset-0 bg-on-surface/50 backdrop-blur-[2px]"
           />
-          <div className="relative z-10 flex max-h-[calc(100dvh-1rem)] w-[min(1480px,97vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
-            <div className="flex items-center justify-between gap-4 border-b border-outline-variant px-5 py-2.5">
+          <div className="relative z-10 flex h-[min(780px,88dvh)] w-[min(1180px,92vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
+            <div className="flex items-center justify-between gap-4 border-b border-outline-variant px-4 py-2">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2
@@ -1247,8 +1247,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               </div>
             </div>
 
-            <div className="border-b border-outline-variant bg-surface-container-low/50 px-5 py-2">
-              <dl className="grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-9">
+            <div className="border-b border-outline-variant bg-surface-container-low/50 px-4 py-1.5">
+              <dl className="grid gap-x-3 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-9">
                 {[
                   ["실행 ID", workflowRunState.runId],
                   ["제품", cefazolinWorkflowRunMeta.productName],
@@ -1297,7 +1297,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               </div>
             </div>
 
-            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[285px_minmax(0,1fr)]">
+            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[240px_minmax(0,1fr)]">
               <div className="max-h-[28vh] min-h-0 overflow-y-auto border-b border-outline-variant bg-surface-container-low/40 p-2 lg:max-h-none lg:border-b-0 lg:border-r">
                 <div className="space-y-3">
                   {workflowGroupOrder.map((group) => (
@@ -1343,7 +1343,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                 </div>
               </div>
 
-              <div className="min-h-0 overflow-y-auto p-4 lg:p-5">
+              <div className="min-h-0 overflow-y-auto p-3 lg:p-4">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex min-w-0 items-start gap-3">
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-scm-primary text-white">
