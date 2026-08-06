@@ -46,6 +46,7 @@ type AiRecommendation = {
   costReduction?: string;
   feasibility?: number;
   executionPeriod?: string;
+  supplyImpact?: string;
   scenarioId?: string;
   projectedTotalInventory?: number;
   affectedRegions?: string[];
@@ -388,6 +389,7 @@ function StandardDashboardView({ product }: { product: Product }) {
             : undefined
         ),
         executionPeriod: recommendation.executionPeriod ?? (recommendation.transferAmount ? "1~2주" : undefined),
+        supplyImpact: recommendation.supplyImpact,
         projectedTotalInventory: recommendation.projectedTotalInventory,
         affectedRegions: recommendation.affectedRegions,
         projectedRegions: recommendation.projectedRegions,
@@ -1048,7 +1050,7 @@ function StandardDashboardView({ product }: { product: Product }) {
                   <DetailItem icon="savings" label="비용 감축 효과" value={selectedRecommendation.costReduction ?? "산정 로직 및 상세 데이터 추가 예정"} />
                   <DetailItem icon="task_alt" label="실현 가능성" value={selectedRecommendation.feasibility ? `${selectedRecommendation.feasibility}/100 · 실행 조건 검토 완료` : "평가 기준 및 점수 추가 예정"} />
                   <DetailItem icon="schedule" label="예상 실행 기간" value={selectedRecommendation.executionPeriod ?? "실행 일정 추가 예정"} />
-                  <DetailItem icon="monitoring" label="예상 공급망 영향" value="정량 시뮬레이션 결과 추가 예정" />
+                  <DetailItem icon="monitoring" label="예상 공급망 영향" value={selectedRecommendation.supplyImpact ?? "현재 재고 수준을 유지하면서 운영 리스크를 완화합니다."} />
                 </div>
 
                 <div className="mt-5 rounded-xl bg-surface-container-low p-4">
