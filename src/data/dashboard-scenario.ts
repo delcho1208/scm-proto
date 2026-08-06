@@ -117,6 +117,20 @@ type LipilouRaw = {
       from_region?: string;
       to_region?: string;
       approval_action: { initial_button_text: string };
+      expected_after_transfer?: {
+        from_region: {
+          region: string;
+          stock_after: number;
+          stock_ratio_after: number;
+          status_after: string;
+        };
+        to_region: {
+          region: string;
+          stock_after: number;
+          stock_ratio_after: number;
+          status_after: string;
+        };
+      };
     }>;
   }>;
 };
@@ -135,9 +149,32 @@ const lipilouTotalInventory = Object.values(lipilouRegions).reduce(
   0,
 );
 
+function getLipilouProjectedRegions(
+  expected: NonNullable<NonNullable<LipilouRaw["scenarios"][number]["ai_solutions"]>[number]["expected_after_transfer"]> | undefined,
+) {
+  if (!expected) return undefined;
+
+  const projected = { ...lipilouRegions };
+  for (const item of [expected.from_region, expected.to_region]) {
+    const id = toRegionId(item.region);
+    const base = projected[id];
+    if (!id || !base) continue;
+    const riskLevel = toRiskLevel(item.status_after, item.stock_ratio_after);
+    projected[id] = {
+      ...base,
+      current_stock: item.stock_after,
+      stock_ratio: item.stock_ratio_after,
+      status: item.status_after,
+      riskLevel,
+      riskText: riskLevel === "danger" ? "부족" : riskLevel === "warning" ? "과잉" : "적정",
+    };
+  }
+  return projected;
+}
+
 export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
   ? {
-      date: "2026-10-01",
+      date: lipilouLatest.date,
       sceneName: lipilouLatest.scene_name,
       regions: lipilouRegions,
       totalInventory: lipilouTotalInventory,
@@ -154,6 +191,13 @@ export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
         fromRegion: solution.from_region ? toRegionId(solution.from_region) : undefined,
         toRegion: solution.to_region ? toRegionId(solution.to_region) : undefined,
         transferAmount: solution.transfer_amount,
+        projectedTotalInventory: solution.expected_after_transfer
+          ? lipilouTotalInventory
+          : undefined,
+        affectedRegions: solution.expected_after_transfer
+          ? [solution.expected_after_transfer.from_region.region, solution.expected_after_transfer.to_region.region].map(toRegionId)
+          : undefined,
+        projectedRegions: getLipilouProjectedRegions(solution.expected_after_transfer),
         approvalButtonText: solution.approval_action.initial_button_text,
       })),
     }
