@@ -194,7 +194,7 @@
         {
           "id": "SOLUTION-02",
           "type": "PRODUCTION_INCREASE",
-          "title": "② 타 생산라인 물량 추가 (참고 옵션)",
+          "title": "타 생산라인 물량 추가",
           "is_final_selected": false,
           "target_line": "B라인",
           "reason": "A라인 재검사로 인한 출하지연 -> 공급 회복력 강화를 위해 B라인 증산 제안",
