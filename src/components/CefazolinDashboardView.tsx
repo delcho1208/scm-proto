@@ -675,11 +675,11 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                   )}
                 </svg>
                 <div
-                  className={`mt-2 grid text-center text-[9px] font-bold text-on-surface-variant/60 ${cefazolinData ? "grid-cols-4" : "grid-cols-6"}`}
+                  className={`mt-2 grid text-center font-bold text-on-surface-variant/60 ${cefazolinData ? "grid-cols-12 text-[7px]" : "grid-cols-6 text-[9px]"}`}
                 >
                   {cefazolinData
-                    ? ["25 Q1", "25 Q2", "25 Q3", "25 Q4"].map((quarter) => (
-                        <span key={quarter}>{quarter}</span>
+                    ? cefazolinData.regionalMonthly[regionId].map((metric) => (
+                        <span key={metric.month}>{metric.month.replace("2025-", "25.")}</span>
                       ))
                     : timelineKeys.map((key, index) => (
                         <span
@@ -1201,7 +1201,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
 
       {showAiWorkflow && cefazolinData && selectedWorkflowStep && (
         <div
-          className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto p-2 sm:items-center"
           role="dialog"
           aria-modal="true"
           aria-labelledby="ai-workflow-title"
@@ -1212,8 +1212,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             onClick={() => setShowAiWorkflow(false)}
             className="absolute inset-0 bg-on-surface/50 backdrop-blur-[2px]"
           />
-          <div className="relative z-10 flex max-h-[94vh] w-[min(1540px,97vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
-            <div className="flex items-center justify-between gap-4 border-b border-outline-variant px-6 py-4">
+          <div className="relative z-10 flex max-h-[calc(100dvh-1rem)] w-[min(1480px,97vw)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
+            <div className="flex items-center justify-between gap-4 border-b border-outline-variant px-5 py-2.5">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2
@@ -1247,7 +1247,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               </div>
             </div>
 
-            <div className="border-b border-outline-variant bg-surface-container-low/50 px-5 py-3">
+            <div className="border-b border-outline-variant bg-surface-container-low/50 px-5 py-2">
               <dl className="grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-9">
                 {[
                   ["실행 ID", workflowRunState.runId],
@@ -1284,7 +1284,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                   </div>
                 ))}
               </dl>
-              <div className="mt-3 flex items-center gap-3">
+              <div className="mt-2 flex items-center gap-3">
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-outline-variant/50">
                   <div
                     className="h-full rounded-full bg-scm-primary transition-[width]"
@@ -1298,7 +1298,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             </div>
 
             <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[285px_minmax(0,1fr)]">
-              <div className="max-h-[34vh] min-h-0 overflow-y-auto border-b border-outline-variant bg-surface-container-low/40 p-3 lg:max-h-none lg:border-b-0 lg:border-r">
+              <div className="max-h-[28vh] min-h-0 overflow-y-auto border-b border-outline-variant bg-surface-container-low/40 p-2 lg:max-h-none lg:border-b-0 lg:border-r">
                 <div className="space-y-3">
                   {workflowGroupOrder.map((group) => (
                     <section key={group} aria-label={group}>
@@ -1343,7 +1343,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                 </div>
               </div>
 
-              <div className="min-h-0 overflow-y-auto p-5 lg:p-7">
+              <div className="min-h-0 overflow-y-auto p-4 lg:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex min-w-0 items-start gap-3">
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-scm-primary text-white">

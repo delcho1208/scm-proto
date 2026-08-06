@@ -51,6 +51,8 @@ type AiRecommendation = {
   projectedTotalInventory?: number;
   affectedRegions?: string[];
   projectedRegions?: Record<string, { current_stock: number; target_stock: number; stock_ratio: number; stockRatioLabel?: string; riskLevel: RiskLevel; riskText: string }>;
+  projectedTotalInventoryByTimelineKey?: Record<string, number>;
+  projectedRegionsByTimelineKey?: Record<string, Record<string, { current_stock: number; target_stock: number; stock_ratio: number; stockRatioLabel?: string; riskLevel: RiskLevel; riskText: string }>>;
   xai?: { summary: string; evidence: string[]; limitation: string };
 };
 
@@ -253,6 +255,10 @@ function StandardDashboardView({ product }: { product: Product }) {
     (sum, id) => sum + (scenario?.regions[id]?.current_stock ?? 0),
     0,
   );
+  const timelineProjectedTotalInventory =
+    appliedProjectedRecommendation?.projectedTotalInventoryByTimelineKey?.[timelineKey];
+  const timelineProjectedRegions =
+    appliedProjectedRecommendation?.projectedRegionsByTimelineKey?.[timelineKey];
   const appliedTransfers = (scenario?.recommendations ?? []).flatMap((recommendation) => {
     return isRecommendationApplied &&
       checkedRecommendationId === recommendation.id &&
@@ -265,9 +271,10 @@ function StandardDashboardView({ product }: { product: Product }) {
   const getScenarioRegion = (id: string) => {
     const baseRegion = isCurrentTimeline
       ? scenario?.regions[id]
-      : lipilouMonthlyForecast?.regions[id];
+      : timelineProjectedRegions?.[id] ?? lipilouMonthlyForecast?.regions[id];
     if (!baseRegion || !isRecommendationApplied) return baseRegion;
-    const exactProjectedRegion = appliedProjectedRecommendation?.projectedRegions?.[id];
+    const exactProjectedRegion =
+      timelineProjectedRegions?.[id] ?? appliedProjectedRecommendation?.projectedRegions?.[id];
     if (exactProjectedRegion) return { ...baseRegion, ...exactProjectedRegion };
     const transferDelta = appliedTransfers.reduce((sum, transfer) => {
       if (transfer.from === id) return sum - transfer.amount;
@@ -331,7 +338,7 @@ function StandardDashboardView({ product }: { product: Product }) {
   const forecastRiskText = forecastRiskLevel === "danger" ? "부족" : forecastRiskLevel === "warning" ? "과잉" : "적정";
 
   const displayedTotalInventory = appliedProjectedRecommendation
-    ? appliedProjectedRecommendation.projectedTotalInventory!
+    ? timelineProjectedTotalInventory ?? appliedProjectedRecommendation.projectedTotalInventory!
     : appliedCefazolinScenario
     ? Math.max(0, (cefazolinDashboard.totalInventory ?? 0) + cefazolinScenarioInventoryDelta)
     : (isCurrentTimeline ? scenario?.totalInventory : lipilouMonthlyForecast?.totalInventory) ?? timeline.totalInventory;
@@ -393,6 +400,8 @@ function StandardDashboardView({ product }: { product: Product }) {
         projectedTotalInventory: recommendation.projectedTotalInventory,
         affectedRegions: recommendation.affectedRegions,
         projectedRegions: recommendation.projectedRegions,
+        projectedTotalInventoryByTimelineKey: recommendation.projectedTotalInventoryByTimelineKey,
+        projectedRegionsByTimelineKey: recommendation.projectedRegionsByTimelineKey,
         xai: recommendation.xai,
       }))
     : [

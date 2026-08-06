@@ -29,6 +29,8 @@ export type DashboardRecommendation = {
   projectedStatus?: string;
   affectedRegions?: string[];
   projectedRegions?: Record<string, DashboardRegion>;
+  projectedTotalInventoryByTimelineKey?: Record<string, number>;
+  projectedRegionsByTimelineKey?: Record<string, Record<string, DashboardRegion>>;
   costReduction?: string;
   feasibility?: number;
   executionPeriod?: string;
@@ -316,6 +318,8 @@ type TamivirScenario = {
       status: string;
       dead_stock_quantity: number;
       map_monitoring: RawRegion[];
+      projectedTotalInventoryByMonth?: Record<string, number>;
+      monthlyMapMonitoring?: Record<string, RawRegion[]>;
     };
   }>;
   xai_cards: Array<{ title: string; value: string; description: string }>;
@@ -452,6 +456,22 @@ export const tamivirDashboard: ProductDashboardScenario = {
     projectedStatus: recommendation.after_apply.status,
     affectedRegions: recommendation.after_apply.map_monitoring.map((region) => toRegionId(region.region)),
     projectedRegions: normalizeRegions(recommendation.after_apply.map_monitoring),
+    projectedTotalInventoryByTimelineKey: Object.fromEntries(
+      Object.entries(recommendation.after_apply.projectedTotalInventoryByMonth ?? {}).map(
+        ([month, value]) => [
+          ({ "2026.08": "26M08", "2026.09": "26M09", "2026.10": "PRES", "2026.11": "26M11", "2026.12": "26M12", "2027.01": "27M01" } as Record<string, string>)[month] ?? month,
+          value,
+        ],
+      ),
+    ),
+    projectedRegionsByTimelineKey: Object.fromEntries(
+      Object.entries(recommendation.after_apply.monthlyMapMonitoring ?? {}).map(
+        ([month, monthlyRegions]) => [
+          ({ "2026.08": "26M08", "2026.09": "26M09", "2026.10": "PRES", "2026.11": "26M11", "2026.12": "26M12", "2027.01": "27M01" } as Record<string, string>)[month] ?? month,
+          normalizeRegions(monthlyRegions),
+        ],
+      ),
+    ),
     approvalButtonText: recommendation.approval_action.initial_button_text,
   })),
 };
