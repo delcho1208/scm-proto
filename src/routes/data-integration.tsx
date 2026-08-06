@@ -48,13 +48,18 @@ const dataTypeStyle: Record<string, string> = {
   "WMS 일별 재고 실적": "bg-amber-50 text-amber-700 border-amber-200",
 };
 
-type TwinStatus = "safe" | "warning" | "danger";
+type StockStatus = "safe" | "warning" | "danger";
 
-function getTwinStatus(records: ReturnType<typeof getIntegrationRecords>): TwinStatus {
-  const delayedCount = records.filter((record) => record.status === "지연").length;
-  if (delayedCount >= 2) return "danger";
-  if (delayedCount === 1) return "warning";
-  return "safe";
+const safetyStockRatios: Record<string, number[]> = {
+  세파졸린: [58, 82, 105, 110, 70, 125, 130, 115],
+  리피로우: [162, 147, 150, 150, 150, 150, 150, 117],
+  타미비어: [69, 71, 80, 78, 96, 93, 78, 91],
+};
+
+function getStockMeta(ratio: number): { status: StockStatus; label: string } {
+  if (ratio < 70) return { status: "danger", label: "위험" };
+  if (ratio < 100) return { status: "warning", label: "주의" };
+  return { status: "safe", label: "정상" };
 }
 
 function getProductIntegrationRecords(regionId: string, productKey: string) {
@@ -184,40 +189,48 @@ function DataIntegrationView({ product }: { product: Product }) {
           </div>
           {viewMode === "twin" ? (
             <div className="twin-section min-h-0 flex-1 overflow-auto">
-              <div className="twin-section-heading">
-                <span className="twin-live-dot" />
-                ERP · MES · WMS LIVE DIGITALIZATION
+              <div className="warehouse-frame" aria-hidden="true">
+                <span className="frame-roof-left" />
+                <span className="frame-roof-right" />
+                <span className="frame-beam" />
+                <span className="frame-column frame-column-left" />
+                <span className="frame-column frame-column-center" />
+                <span className="frame-column frame-column-right" />
+              </div>
+              <div className="warehouse-zone-tags" aria-label="창고 작업 구역">
+                <span><Icon name="move_to_inbox" /> 입고</span>
+                <span><Icon name="inventory_2" /> 보관</span>
+                <span><Icon name="shopping_cart" /> 피킹</span>
+                <span><Icon name="local_shipping" /> 출고</span>
               </div>
               <div className="twin-grid">
-                {markerOrder.map((id) => {
-                  const rows = getProductIntegrationRecords(id, product.key);
-                  const twinStatus = getTwinStatus(rows);
+                {markerOrder.map((id, index) => {
+                  const ratio = safetyStockRatios[product.key]?.[index] ?? 100;
+                  const stock = getStockMeta(ratio);
                   const isActive = regionId === id;
                   return (
                     <button
                       key={id}
                       type="button"
-                      data-status={twinStatus}
+                      data-status={stock.status}
                       className={`twin-block ${isActive ? "active" : ""}`}
                       onClick={() => selectTwinRegion(id)}
                       aria-label={`${regions[id].name} 시스템 상세 보기`}
                     >
+                      <span className="rack-info-card">
+                        <span>{regions[id].name}</span>
+                        <strong>안전재고 {ratio}%</strong>
+                      </span>
                       <span className="cube" aria-hidden="true">
                         <span className="cube-face cube-top" />
                         <span className="cube-face cube-front">
-                          <span className="cube-systems">
-                            {rows.map((row) => (
-                              <span key={row.system} className={row.status === "지연" ? "delayed" : ""}>
-                                {row.system}
-                              </span>
-                            ))}
-                          </span>
+                          <i /><i /><i />
                         </span>
-                        <span className="cube-face cube-side" />
+                        <span className="cube-face cube-side"><i /><i /><i /></span>
                       </span>
                       <span className="block-label">
                         <span className="status-dot" />
-                        <span>{regions[id].name}</span>
+                        <span>{stock.label}</span>
                       </span>
                     </button>
                   );
