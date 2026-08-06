@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
-import { lipilouDashboard, tamivirAnnualF2aTarget, tamivirDashboard, tamivirForecastByRegion } from "@/data/dashboard-scenario";
+import { lipilouDashboard, lipilouMonthlyForecastByTimelineKey, tamivirAnnualF2aTarget, tamivirDashboard, tamivirForecastByRegion } from "@/data/dashboard-scenario";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
 import { cefazolinWorkflowSteps } from "@/data/cefazolin-ai-workflow";
 import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
@@ -210,6 +210,9 @@ export function DashboardView({ product }: { product: Product }) {
       ? `${tamivirForecastRegion.yoy >= 0 ? "+" : ""}${tamivirForecastRegion.yoy.toFixed(1)}% YoY`
       : product.yoyGrowth;
   const isCurrentTimeline = timelineKey === "PRES";
+  const lipilouMonthlyForecast = product.key === "리피로우"
+    ? lipilouMonthlyForecastByTimelineKey[timelineKey]
+    : undefined;
   const appliedCefazolinScenarioId = isRecommendationApplied && product.key === "세파졸린"
     ? ({
         "CEFAZOLIN-S1-NO-RESPONSE": "S1_무대응",
@@ -250,7 +253,9 @@ export function DashboardView({ product }: { product: Product }) {
       : [];
   });
   const getScenarioRegion = (id: string) => {
-    const baseRegion = isCurrentTimeline ? scenario?.regions[id] : undefined;
+    const baseRegion = isCurrentTimeline
+      ? scenario?.regions[id]
+      : lipilouMonthlyForecast?.regions[id];
     if (!baseRegion || !isRecommendationApplied) return baseRegion;
     const exactProjectedRegion = appliedProjectedRecommendation?.projectedRegions?.[id];
     if (exactProjectedRegion) return { ...baseRegion, ...exactProjectedRegion };
@@ -302,7 +307,7 @@ export function DashboardView({ product }: { product: Product }) {
   const nationalRiskLevel: RiskLevel =
     (appliedCefazolinScenario
       ? appliedCefazolinScenario.unmetDemandRatePct > 0 ? "danger" : "safe"
-      : isCurrentTimeline ? scenario?.inventoryLevel : undefined) ??
+      : isCurrentTimeline ? scenario?.inventoryLevel : lipilouMonthlyForecast?.inventoryLevel) ??
     (timeline.stockoutRisk >= 15 ? "danger" : timeline.stockoutRisk >= 8 ? "warning" : "safe");
   const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
@@ -321,7 +326,7 @@ export function DashboardView({ product }: { product: Product }) {
     ? appliedProjectedRecommendation.projectedTotalInventory!
     : appliedCefazolinScenario
     ? Math.max(0, (cefazolinDashboard.totalInventory ?? 0) + cefazolinScenarioInventoryDelta)
-    : (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
+    : (isCurrentTimeline ? scenario?.totalInventory : lipilouMonthlyForecast?.totalInventory) ?? timeline.totalInventory;
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
   const forecastInventory = lipilouGraphRegion?.current_stock_box ?? tamivirForecastRegion?.currentStock ?? displayedTotalInventory;
@@ -332,7 +337,7 @@ export function DashboardView({ product }: { product: Product }) {
   const regionDescription = scenarioRegion
     ? appliedCefazolinScenario && regionId === "National"
       ? `${appliedCefazolinScenario.id} 예상 · 조달·미충족 반영 재고 ${Math.round(scenarioRegion.current_stock).toLocaleString("ko-KR")} BOX · 서비스율 ${appliedCefazolinScenario.serviceRatePct.toFixed(2)}% · 부족 ${appliedCefazolinScenario.shortageWeeks}주`
-      : `${scenario?.date} ${isRecommendationApplied ? "추천안 적용 예상값" : "실데이터"} · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
+      : `${lipilouMonthlyForecast?.month ?? scenario?.date} ${lipilouMonthlyForecast ? "시뮬레이션 예측" : isRecommendationApplied ? "추천안 적용 예상값" : "실데이터"} · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
     : `${timeline.label} ${timeline.isPrediction ? "예측" : "실측"} · 재고 상태 ${riskText}`;
 
   const recommendations: AiRecommendation[] = product.key === "세파졸린"

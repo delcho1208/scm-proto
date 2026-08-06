@@ -1,0 +1,217 @@
+{
+  "project": "종근당 리피로우 SCM 모니터링 대시보드 - 2027년 월별 재고 예상",
+  "unit_info": {
+    "unit": "BOX",
+    "box_conversion": "30정(EA) = 1박스",
+    "note": "target_stock은 전국권역월별재고결과_종근당최종수요.csv(2025-12 안전재고 기준, 30정=1박스 환산) 값을 그대로 사용"
+  },
+  "months": [
+    {
+      "month": "2026-11",
+      "regions_stock": [
+        {
+          "region": "Zone1_서울권",
+          "current_stock": 48757,
+          "target_stock": 38400,
+          "stock_ratio": 126.9,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone2_경기인천수도권",
+          "current_stock": 75659,
+          "target_stock": 54600,
+          "stock_ratio": 138.5,
+          "status": "과잉",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone3_강원권",
+          "current_stock": 7512,
+          "target_stock": 6400,
+          "stock_ratio": 117.0,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone4_대전세종충청권",
+          "current_stock": 5086,
+          "target_stock": 4800,
+          "stock_ratio": 105.9,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone5_광주전북전남권",
+          "current_stock": 7266,
+          "target_stock": 6900,
+          "stock_ratio": 105.3,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone6_대구경북권",
+          "current_stock": 13188,
+          "target_stock": 12200,
+          "stock_ratio": 108.1,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone7_부산울산경남권",
+          "current_stock": 16361,
+          "target_stock": 13400,
+          "stock_ratio": 122.1,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone8_제주권",
+          "current_stock": 3042,
+          "target_stock": 4300,
+          "stock_ratio": 70.7,
+          "status": "부족",
+          "color_status": "red"
+        }
+      ]
+    },
+    {
+      "month": "2026-12",
+      "regions_stock": [
+        {
+          "region": "Zone1_서울권",
+          "current_stock": 53997,
+          "target_stock": 38400,
+          "stock_ratio": 140.6,
+          "status": "과잉",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone2_경기인천수도권",
+          "current_stock": 70106,
+          "target_stock": 54600,
+          "stock_ratio": 128.4,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone3_강원권",
+          "current_stock": 7904,
+          "target_stock": 6400,
+          "stock_ratio": 123.5,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone4_대전세종충청권",
+          "current_stock": 6470,
+          "target_stock": 4800,
+          "stock_ratio": 134.8,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone5_광주전북전남권",
+          "current_stock": 9453,
+          "target_stock": 6900,
+          "stock_ratio": 137.0,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone6_대구경북권",
+          "current_stock": 10224,
+          "target_stock": 12200,
+          "stock_ratio": 83.8,
+          "status": "부족",
+          "color_status": "red"
+        },
+        {
+          "region": "Zone7_부산울산경남권",
+          "current_stock": 14686,
+          "target_stock": 13400,
+          "stock_ratio": 109.6,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone8_제주권",
+          "current_stock": 5156,
+          "target_stock": 4300,
+          "stock_ratio": 119.9,
+          "status": "적정",
+          "color_status": "green"
+        }
+      ]
+    },
+    {
+      "month": "2027-01",
+      "regions_stock": [
+        {
+          "region": "Zone1_서울권",
+          "current_stock": 48045,
+          "target_stock": 38400,
+          "stock_ratio": 125.1,
+          "status": "과잉",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone2_경기인천수도권",
+          "current_stock": 54584,
+          "target_stock": 54600,
+          "stock_ratio": 99.9,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone3_강원권",
+          "current_stock": 5792,
+          "target_stock": 6400,
+          "stock_ratio": 90.5,
+          "status": "부족",
+          "color_status": "red"
+        },
+        {
+          "region": "Zone4_대전세종충청권",
+          "current_stock": 5578,
+          "target_stock": 4800,
+          "stock_ratio": 116.2,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone5_광주전북전남권",
+          "current_stock": 7439,
+          "target_stock": 6900,
+          "stock_ratio": 107.8,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone6_대구경북권",
+          "current_stock": 14408,
+          "target_stock": 12200,
+          "stock_ratio": 118.1,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone7_부산울산경남권",
+          "current_stock": 14870,
+          "target_stock": 13400,
+          "stock_ratio": 110.9,
+          "status": "적정",
+          "color_status": "green"
+        },
+        {
+          "region": "Zone8_제주권",
+          "current_stock": 4341,
+          "target_stock": 4300,
+          "stock_ratio": 100.9,
+          "status": "적정",
+          "color_status": "green"
+        }
+      ]
+    }
+  ]
+}

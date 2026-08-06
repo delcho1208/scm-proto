@@ -1,4 +1,5 @@
 import rawLipilouScenario from "../../lipilou_dashboard_scenario.json";
+import rawLipilouMonthlyScenario from "../../lipilou_dashboard_2027_months.json";
 import rawTamivirScenario from "../../tamivir_dashboard_scenario.json";
 import type { RiskLevel } from "@/data/scm";
 
@@ -135,6 +136,13 @@ type LipilouRaw = {
   }>;
 };
 
+export type LipilouMonthlyForecast = {
+  month: string;
+  regions: Record<string, DashboardRegion>;
+  totalInventory: number;
+  inventoryLevel: RiskLevel;
+};
+
 const lipilouRaw = rawLipilouScenario as LipilouRaw;
 const lipilouLatest = [...lipilouRaw.scenarios]
   .filter((scenario) => scenario.map_monitoring?.length)
@@ -148,6 +156,33 @@ const lipilouTotalInventory = Object.values(lipilouRegions).reduce(
   (sum, region) => sum + region.current_stock,
   0,
 );
+
+const lipilouTimelineKeyByMonth: Record<string, string> = {
+  "2026-11": "26M11",
+  "2026-12": "26M12",
+  "2027-01": "27M01",
+};
+
+export const lipilouMonthlyForecastByTimelineKey = Object.fromEntries(
+  rawLipilouMonthlyScenario.months.map((item) => {
+    const month = item.month;
+    const regions = normalizeRegions(item.regions_stock);
+    const regionValues = Object.values(regions);
+    return [
+      lipilouTimelineKeyByMonth[month],
+      {
+        month,
+        regions,
+        totalInventory: regionValues.reduce((sum, region) => sum + region.current_stock, 0),
+        inventoryLevel: regionValues.some((region) => region.riskLevel === "danger")
+          ? "danger"
+          : regionValues.some((region) => region.riskLevel === "warning")
+            ? "warning"
+            : "safe",
+      } satisfies LipilouMonthlyForecast,
+    ];
+  }),
+) as Record<string, LipilouMonthlyForecast>;
 
 function getLipilouProjectedRegions(
   expected: NonNullable<NonNullable<LipilouRaw["scenarios"][number]["ai_solutions"]>[number]["expected_after_transfer"]> | undefined,
