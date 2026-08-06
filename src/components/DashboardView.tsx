@@ -3,6 +3,7 @@ import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
 import { lipilouDashboard, tamivirAnnualF2aTarget, tamivirDashboard, tamivirForecastByRegion } from "@/data/dashboard-scenario";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
 import { cefazolinWorkflowSteps } from "@/data/cefazolin-ai-workflow";
+import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
 import { createLipilouGraph, getLipilouGraphRegion } from "@/data/lipilou-graph";
 import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
@@ -119,7 +120,7 @@ export function DashboardView({ product }: { product: Product }) {
   const [timelineIndex, setTimelineIndex] = useState(2);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecommendationOpen, setIsRecommendationOpen] = useState(false);
-  const [isCefazolinWorkflowOpen, setIsCefazolinWorkflowOpen] = useState(false);
+  const [isAiWorkflowOpen, setIsAiWorkflowOpen] = useState(false);
   const [selectedRecommendationIndex, setSelectedRecommendationIndex] = useState(0);
   const [isRecommendationApplied, setIsRecommendationApplied] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -133,7 +134,7 @@ export function DashboardView({ product }: { product: Product }) {
   useEffect(() => {
     setCheckedRecommendationId(null);
     setIsRecommendationApplied(false);
-    setIsCefazolinWorkflowOpen(false);
+    setIsAiWorkflowOpen(false);
   }, [product.key]);
 
   useEffect(() => {
@@ -393,6 +394,9 @@ export function DashboardView({ product }: { product: Product }) {
 
   const selectedRecommendation =
     recommendations[selectedRecommendationIndex] ?? recommendations[0];
+  const hasAiWorkflow = product.key === "리피로우" || product.key === "세파졸린";
+  const aiWorkflowSteps = product.key === "리피로우" ? lipilouWorkflowSteps : cefazolinWorkflowSteps;
+  const aiWorkflowProductName = product.key === "리피로우" ? "Lipilou" : "Cefazolin";
 
   const checkedRecommendation = recommendations.find((recommendation) => recommendation.id === checkedRecommendationId);
   const activeTransferRoutes = checkedRecommendation?.routes ?? [];
@@ -779,10 +783,10 @@ export function DashboardView({ product }: { product: Product }) {
                 <Icon name="auto_awesome" className="text-[16px]" filled />
               </div>
               <h4 className="font-display text-headline-sm">AI 추천 실행안</h4>
-              {product.key === "세파졸린" ? (
+              {hasAiWorkflow ? (
                 <button
                   type="button"
-                  onClick={() => setIsCefazolinWorkflowOpen(true)}
+                  onClick={() => setIsAiWorkflowOpen(true)}
                   className="ml-auto cursor-pointer rounded-full border border-scm-primary/30 bg-white px-2.5 py-1 text-[10px] font-bold text-scm-primary hover:bg-primary-container/20"
                 >
                   AI 운영흐름
@@ -883,31 +887,31 @@ export function DashboardView({ product }: { product: Product }) {
         </div>
       </div>
 
-      {isCefazolinWorkflowOpen ? (
+      {isAiWorkflowOpen ? (
         <div
           className="fixed inset-0 z-[410] flex items-center justify-center bg-black/45 p-6 backdrop-blur-[2px]"
           role="presentation"
-          onMouseDown={() => setIsCefazolinWorkflowOpen(false)}
+          onMouseDown={() => setIsAiWorkflowOpen(false)}
         >
           <section
             role="dialog"
             aria-modal="true"
-            aria-label="세파졸린 AI 운영흐름"
+            aria-label={`${product.name} AI 운영흐름`}
             onMouseDown={(event) => event.stopPropagation()}
             className="flex max-h-[84vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl"
           >
             <header className="flex items-center justify-between border-b border-outline-variant px-6 py-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-scm-primary">Cefazolin AI Workflow</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-scm-primary">{aiWorkflowProductName} AI Workflow</p>
                 <h3 className="mt-1 font-display text-xl font-bold">AI 운영흐름 10단계</h3>
               </div>
-              <button type="button" onClick={() => setIsCefazolinWorkflowOpen(false)} className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-surface-container-low">
+              <button type="button" onClick={() => setIsAiWorkflowOpen(false)} className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-surface-container-low">
                 <Icon name="close" className="text-[20px]" />
               </button>
             </header>
             <div className="min-h-0 overflow-y-auto p-5">
               <div className="grid grid-cols-2 gap-3">
-                {cefazolinWorkflowSteps.map((step) => (
+                {aiWorkflowSteps.map((step) => (
                   <article key={step.id} className="rounded-xl border border-outline-variant bg-surface-container-low/40 p-4">
                     <div className="flex items-start gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
