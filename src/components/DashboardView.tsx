@@ -75,10 +75,10 @@ const productApiMeta: Record<string, { title: string; description: string; endpo
     icon: "coronavirus",
   },
   세파졸린: {
-    title: "원료 중단 API",
-    description: "원료 공급 중단·납기 지연 신호 연동 영역",
-    endpoint: "/api/raw-material-disruption",
-    icon: "factory",
+    title: "식약처 원료의약품 DMF API",
+    description: "세파졸린 원료 등록업체·제조소·제조국 조회",
+    endpoint: "/api/dmf?ingredient=세파졸린",
+    icon: "medication",
   },
 };
 
@@ -866,7 +866,7 @@ export function DashboardView({ product }: { product: Product }) {
             </div>
           </div>
 
-          <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
+          {product.key === "세파졸린" ? <DmfApiCard /> : <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
             <div className="flex items-start gap-sm">
               <div className="api-placeholder-icon">
                 <Icon name={productApi.icon} className="text-[18px]" />
@@ -886,7 +886,7 @@ export function DashboardView({ product }: { product: Product }) {
                 </code>
               </div>
             </div>
-          </div>
+          </div>}
 
           <NewsApiCard productName={product.name} />
         </div>
@@ -1053,6 +1053,82 @@ export function DashboardView({ product }: { product: Product }) {
           </section>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+type DmfItem = {
+  permitNo: string;
+  ingredient: string;
+  company: string;
+  manufacturer: string;
+  location: string;
+  country: string;
+  permitDate: string;
+};
+
+function DmfApiCard() {
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [items, setItems] = useState<DmfItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/dmf?ingredient=세파졸린", { signal: controller.signal })
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          items?: DmfItem[];
+          totalCount?: number;
+          error?: string;
+        };
+        if (!response.ok) throw new Error(payload.error || "DMF 데이터를 불러오지 못했습니다.");
+        setItems(payload.items ?? []);
+        setTotalCount(payload.totalCount ?? 0);
+        setState("ready");
+      })
+      .catch((requestError: unknown) => {
+        if (requestError instanceof DOMException && requestError.name === "AbortError") return;
+        setError(requestError instanceof Error ? requestError.message : "DMF API 연결 오류");
+        setState("error");
+      });
+    return () => controller.abort();
+  }, []);
+
+  const first = items[0];
+  return (
+    <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
+      <div className="flex items-start gap-sm">
+        <div className="api-placeholder-icon">
+          <Icon name="medication" className="text-[18px]" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-xs">
+            <h4 className="truncate text-sm font-bold text-on-surface">식약처 원료의약품 DMF API</h4>
+            <span className="api-ready-badge">
+              {state === "loading" ? "조회 중" : state === "ready" ? "데이터 연결" : "설정 필요"}
+            </span>
+          </div>
+          {state === "ready" ? (
+            <div className="mt-1 space-y-1 text-[10px] leading-tight text-on-surface-variant">
+              <p>세파졸린 검색 결과 {totalCount.toLocaleString("ko-KR")}건</p>
+              {first ? (
+                <p className="line-clamp-2">
+                  {first.company || "업체 미상"} · {first.manufacturer || "제조소 미상"}
+                  {first.country ? ` · ${first.country}` : ""}
+                </p>
+              ) : <p>등록된 원료의약품 결과가 없습니다.</p>}
+            </div>
+          ) : (
+            <p className={`mt-1 text-[10px] leading-tight ${state === "error" ? "text-error" : "text-on-surface-variant"}`}>
+              {state === "error" ? error : "식약처 DMF 등록현황을 조회하고 있습니다."}
+            </p>
+          )}
+          <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
+            /api/dmf?ingredient=세파졸린
+          </code>
+        </div>
+      </div>
     </div>
   );
 }
