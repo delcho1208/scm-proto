@@ -776,27 +776,30 @@
 .warehouse-photo-grid {
   position: absolute;
   z-index: 2;
-  top: 23%;
-  right: 16.5%;
-  bottom: 19%;
-  left: 19%;
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  grid-template-rows: repeat(2,1fr);
-  gap: 8% 3%;
+  inset: 0;
 }
 .warehouse-photo-zone {
   --zone-color: #16a34a;
-  position: relative;
+  position: absolute;
+  width: 14.2%;
+  height: 30.5%;
   border: 0;
   background: transparent;
   cursor: pointer;
 }
+.warehouse-photo-zone:nth-child(1) { left: 18.5%; top: 20.5%; }
+.warehouse-photo-zone:nth-child(2) { left: 34.1%; top: 20.5%; }
+.warehouse-photo-zone:nth-child(3) { left: 50.6%; top: 20.5%; }
+.warehouse-photo-zone:nth-child(4) { left: 67.0%; top: 20.5%; }
+.warehouse-photo-zone:nth-child(5) { left: 16.7%; top: 51.0%; }
+.warehouse-photo-zone:nth-child(6) { left: 34.1%; top: 51.0%; }
+.warehouse-photo-zone:nth-child(7) { left: 50.6%; top: 51.0%; }
+.warehouse-photo-zone:nth-child(8) { left: 67.0%; top: 51.0%; }
 .warehouse-photo-zone[data-status="warning"] { --zone-color: #eab308; }
 .warehouse-photo-zone[data-status="danger"] { --zone-color: #dc2626; }
 .warehouse-photo-outline {
   position: absolute;
-  inset: 20% 1% 2%;
+  inset: 17% 1% 1%;
   border: 2px solid color-mix(in srgb,var(--zone-color) 84%,white);
   border-radius: 4px;
   background: color-mix(in srgb,var(--zone-color) 9%,transparent);
@@ -805,14 +808,35 @@
   transition: .2s ease;
 }
 .warehouse-photo-zone:hover .warehouse-photo-outline,
-.warehouse-photo-zone.active .warehouse-photo-outline {
+.warehouse-photo-zone:focus-visible .warehouse-photo-outline {
   border-width: 3px;
   background: color-mix(in srgb,var(--zone-color) 14%,transparent);
   box-shadow: 0 0 14px color-mix(in srgb,var(--zone-color) 50%,transparent),inset 0 0 10px color-mix(in srgb,var(--zone-color) 24%,transparent);
 }
+.warehouse-photo-zone.active .warehouse-photo-outline {
+  inset: 14% -2% -2%;
+  border: 4px solid #2563eb;
+  background: color-mix(in srgb,var(--zone-color) 12%,transparent);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.82),0 0 20px rgba(37,99,235,.7),inset 0 0 14px rgba(37,99,235,.22);
+}
+.warehouse-photo-zone.active::after {
+  content: "✓ 선택됨";
+  position: absolute;
+  z-index: 5;
+  top: -10px;
+  right: -9px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  padding: 3px 7px;
+  color: #fff;
+  background: #2563eb;
+  box-shadow: 0 3px 10px rgba(37,99,235,.42);
+  font-size: 8px;
+  font-weight: 900;
+}
 .warehouse-photo-card {
   position: absolute;
-  top: -6px;
+  top: -4px;
   left: 50%;
   z-index: 3;
   display: flex;
@@ -826,6 +850,12 @@
   background: rgba(255,255,255,.96);
   box-shadow: 0 4px 12px rgba(15,23,42,.2);
   transform: translateX(-50%);
+  transition: border-color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+.warehouse-photo-zone.active .warehouse-photo-card {
+  border: 2px solid #2563eb;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.88),0 6px 18px rgba(37,99,235,.3);
+  transform: translateX(-50%) translateY(-4px);
 }
 .warehouse-photo-card span { display:flex; align-items:center; gap:6px; white-space:nowrap; font-size:10px; font-weight:900; }
 .warehouse-photo-card span i { width:8px; height:8px; border-radius:50%; background:var(--zone-color); }
@@ -834,7 +864,7 @@
 .warehouse-photo-status {
   position:absolute;
   right:5px;
-  bottom:5px;
+  bottom:2px;
   z-index:3;
   border-radius:99px;
   padding:2px 6px;
@@ -843,6 +873,7 @@
   font-size:8px;
   font-weight:900;
 }
+.warehouse-photo-zone.active .warehouse-photo-status { background:#2563eb; }
 .warehouse-photo-legend {
   position:absolute;
   z-index:4;
