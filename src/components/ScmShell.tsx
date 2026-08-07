@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { brandLogo, products, userAvatar, type Product } from "@/data/scm";
 import { useSelectedProductKey, setSelectedProductKey } from "@/data/product-store";
+import { triggerDataRefresh } from "@/data/app-signals";
 
 export function Icon({
   name,
