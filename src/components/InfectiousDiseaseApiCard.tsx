@@ -64,24 +64,12 @@ export function InfectiousDiseaseApiCard({ regionId }: { regionId: string }) {
           </div>
 
           {state === "ready" && summary ? (
-            <>
-              <div className="mt-1 flex items-end gap-2">
-                <strong className="font-data text-[20px] leading-none text-scm-primary">
-                  {summary.selected_region_total_patients.toLocaleString("ko-KR")}
-                </strong>
-                <span className="mb-0.5 text-[10px] font-bold text-on-surface-variant">명</span>
-                <span
-                  className={`mb-0.5 text-[10px] font-bold ${summary.mom_change > 0 ? "text-error" : "text-[#318f19]"}`}
-                >
-                  {summary.mom_change > 0 ? "▲" : "▼"} {Math.abs(summary.mom_change).toFixed(1)}%
-                  MoM
-                </span>
-              </div>
-              <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
-                {regionLabel} · 기준일 {summary.latest_date} · 전국{" "}
-                {summary.nationwide_total_patients.toLocaleString("ko-KR")}명
-              </p>
-            </>
+            <div className="mt-1 flex items-end gap-2">
+              <strong className="font-data text-[20px] leading-none text-scm-primary">
+                {summary.selected_region_total_patients.toLocaleString("ko-KR")}
+              </strong>
+              <span className="mb-0.5 text-[10px] font-bold text-on-surface-variant">명</span>
+            </div>
           ) : (
             <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
               {state === "error" ? error : "지역별 감염병 환자 추이 조회 중"}
