@@ -187,12 +187,6 @@ function DataIntegrationView({ product }: { product: Product }) {
           </div>
           {viewMode === "twin" ? (
             <div className="warehouse-photo-stage min-h-0 flex-1 overflow-hidden">
-              <div className="warehouse-zone-tags" aria-label="창고 작업 구역">
-                <span><Icon name="move_to_inbox" /> 입고</span>
-                <span><Icon name="inventory_2" /> 보관</span>
-                <span><Icon name="shopping_cart" /> 피킹</span>
-                <span><Icon name="local_shipping" /> 출고</span>
-              </div>
               <div className="warehouse-photo-grid">
                 {markerOrder.map((id) => {
                   const stock = getSimulationStockMeta(product.key, id);
