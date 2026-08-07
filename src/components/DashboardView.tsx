@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
-import { lipilouDashboard, lipilouMonthlyForecastByTimelineKey, tamivirAnnualF2aTarget, tamivirDashboard, tamivirForecastByRegion, tamivirMonthlyForecastByTimelineKey } from "@/data/dashboard-scenario";
+import {
+  lipilouDashboard,
+  lipilouMonthlyForecastByTimelineKey,
+  tamivirAnnualF2aTarget,
+  tamivirDashboard,
+  tamivirForecastByRegion,
+  tamivirMonthlyForecastByTimelineKey,
+} from "@/data/dashboard-scenario";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
 import { cefazolinWorkflowSteps } from "@/data/cefazolin-ai-workflow";
 import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
@@ -51,22 +58,60 @@ type AiRecommendation = {
   scenarioId?: string;
   projectedTotalInventory?: number;
   affectedRegions?: string[];
-  projectedRegions?: Record<string, { current_stock: number; target_stock: number; stock_ratio: number; stockRatioLabel?: string; riskLevel: RiskLevel; riskText: string }>;
+  projectedRegions?: Record<
+    string,
+    {
+      current_stock: number;
+      target_stock: number;
+      stock_ratio: number;
+      stockRatioLabel?: string;
+      riskLevel: RiskLevel;
+      riskText: string;
+    }
+  >;
   projectedTotalInventoryByTimelineKey?: Record<string, number>;
-  projectedRegionsByTimelineKey?: Record<string, Record<string, { current_stock: number; target_stock: number; stock_ratio: number; stockRatioLabel?: string; riskLevel: RiskLevel; riskText: string }>>;
+  projectedRegionsByTimelineKey?: Record<
+    string,
+    Record<
+      string,
+      {
+        current_stock: number;
+        target_stock: number;
+        stock_ratio: number;
+        stockRatioLabel?: string;
+        riskLevel: RiskLevel;
+        riskText: string;
+      }
+    >
+  >;
   xai?: { summary: string; evidence: string[]; limitation: string };
 };
 
 type ChartPoint = { x: number; y: number };
 
-function getPathPoints(path: string): ChartPoint[] {
-  return Array.from(path.matchAll(/[ML]\s*(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/gi), (match) => ({
-    x: Number(match[1]),
-    y: Number(match[2]),
-  }));
+function simulationScenarioTitle(productKey: Product["key"], index: number, fallback: string) {
+  if (/^S\d+\s/.test(fallback)) return fallback;
+  const titles: Partial<Record<Product["key"], string[]>> = {
+    리피로우: ["재고 이관", "타 생산라인 물량 추가"],
+    타미비어: ["신규 발주 보류", "잉여재고 CDC 이송"],
+  };
+  return `S${index + 1} ${titles[productKey]?.[index] ?? fallback}`;
 }
 
-const productApiMeta: Record<string, { title: string; description: string; endpoint: string; icon: string }> = {
+function getPathPoints(path: string): ChartPoint[] {
+  return Array.from(
+    path.matchAll(/[ML]\s*(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/gi),
+    (match) => ({
+      x: Number(match[1]),
+      y: Number(match[2]),
+    }),
+  );
+}
+
+const productApiMeta: Record<
+  string,
+  { title: string; description: string; endpoint: string; icon: string }
+> = {
   리피로우: {
     title: "건강검진 데이터 API",
     description: "이상지질혈증 검사·처방 수요 신호 연동 영역",
@@ -115,7 +160,14 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
     return () => cancelAnimationFrame(frame);
   }, [value]);
 
-  return <>{displayValue.toLocaleString("ko-KR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
+  return (
+    <>
+      {displayValue.toLocaleString("ko-KR", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
+    </>
+  );
 }
 
 export function DashboardView({ product }: { product: Product }) {
@@ -199,49 +251,64 @@ function StandardDashboardView({ product }: { product: Product }) {
           : null;
   const lipilouGraphRegion = product.key === "리피로우" ? getLipilouGraphRegion(regionId) : null;
   const lipilouGraph = lipilouGraphRegion ? createLipilouGraph(lipilouGraphRegion) : null;
-  const tamivirForecastRegion = product.key === "타미비어" ? tamivirForecastByRegion[regionId] ?? tamivirForecastByRegion.National : null;
+  const tamivirForecastRegion =
+    product.key === "타미비어"
+      ? (tamivirForecastByRegion[regionId] ?? tamivirForecastByRegion.National)
+      : null;
   const tamivirMonthlyTicks = ["26.08", "26.09", "26.10", "26.11", "26.12", "27.01"];
   const forecastPaths =
-    lipilouGraph ?? tamivirForecastRegion?.paths ?? (product.key === "세파졸린" ? (cefazolinDashboard.chartByRegion[regionId] ?? cefazolinDashboard.chart) : product.paths);
+    lipilouGraph ??
+    tamivirForecastRegion?.paths ??
+    (product.key === "세파졸린"
+      ? (cefazolinDashboard.chartByRegion[regionId] ?? cefazolinDashboard.chart)
+      : product.paths);
   const actualChartPoints = getPathPoints(forecastPaths.actual);
   const predictionChartPoints = getPathPoints(forecastPaths.prediction).filter((point, index) => {
     if (index > 0) return true;
     const lastActualPoint = actualChartPoints.at(-1);
     return !lastActualPoint || point.x !== lastActualPoint.x || point.y !== lastActualPoint.y;
   });
-  const annualDemand =
-    lipilouGraphRegion
-      ? lipilouGraphRegion.annual_demand_box.toLocaleString("ko-KR")
-      : product.key === "세파졸린"
-      ? Math.round(cefazolinDashboard.annualForecastDemandByRegion[regionId] ?? cefazolinDashboard.annualForecastDemand).toLocaleString("ko-KR")
+  const annualDemand = lipilouGraphRegion
+    ? lipilouGraphRegion.annual_demand_box.toLocaleString("ko-KR")
+    : product.key === "세파졸린"
+      ? Math.round(
+          cefazolinDashboard.annualForecastDemandByRegion[regionId] ??
+            cefazolinDashboard.annualForecastDemand,
+        ).toLocaleString("ko-KR")
       : product.key === "타미비어"
-      ? Math.round(regionId === "National" ? tamivirAnnualF2aTarget : tamivirForecastRegion?.forecast ?? 0).toLocaleString("ko-KR")
-      : product.annualDemand;
+        ? Math.round(
+            regionId === "National"
+              ? tamivirAnnualF2aTarget
+              : (tamivirForecastRegion?.forecast ?? 0),
+          ).toLocaleString("ko-KR")
+        : product.annualDemand;
   const forecastYoy = lipilouGraphRegion
     ? `${lipilouGraphRegion.yoy_pct >= 0 ? "+" : ""}${lipilouGraphRegion.yoy_pct}% YoY`
     : tamivirForecastRegion
       ? `${tamivirForecastRegion.yoy >= 0 ? "+" : ""}${tamivirForecastRegion.yoy.toFixed(1)}% YoY`
       : product.yoyGrowth;
   const isCurrentTimeline = timelineKey === "PRES";
-  const lipilouMonthlyForecast = product.key === "리피로우"
-    ? lipilouMonthlyForecastByTimelineKey[timelineKey]
-    : undefined;
-  const tamivirMonthlyForecast = scenario === tamivirDashboard
-    ? tamivirMonthlyForecastByTimelineKey[timelineKey]
-    : undefined;
-  const appliedCefazolinScenarioId = isRecommendationApplied && product.key === "세파졸린"
-    ? ({
-        "CEFAZOLIN-S1-NO-RESPONSE": "S1_무대응",
-        "CEFAZOLIN-S2-INTERNAL-RESPONSE": "S2_내부대응",
-        "CEFAZOLIN-EMERGENCY-PROCUREMENT": "S3_통합대응",
-        "CEFAZOLIN-S3-INTEGRATED-RESPONSE": "S3_통합대응",
-      } as Record<string, string>)[checkedRecommendationId ?? ""]
-    : undefined;
+  const lipilouMonthlyForecast =
+    product.key === "리피로우" ? lipilouMonthlyForecastByTimelineKey[timelineKey] : undefined;
+  const tamivirMonthlyForecast =
+    scenario === tamivirDashboard ? tamivirMonthlyForecastByTimelineKey[timelineKey] : undefined;
+  const appliedCefazolinScenarioId =
+    isRecommendationApplied && product.key === "세파졸린"
+      ? (
+          {
+            "CEFAZOLIN-S1-NO-RESPONSE": "S1_무대응",
+            "CEFAZOLIN-S2-INTERNAL-RESPONSE": "S2_내부대응",
+            "CEFAZOLIN-EMERGENCY-PROCUREMENT": "S3_통합대응",
+            "CEFAZOLIN-S3-INTEGRATED-RESPONSE": "S3_통합대응",
+          } as Record<string, string>
+        )[checkedRecommendationId ?? ""]
+      : undefined;
   const appliedCefazolinScenario = appliedCefazolinScenarioId
     ? cefazolinDashboard.scenarios.find((item) => item.id === appliedCefazolinScenarioId)
     : undefined;
   const cefazolinScenarioInventoryDelta = appliedCefazolinScenario
-    ? appliedCefazolinScenario.emergencyProcurementQuantity - appliedCefazolinScenario.totalUnmetDemand
+    ? appliedCefazolinScenario.emergencyProcurementQuantity -
+      appliedCefazolinScenario.totalUnmetDemand
     : 0;
   const cefazolinRegionalTargetTotal = Object.entries(cefazolinDashboard.regions)
     .filter(([id]) => id !== "National")
@@ -253,12 +320,13 @@ function StandardDashboardView({ product }: { product: Product }) {
     .filter(([id]) => id !== "National")
     .reduce((sum, [, item]) => sum + Math.max(0, item.target_stock - item.current_stock), 0);
   const appliedProjectedRecommendation = isRecommendationApplied
-    ? scenario?.recommendations.find((item) => item.id === checkedRecommendationId && item.projectedTotalInventory !== undefined)
+    ? scenario?.recommendations.find(
+        (item) => item.id === checkedRecommendationId && item.projectedTotalInventory !== undefined,
+      )
     : undefined;
-  const projectedAffectedStockTotal = (appliedProjectedRecommendation?.affectedRegions ?? []).reduce(
-    (sum, id) => sum + (scenario?.regions[id]?.current_stock ?? 0),
-    0,
-  );
+  const projectedAffectedStockTotal = (
+    appliedProjectedRecommendation?.affectedRegions ?? []
+  ).reduce((sum, id) => sum + (scenario?.regions[id]?.current_stock ?? 0), 0);
   const timelineProjectedTotalInventory =
     appliedProjectedRecommendation?.projectedTotalInventoryByTimelineKey?.[timelineKey];
   const timelineProjectedRegions =
@@ -269,13 +337,21 @@ function StandardDashboardView({ product }: { product: Product }) {
       recommendation.fromRegion &&
       recommendation.toRegion &&
       recommendation.transferAmount
-      ? [{ from: recommendation.fromRegion, to: recommendation.toRegion, amount: recommendation.transferAmount }]
+      ? [
+          {
+            from: recommendation.fromRegion,
+            to: recommendation.toRegion,
+            amount: recommendation.transferAmount,
+          },
+        ]
       : [];
   });
   const getScenarioRegion = (id: string) => {
     const baseRegion = isCurrentTimeline
       ? scenario?.regions[id]
-      : timelineProjectedRegions?.[id] ?? lipilouMonthlyForecast?.regions[id] ?? tamivirMonthlyForecast?.regions[id];
+      : (timelineProjectedRegions?.[id] ??
+        lipilouMonthlyForecast?.regions[id] ??
+        tamivirMonthlyForecast?.regions[id]);
     if (!baseRegion || !isRecommendationApplied) return baseRegion;
     const exactProjectedRegion =
       timelineProjectedRegions?.[id] ?? appliedProjectedRecommendation?.projectedRegions?.[id];
@@ -288,31 +364,42 @@ function StandardDashboardView({ product }: { product: Product }) {
     const scenarioDelta = appliedCefazolinScenario
       ? id === "National"
         ? cefazolinScenarioInventoryDelta
-        : (appliedCefazolinScenario.emergencyProcurementQuantity - appliedCefazolinScenario.totalUnmetDemand) *
-            (baseRegion.target_stock / cefazolinRegionalTargetTotal)
+        : (appliedCefazolinScenario.emergencyProcurementQuantity -
+            appliedCefazolinScenario.totalUnmetDemand) *
+          (baseRegion.target_stock / cefazolinRegionalTargetTotal)
       : 0;
-    const shouldRedistribute = appliedCefazolinScenarioId === "S2_내부대응" || appliedCefazolinScenarioId === "S3_통합대응";
+    const shouldRedistribute =
+      appliedCefazolinScenarioId === "S2_내부대응" || appliedCefazolinScenarioId === "S3_통합대응";
     const transferableQuantity = cefazolinDashboard.transferableQuantityByRegion[id] ?? 0;
-    const redistributionDelta = shouldRedistribute && id !== "National"
-      ? transferableQuantity
-        ? -transferableQuantity
-        : cefazolinShortfallTotal > 0
-          ? cefazolinRedistributionPool * (Math.max(0, baseRegion.target_stock - baseRegion.current_stock) / cefazolinShortfallTotal)
-          : 0
-      : 0;
+    const redistributionDelta =
+      shouldRedistribute && id !== "National"
+        ? transferableQuantity
+          ? -transferableQuantity
+          : cefazolinShortfallTotal > 0
+            ? cefazolinRedistributionPool *
+              (Math.max(0, baseRegion.target_stock - baseRegion.current_stock) /
+                cefazolinShortfallTotal)
+            : 0
+        : 0;
     const projectedInventoryDelta = appliedProjectedRecommendation
       ? id === "National"
-        ? appliedProjectedRecommendation.projectedTotalInventory! - (scenario?.totalInventory ?? baseRegion.current_stock)
-        : appliedProjectedRecommendation.affectedRegions?.includes(id) && projectedAffectedStockTotal > 0
-          ? (appliedProjectedRecommendation.projectedTotalInventory! - (scenario?.totalInventory ?? 0)) *
+        ? appliedProjectedRecommendation.projectedTotalInventory! -
+          (scenario?.totalInventory ?? baseRegion.current_stock)
+        : appliedProjectedRecommendation.affectedRegions?.includes(id) &&
+            projectedAffectedStockTotal > 0
+          ? (appliedProjectedRecommendation.projectedTotalInventory! -
+              (scenario?.totalInventory ?? 0)) *
             (baseRegion.current_stock / projectedAffectedStockTotal)
           : 0
       : 0;
-    const inventoryDelta = transferDelta + scenarioDelta + redistributionDelta + projectedInventoryDelta;
+    const inventoryDelta =
+      transferDelta + scenarioDelta + redistributionDelta + projectedInventoryDelta;
     if (inventoryDelta === 0) return baseRegion;
     const currentStock = Math.max(0, baseRegion.current_stock + inventoryDelta);
-    const stockRatio = baseRegion.target_stock > 0 ? (currentStock / baseRegion.target_stock) * 100 : 0;
-    const riskLevel: RiskLevel = stockRatio < 100 ? "danger" : stockRatio >= 130 ? "warning" : "safe";
+    const stockRatio =
+      baseRegion.target_stock > 0 ? (currentStock / baseRegion.target_stock) * 100 : 0;
+    const riskLevel: RiskLevel =
+      stockRatio < 100 ? "danger" : stockRatio >= 130 ? "warning" : "safe";
     return {
       ...baseRegion,
       current_stock: currentStock,
@@ -327,110 +414,145 @@ function StandardDashboardView({ product }: { product: Product }) {
   const region = regions[regionId];
   const nationalRiskLevel: RiskLevel =
     (appliedCefazolinScenario
-      ? appliedCefazolinScenario.unmetDemandRatePct > 0 ? "danger" : "safe"
-      : isCurrentTimeline ? scenario?.inventoryLevel : lipilouMonthlyForecast?.inventoryLevel ?? tamivirMonthlyForecast?.inventoryLevel) ??
+      ? appliedCefazolinScenario.unmetDemandRatePct > 0
+        ? "danger"
+        : "safe"
+      : isCurrentTimeline
+        ? scenario?.inventoryLevel
+        : (lipilouMonthlyForecast?.inventoryLevel ?? tamivirMonthlyForecast?.inventoryLevel)) ??
     (timeline.stockoutRisk >= 15 ? "danger" : timeline.stockoutRisk >= 8 ? "warning" : "safe");
-  const regionRiskLevel = scenarioRegion?.riskLevel ?? timelineRegion?.status ?? (regionId === "National" ? nationalRiskLevel : region.riskLevel);
+  const regionRiskLevel =
+    scenarioRegion?.riskLevel ??
+    timelineRegion?.status ??
+    (regionId === "National" ? nationalRiskLevel : region.riskLevel);
   const risk = riskStyles[regionRiskLevel];
   const nationalRisk = riskStyles[nationalRiskLevel];
-  const forecastRiskLevel: RiskLevel = product.key === "리피로우"
-    ? regionId === "National"
-      ? nationalRiskLevel
-      : regionRiskLevel
-    : nationalRiskLevel;
+  const forecastRiskLevel: RiskLevel =
+    product.key === "리피로우"
+      ? regionId === "National"
+        ? nationalRiskLevel
+        : regionRiskLevel
+      : nationalRiskLevel;
   const forecastRisk = riskStyles[forecastRiskLevel];
-  const forecastRiskText = forecastRiskLevel === "danger" ? "부족" : forecastRiskLevel === "warning" ? "과잉" : "적정";
+  const forecastRiskText =
+    forecastRiskLevel === "danger" ? "부족" : forecastRiskLevel === "warning" ? "과잉" : "적정";
 
   const displayedTotalInventory = appliedProjectedRecommendation
-    ? timelineProjectedTotalInventory ?? appliedProjectedRecommendation.projectedTotalInventory!
+    ? (timelineProjectedTotalInventory ?? appliedProjectedRecommendation.projectedTotalInventory!)
     : appliedCefazolinScenario
-    ? Math.max(0, (cefazolinDashboard.totalInventory ?? 0) + cefazolinScenarioInventoryDelta)
-    : (isCurrentTimeline ? scenario?.totalInventory : lipilouMonthlyForecast?.totalInventory ?? tamivirMonthlyForecast?.totalInventory) ?? timeline.totalInventory;
+      ? Math.max(0, (cefazolinDashboard.totalInventory ?? 0) + cefazolinScenarioInventoryDelta)
+      : ((isCurrentTimeline
+          ? scenario?.totalInventory
+          : (lipilouMonthlyForecast?.totalInventory ?? tamivirMonthlyForecast?.totalInventory)) ??
+        timeline.totalInventory);
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
-  const forecastInventory = lipilouGraphRegion?.current_stock_box ?? tamivirForecastRegion?.currentStock ?? displayedTotalInventory;
-  const forecastUtilization = lipilouGraphRegion?.operating_rate_pct ?? tamivirForecastRegion?.operationRate ?? displayedUtilization;
-  const panelInventory = scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
-  const riskText = regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
-  const nationalRiskText = nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
+  const forecastInventory =
+    lipilouGraphRegion?.current_stock_box ??
+    tamivirForecastRegion?.currentStock ??
+    displayedTotalInventory;
+  const forecastUtilization =
+    lipilouGraphRegion?.operating_rate_pct ??
+    tamivirForecastRegion?.operationRate ??
+    displayedUtilization;
+  const panelInventory =
+    scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
+  const riskText =
+    regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
+  const nationalRiskText =
+    nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
   const regionDescription = scenarioRegion
     ? appliedCefazolinScenario && regionId === "National"
       ? `${appliedCefazolinScenario.id} 예상 · 조달·미충족 반영 재고 ${Math.round(scenarioRegion.current_stock).toLocaleString("ko-KR")} BOX · 서비스율 ${appliedCefazolinScenario.serviceRatePct.toFixed(2)}% · 부족 ${appliedCefazolinScenario.shortageWeeks}주`
       : `${lipilouMonthlyForecast?.month ?? scenario?.date} ${lipilouMonthlyForecast ? "시뮬레이션 예측" : isRecommendationApplied ? "추천안 적용 예상값" : "실데이터"} · 목표 ${scenarioRegion.target_stock.toLocaleString()} BOX · 재고 수준 ${scenarioRegion.stockRatioLabel ?? `${scenarioRegion.stock_ratio}%`}`
     : `${timeline.label} ${timeline.isPrediction ? "예측" : "실측"} · 재고 상태 ${riskText}`;
 
-  const recommendations: AiRecommendation[] = product.key === "세파졸린"
-    ? cefazolinDashboard.recommendationEvaluations
-      .filter((recommendation) => [
-        "CEFAZOLIN-S1-NO-RESPONSE",
-        "CEFAZOLIN-S2-INTERNAL-RESPONSE",
-        "CEFAZOLIN-S3-INTEGRATED-RESPONSE",
-      ].includes(recommendation.id))
-      .map((recommendation) => ({
-        id: recommendation.id,
-        t: recommendation.title,
-        d: recommendation.description,
-        costReduction: recommendation.costKpi.value,
-        feasibility: recommendation.feasibility ? Math.round(recommendation.feasibility.score) : undefined,
-        scenarioId: recommendation.scenarioId,
-        xai: recommendation.xai,
-      }))
-    : scenario?.recommendations.length
-    ? scenario.recommendations.map((recommendation) => ({
-        id: recommendation.id,
-        t: recommendation.title,
-        d: recommendation.description,
-        routes:
-          recommendation.fromRegion && recommendation.toRegion
-            ? [
-                {
-                  from: recommendation.fromRegion,
-                  to: recommendation.toRegion,
-                  label: recommendation.transferAmount
-                    ? `${recommendation.transferAmount.toLocaleString()}${lipilouGraphRegion ? "BOX" : "EA"}`
-                    : undefined,
-                  amount: recommendation.transferAmount,
-                },
-              ]
-            : undefined,
-        costReduction: recommendation.costReduction ?? (recommendation.transferAmount ? "8~12%" : undefined),
-        feasibility: recommendation.feasibility ?? (
-          recommendation.fromRegion && recommendation.toRegion && recommendation.transferAmount
-            ? 86
-            : undefined
-        ),
-        executionPeriod: recommendation.executionPeriod ?? (recommendation.transferAmount ? "1~2주" : undefined),
-        supplyImpact: recommendation.supplyImpact,
-        projectedTotalInventory: recommendation.projectedTotalInventory,
-        affectedRegions: recommendation.affectedRegions,
-        projectedRegions: recommendation.projectedRegions,
-        projectedTotalInventoryByTimelineKey: recommendation.projectedTotalInventoryByTimelineKey,
-        projectedRegionsByTimelineKey: recommendation.projectedRegionsByTimelineKey,
-        xai: recommendation.xai,
-      }))
-    : [
-        { id: "fallback-1", t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
-        {
-          id: "fallback-2",
-          t: "재고 권역 재배치 최적화",
-          d: "강원/충청 → 수도권 물량 조정",
-          routes: [
-            { from: "Gangwon", to: "Gyeonggi" },
-            { from: "Chungcheong", to: "Gyeonggi" },
-          ],
-        },
-      ];
+  const recommendations: AiRecommendation[] =
+    product.key === "세파졸린"
+      ? cefazolinDashboard.recommendationEvaluations
+          .filter((recommendation) =>
+            [
+              "CEFAZOLIN-S1-NO-RESPONSE",
+              "CEFAZOLIN-S2-INTERNAL-RESPONSE",
+              "CEFAZOLIN-S3-INTEGRATED-RESPONSE",
+            ].includes(recommendation.id),
+          )
+          .map((recommendation, index) => ({
+            id: recommendation.id,
+            t: simulationScenarioTitle(product.key, index, recommendation.title),
+            d: recommendation.description,
+            costReduction: recommendation.costKpi.value,
+            feasibility: recommendation.feasibility
+              ? Math.round(recommendation.feasibility.score)
+              : undefined,
+            scenarioId: recommendation.scenarioId,
+            xai: recommendation.xai,
+          }))
+      : scenario?.recommendations.length
+        ? scenario.recommendations.map((recommendation, index) => ({
+            id: recommendation.id,
+            t: simulationScenarioTitle(product.key, index, recommendation.title),
+            d: recommendation.description,
+            routes:
+              recommendation.fromRegion && recommendation.toRegion
+                ? [
+                    {
+                      from: recommendation.fromRegion,
+                      to: recommendation.toRegion,
+                      label: recommendation.transferAmount
+                        ? `${recommendation.transferAmount.toLocaleString()}${lipilouGraphRegion ? "BOX" : "EA"}`
+                        : undefined,
+                      amount: recommendation.transferAmount,
+                    },
+                  ]
+                : undefined,
+            costReduction:
+              recommendation.costReduction ?? (recommendation.transferAmount ? "8~12%" : undefined),
+            feasibility:
+              recommendation.feasibility ??
+              (recommendation.fromRegion && recommendation.toRegion && recommendation.transferAmount
+                ? 86
+                : undefined),
+            executionPeriod:
+              recommendation.executionPeriod ??
+              (recommendation.transferAmount ? "1~2주" : undefined),
+            supplyImpact: recommendation.supplyImpact,
+            projectedTotalInventory: recommendation.projectedTotalInventory,
+            affectedRegions: recommendation.affectedRegions,
+            projectedRegions: recommendation.projectedRegions,
+            projectedTotalInventoryByTimelineKey:
+              recommendation.projectedTotalInventoryByTimelineKey,
+            projectedRegionsByTimelineKey: recommendation.projectedRegionsByTimelineKey,
+            xai: recommendation.xai,
+          }))
+        : [
+            { id: "fallback-1", t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
+            {
+              id: "fallback-2",
+              t: "재고 권역 재배치 최적화",
+              d: "강원/충청 → 수도권 물량 조정",
+              routes: [
+                { from: "Gangwon", to: "Gyeonggi" },
+                { from: "Chungcheong", to: "Gyeonggi" },
+              ],
+            },
+          ];
 
-  const selectedRecommendation =
-    recommendations[selectedRecommendationIndex] ?? recommendations[0];
+  const selectedRecommendation = recommendations[selectedRecommendationIndex] ?? recommendations[0];
   const hasAiWorkflow = product.key === "리피로우" || product.key === "세파졸린";
-  const aiWorkflowSteps = product.key === "리피로우" ? lipilouWorkflowSteps : cefazolinWorkflowSteps;
+  const aiWorkflowSteps =
+    product.key === "리피로우" ? lipilouWorkflowSteps : cefazolinWorkflowSteps;
   const aiWorkflowProductName = product.key === "리피로우" ? "Lipilou" : "Cefazolin";
 
-  const checkedRecommendation = recommendations.find((recommendation) => recommendation.id === checkedRecommendationId);
+  const checkedRecommendation = recommendations.find(
+    (recommendation) => recommendation.id === checkedRecommendationId,
+  );
   const activeTransferRoutes = checkedRecommendation?.routes ?? [];
   const canApplyCheckedRecommendation = Boolean(
-    checkedRecommendation && (checkedRecommendation.routes?.length || checkedRecommendation.scenarioId || checkedRecommendation.projectedTotalInventory !== undefined),
+    checkedRecommendation &&
+    (checkedRecommendation.routes?.length ||
+      checkedRecommendation.scenarioId ||
+      checkedRecommendation.projectedTotalInventory !== undefined),
   );
   const displayedTransferRoutes = isRecommendationApplied ? activeTransferRoutes : [];
   const productApi = productApiMeta[product.key] ?? productApiMeta.리피로우;
@@ -548,19 +670,42 @@ function StandardDashboardView({ product }: { product: Product }) {
                   <path className="path-actual" d={forecastPaths.actual} />
                   <path className="path-prediction" d={forecastPaths.prediction} />
                   {actualChartPoints.map((point, index) => (
-                    <circle key={`actual-${index}`} className="chart-dot" cx={point.x} cy={point.y} r="3" />
+                    <circle
+                      key={`actual-${index}`}
+                      className="chart-dot"
+                      cx={point.x}
+                      cy={point.y}
+                      r="3"
+                    />
                   ))}
                   {predictionChartPoints.map((point, index) => (
-                    <circle key={`prediction-${index}`} className="chart-dot chart-dot-prediction" cx={point.x} cy={point.y} r="3" />
+                    <circle
+                      key={`prediction-${index}`}
+                      className="chart-dot chart-dot-prediction"
+                      cx={point.x}
+                      cy={point.y}
+                      r="3"
+                    />
                   ))}
                 </svg>
                 <div className="mt-2 grid grid-cols-6 text-center text-[9px] font-bold text-on-surface-variant/60">
-                  {(lipilouGraph?.ticks ?? (tamivirForecastRegion ? tamivirMonthlyTicks : timelineKeys)).map((key, index) => (
+                  {(
+                    lipilouGraph?.ticks ??
+                    (tamivirForecastRegion ? tamivirMonthlyTicks : timelineKeys)
+                  ).map((key, index) => (
                     <span
                       key={key}
-                      className={index === timelineIndex ? (timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary") : ""}
+                      className={
+                        index === timelineIndex
+                          ? timeline.isPrediction
+                            ? "text-[#ad6800]"
+                            : "text-scm-primary"
+                          : ""
+                      }
                     >
-                      {lipilouGraph || tamivirForecastRegion ? key : timelineData[key as TimelineKey].tick}
+                      {lipilouGraph || tamivirForecastRegion
+                        ? key
+                        : timelineData[key as TimelineKey].tick}
                     </span>
                   ))}
                 </div>
@@ -570,23 +715,31 @@ function StandardDashboardView({ product }: { product: Product }) {
               <div className="forecast-kpi-row">
                 <div>
                   <p>현재 재고 (BOX)</p>
-                  <strong><AnimatedNumber value={forecastInventory} /></strong>
+                  <strong>
+                    <AnimatedNumber value={forecastInventory} />
+                  </strong>
                 </div>
                 <Icon name="inventory_2" className="text-[18px] text-scm-primary" />
               </div>
               <div className="forecast-kpi-row">
                 <div>
                   <p>가동률 (Operating Rate)</p>
-                  <strong className="text-scm-primary"><AnimatedNumber value={forecastUtilization} decimals={1} />%</strong>
+                  <strong className="text-scm-primary">
+                    <AnimatedNumber value={forecastUtilization} decimals={1} />%
+                  </strong>
                 </div>
                 <Icon name="precision_manufacturing" className="text-[18px] text-scm-primary" />
               </div>
               <div className="forecast-kpi-row">
                 <div>
                   <p>품절 위험</p>
-                  <div className={`mt-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 ${forecastRisk.badge}`}>
+                  <div
+                    className={`mt-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 ${forecastRisk.badge}`}
+                  >
                     <span className={`h-2 w-2 rounded-full ${forecastRisk.bullet}`} />
-                    <span className={`text-[10px] font-bold uppercase ${forecastRisk.text}`}>{forecastRiskText}</span>
+                    <span className={`text-[10px] font-bold uppercase ${forecastRisk.text}`}>
+                      {forecastRiskText}
+                    </span>
                   </div>
                 </div>
                 <Icon name="warning" className={`text-[18px] ${forecastRisk.text}`} />
@@ -601,16 +754,25 @@ function StandardDashboardView({ product }: { product: Product }) {
             <h4 className="shrink-0 font-display text-headline-sm text-on-surface">
               지능형 권역 모니터링
             </h4>
-            <div className="flex w-[145px] shrink-0 justify-start" aria-hidden={!isRecommendationApplied}>
-              <span className={`whitespace-nowrap rounded-full border border-scm-primary/30 bg-primary-container px-2.5 py-1 text-[10px] font-black text-on-primary-container transition-opacity ${isRecommendationApplied ? "opacity-100" : "pointer-events-none opacity-0"}`}>
+            <div
+              className="flex w-[145px] shrink-0 justify-start"
+              aria-hidden={!isRecommendationApplied}
+            >
+              <span
+                className={`whitespace-nowrap rounded-full border border-scm-primary/30 bg-primary-container px-2.5 py-1 text-[10px] font-black text-on-primary-container transition-opacity ${isRecommendationApplied ? "opacity-100" : "pointer-events-none opacity-0"}`}
+              >
                 AI 추천 적용 예상 결과
               </span>
             </div>
             <div className="time-scrubber min-w-0 flex-1">
               <div className="mb-1 flex items-center justify-between gap-sm">
                 <div className="flex items-center gap-xs">
-                  <span className="font-data text-xs font-bold text-on-surface">{timeline.label}</span>
-                  <span className={`timeline-badge ${timeline.isPrediction ? "prediction" : "actual"}`}>
+                  <span className="font-data text-xs font-bold text-on-surface">
+                    {timeline.label}
+                  </span>
+                  <span
+                    className={`timeline-badge ${timeline.isPrediction ? "prediction" : "actual"}`}
+                  >
                     {timeline.isPrediction ? "예측치" : "실측치"}
                   </span>
                 </div>
@@ -639,7 +801,15 @@ function StandardDashboardView({ product }: { product: Product }) {
               />
               <div className="timeline-ticks">
                 {timelineKeys.map((key, index) => (
-                  <button key={key} type="button" onClick={() => { setIsPlaying(false); changeTimeline(index); }} className={index === timelineIndex ? "active" : ""}>
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setIsPlaying(false);
+                      changeTimeline(index);
+                    }}
+                    className={index === timelineIndex ? "active" : ""}
+                  >
                     {timelineData[key].tick}
                   </button>
                 ))}
@@ -656,7 +826,10 @@ function StandardDashboardView({ product }: { product: Product }) {
               src={region.img}
               className="max-h-[90%] max-w-[90%] object-contain transition-opacity duration-300"
             />
-            <div key={timelineKey} className="timeline-data-fade pointer-events-none absolute left-1/2 top-1/2 aspect-[1456/1941] h-[90%] -translate-x-1/2 -translate-y-1/2">
+            <div
+              key={timelineKey}
+              className="timeline-data-fade pointer-events-none absolute left-1/2 top-1/2 aspect-[1456/1941] h-[90%] -translate-x-1/2 -translate-y-1/2"
+            >
               {displayedTransferRoutes.length > 0 && (
                 <svg
                   aria-label="AI 추천 물류 이동 경로"
@@ -696,7 +869,14 @@ function StandardDashboardView({ product }: { product: Product }) {
                         <circle className="transfer-route-origin" cx={from.x} cy={from.y} r="1.5" />
                         {route.label && (
                           <g transform={`translate(${labelX} ${labelY})`}>
-                            <rect className="transfer-route-label-bg" x="-8" y="-3.2" width="16" height="6.4" rx="3.2" />
+                            <rect
+                              className="transfer-route-label-bg"
+                              x="-8"
+                              y="-3.2"
+                              width="16"
+                              height="6.4"
+                              rx="3.2"
+                            />
                             <text className="transfer-route-label" textAnchor="middle" y="1.2">
                               {route.label}
                             </text>
@@ -709,9 +889,7 @@ function StandardDashboardView({ product }: { product: Product }) {
               )}
               {markerOrder.map((id) => {
                 const r = regions[id];
-                const markerRisk =
-                  getScenarioRegion(id)?.riskLevel ??
-                  timeline.regions[id]?.status;
+                const markerRisk = getScenarioRegion(id)?.riskLevel ?? timeline.regions[id]?.status;
                 if (!r.box) return null;
                 return (
                   <button
@@ -726,7 +904,6 @@ function StandardDashboardView({ product }: { product: Product }) {
                 );
               })}
             </div>
-
 
             <div
               key={`${timelineKey}-${regionId}`}
@@ -767,9 +944,7 @@ function StandardDashboardView({ product }: { product: Product }) {
                       className={`flex items-center gap-1.5 rounded-full border px-3 py-1 ${risk.badge}`}
                     >
                       <span className={`h-2 w-2 rounded-full ${risk.bullet}`} />
-                      <span className={`text-xs font-bold uppercase ${risk.text}`}>
-                        {riskText}
-                      </span>
+                      <span className={`text-xs font-bold uppercase ${risk.text}`}>{riskText}</span>
                     </div>
                   </div>
                 </div>
@@ -813,30 +988,33 @@ function StandardDashboardView({ product }: { product: Product }) {
               </div>
               <h4 className="font-display text-headline-sm">AI 추천 실행안</h4>
             </div>
-            <p className={`mb-xs text-[10px] font-bold ${timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary"}`}>
-              {timeline.label} 시점 기준 추천 · {timeline.isPrediction ? "예측 데이터 기반" : "실측 데이터 기반"}
+            <p
+              className={`mb-xs text-[10px] font-bold ${timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary"}`}
+            >
+              {timeline.label} 시점 기준 추천 ·{" "}
+              {timeline.isPrediction ? "예측 데이터 기반" : "실측 데이터 기반"}
             </p>
             <div className="min-h-0 flex-1 space-y-sm overflow-y-auto">
               {recommendations.map((rec, index) => {
                 const checked = checkedRecommendationId === rec.id;
                 return (
-                <label
-                  key={rec.t}
-                  className="flex cursor-pointer items-center gap-sm rounded p-xs transition-colors hover:bg-white/50"
-                >
-                  <input
-                    checked={checked}
-                    onChange={(event) => {
-                      setCheckedRecommendationId(event.target.checked ? rec.id : null);
-                      setIsRecommendationApplied(false);
-                    }}
-                    className="h-4 w-4 shrink-0 rounded accent-[#004ccd]"
-                    type="checkbox"
-                  />
-                  <div>
-                    <p className="text-xs font-bold text-on-surface">{rec.t}</p>
-                  </div>
-                </label>
+                  <label
+                    key={rec.t}
+                    className="flex cursor-pointer items-center gap-sm rounded p-xs transition-colors hover:bg-white/50"
+                  >
+                    <input
+                      checked={checked}
+                      onChange={(event) => {
+                        setCheckedRecommendationId(event.target.checked ? rec.id : null);
+                        setIsRecommendationApplied(false);
+                      }}
+                      className="h-4 w-4 shrink-0 rounded accent-[#004ccd]"
+                      type="checkbox"
+                    />
+                    <div>
+                      <p className="text-xs font-bold text-on-surface">{rec.t}</p>
+                    </div>
+                  </label>
                 );
               })}
             </div>
@@ -859,11 +1037,13 @@ function StandardDashboardView({ product }: { product: Product }) {
                 <button
                   type="button"
                   disabled={!canApplyCheckedRecommendation}
-                  title={!checkedRecommendation
-                    ? "실행안을 하나 선택해 주세요"
-                    : !canApplyCheckedRecommendation
-                      ? "예상 결과 데이터가 추가되면 적용할 수 있습니다"
-                      : undefined}
+                  title={
+                    !checkedRecommendation
+                      ? "실행안을 하나 선택해 주세요"
+                      : !canApplyCheckedRecommendation
+                        ? "예상 결과 데이터가 추가되면 적용할 수 있습니다"
+                        : undefined
+                  }
                   onClick={() => {
                     setIsPlaying(false);
                     setTimelineIndex(2);
@@ -877,27 +1057,35 @@ function StandardDashboardView({ product }: { product: Product }) {
             </div>
           </div>
 
-          {product.key === "세파졸린" ? <DmfApiCard /> : <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
-            <div className="flex items-start gap-sm">
-              <div className="api-placeholder-icon">
-                <Icon name={productApi.icon} className="text-[18px]" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-xs">
-                  <h4 className="truncate text-sm font-bold text-on-surface">{productApi.title}</h4>
-                  <span className="api-ready-badge">{scenario?.externalSignal ? "데이터 연결" : "연결 대기"}</span>
+          {product.key === "세파졸린" ? (
+            <DmfApiCard />
+          ) : (
+            <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
+              <div className="flex items-start gap-sm">
+                <div className="api-placeholder-icon">
+                  <Icon name={productApi.icon} className="text-[18px]" />
                 </div>
-                <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
-                  {scenario?.externalSignal
-                    ? `${scenario.externalSignal.title} · ${scenario.externalSignal.value} · ${scenario.externalSignal.detail}`
-                    : productApi.description}
-                </p>
-                <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
-                  {productApi.endpoint}
-                </code>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-xs">
+                    <h4 className="truncate text-sm font-bold text-on-surface">
+                      {productApi.title}
+                    </h4>
+                    <span className="api-ready-badge">
+                      {scenario?.externalSignal ? "데이터 연결" : "연결 대기"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
+                    {scenario?.externalSignal
+                      ? `${scenario.externalSignal.title} · ${scenario.externalSignal.value} · ${scenario.externalSignal.detail}`
+                      : productApi.description}
+                  </p>
+                  <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
+                    {productApi.endpoint}
+                  </code>
+                </div>
               </div>
             </div>
-          </div>}
+          )}
 
           <NewsApiCard productName={product.name} />
         </div>
@@ -918,29 +1106,53 @@ function StandardDashboardView({ product }: { product: Product }) {
           >
             <header className="flex items-center justify-between border-b border-outline-variant px-6 py-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-scm-primary">{aiWorkflowProductName} AI Workflow</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-scm-primary">
+                  {aiWorkflowProductName} AI Workflow
+                </p>
                 <h3 className="mt-1 font-display text-xl font-bold">AI 운영흐름 10단계</h3>
               </div>
-              <button type="button" onClick={() => setIsAiWorkflowOpen(false)} className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-surface-container-low">
+              <button
+                type="button"
+                onClick={() => setIsAiWorkflowOpen(false)}
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-surface-container-low"
+              >
                 <Icon name="close" className="text-[20px]" />
               </button>
             </header>
             <div className="min-h-0 overflow-y-auto p-5">
               <div className="grid grid-cols-2 gap-3">
                 {aiWorkflowSteps.map((step) => (
-                  <article key={step.id} className="rounded-xl border border-outline-variant bg-surface-container-low/40 p-4">
+                  <article
+                    key={step.id}
+                    className="rounded-xl border border-outline-variant bg-surface-container-low/40 p-4"
+                  >
                     <div className="flex items-start gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
                         <Icon name={step.icon} className="text-[18px]" />
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <h4 className="text-sm font-bold">{step.order}. {step.title}</h4>
-                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${step.status === "완료" ? "bg-green-50 text-[#318f19]" : step.status === "준비" ? "bg-blue-50 text-scm-primary" : step.status === "승인 필요" ? "bg-orange-50 text-[#ad6800]" : "bg-slate-100 text-slate-500"}`}>{step.status}</span>
+                          <h4 className="text-sm font-bold">
+                            {step.order}. {step.title}
+                          </h4>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${step.status === "완료" ? "bg-green-50 text-[#318f19]" : step.status === "준비" ? "bg-blue-50 text-scm-primary" : step.status === "승인 필요" ? "bg-orange-50 text-[#ad6800]" : "bg-slate-100 text-slate-500"}`}
+                          >
+                            {step.status}
+                          </span>
                         </div>
-                        <p className="mt-1 text-[11px] leading-5 text-on-surface-variant">{step.description}</p>
+                        <p className="mt-1 text-[11px] leading-5 text-on-surface-variant">
+                          {step.description}
+                        </p>
                         <ul className="mt-2 space-y-1 border-t border-outline-variant/50 pt-2">
-                          {step.evidence.slice(0, 3).map((evidence) => <li key={evidence} className="text-[10px] leading-4 text-on-surface-variant">· {evidence}</li>)}
+                          {step.evidence.slice(0, 3).map((evidence) => (
+                            <li
+                              key={evidence}
+                              className="text-[10px] leading-4 text-on-surface-variant"
+                            >
+                              · {evidence}
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     </div>
@@ -970,7 +1182,10 @@ function StandardDashboardView({ product }: { product: Product }) {
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-scm-primary">
                   AI Recommendation Evaluation
                 </p>
-                <h3 id="recommendation-dialog-title" className="mt-1 font-display text-xl font-bold text-on-surface">
+                <h3
+                  id="recommendation-dialog-title"
+                  className="mt-1 font-display text-xl font-bold text-on-surface"
+                >
                   AI 추천 실행안 비교 및 XAI 설명
                 </h3>
               </div>
@@ -1006,14 +1221,35 @@ function StandardDashboardView({ product }: { product: Product }) {
                             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-container text-[11px] font-black text-on-primary-container">
                               {index + 1}
                             </span>
-                            <span className="text-sm font-bold leading-snug text-on-surface">{recommendation.t}</span>
+                            <span className="text-sm font-bold leading-snug text-on-surface">
+                              {recommendation.t}
+                            </span>
                           </div>
-                          {isSelected ? <Icon name="check_circle" className="shrink-0 text-[18px] text-scm-primary" filled /> : null}
+                          {isSelected ? (
+                            <Icon
+                              name="check_circle"
+                              className="shrink-0 text-[18px] text-scm-primary"
+                              filled
+                            />
+                          ) : null}
                         </div>
                         <div className="mt-3 grid grid-cols-3 gap-2">
-                          <Metric label="비용 감축(추정)" value={recommendation.costReduction ?? "추가 예정"} />
-                          <Metric label="실현 가능성(추정)" value={recommendation.feasibility ? `${recommendation.feasibility}/100` : "추가 예정"} />
-                          <Metric label="실행 기간" value={recommendation.executionPeriod ?? "추가 예정"} />
+                          <Metric
+                            label="비용 감축(추정)"
+                            value={recommendation.costReduction ?? "추가 예정"}
+                          />
+                          <Metric
+                            label="실현 가능성(추정)"
+                            value={
+                              recommendation.feasibility
+                                ? `${recommendation.feasibility}/100`
+                                : "추가 예정"
+                            }
+                          />
+                          <Metric
+                            label="실행 기간"
+                            value={recommendation.executionPeriod ?? "추가 예정"}
+                          />
                         </div>
                       </button>
                     );
@@ -1024,20 +1260,29 @@ function StandardDashboardView({ product }: { product: Product }) {
               <div className="min-h-0 overflow-y-auto p-6">
                 <div className="flex items-center gap-2 text-scm-primary">
                   <Icon name="psychology" className="text-[22px]" filled />
-                  <span className="text-xs font-black uppercase tracking-wider">XAI Explanation</span>
+                  <span className="text-xs font-black uppercase tracking-wider">
+                    XAI Explanation
+                  </span>
                 </div>
                 <h4 className="mt-4 font-display text-lg font-bold leading-snug text-on-surface">
                   {selectedRecommendation.t}
                 </h4>
                 <div className="mt-4 rounded-xl border border-primary-container bg-primary-container/20 p-4">
-                  <p className="text-[11px] font-bold text-scm-primary">AI가 이 실행안을 추천한 이유</p>
+                  <p className="text-[11px] font-bold text-scm-primary">
+                    AI가 이 실행안을 추천한 이유
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-on-surface">
-                    {selectedRecommendation.xai?.summary ?? selectedRecommendation.d ?? "상세 XAI 설명은 추가 예정입니다."}
+                    {selectedRecommendation.xai?.summary ??
+                      selectedRecommendation.d ??
+                      "상세 XAI 설명은 추가 예정입니다."}
                   </p>
                   {selectedRecommendation.xai?.evidence.length ? (
                     <ul className="mt-3 space-y-1.5 border-t border-scm-primary/15 pt-3">
                       {selectedRecommendation.xai.evidence.map((evidence) => (
-                        <li key={evidence} className="flex gap-2 text-xs leading-5 text-on-surface-variant">
+                        <li
+                          key={evidence}
+                          className="flex gap-2 text-xs leading-5 text-on-surface-variant"
+                        >
                           <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-scm-primary" />
                           {evidence}
                         </li>
@@ -1047,16 +1292,44 @@ function StandardDashboardView({ product }: { product: Product }) {
                 </div>
 
                 <div className="mt-5 grid grid-cols-2 gap-3">
-                  <DetailItem icon="savings" label="비용 감축 효과" value={selectedRecommendation.costReduction ?? "산정 로직 및 상세 데이터 추가 예정"} />
-                  <DetailItem icon="task_alt" label="실현 가능성" value={selectedRecommendation.feasibility ? `${selectedRecommendation.feasibility}/100 · 실행 조건 검토 완료` : "평가 기준 및 점수 추가 예정"} />
-                  <DetailItem icon="schedule" label="예상 실행 기간" value={selectedRecommendation.executionPeriod ?? "실행 일정 추가 예정"} />
-                  <DetailItem icon="monitoring" label="예상 공급망 영향" value={selectedRecommendation.supplyImpact ?? "현재 재고 수준을 유지하면서 운영 리스크를 완화합니다."} />
+                  <DetailItem
+                    icon="savings"
+                    label="비용 감축 효과"
+                    value={
+                      selectedRecommendation.costReduction ?? "산정 로직 및 상세 데이터 추가 예정"
+                    }
+                  />
+                  <DetailItem
+                    icon="task_alt"
+                    label="실현 가능성"
+                    value={
+                      selectedRecommendation.feasibility
+                        ? `${selectedRecommendation.feasibility}/100 · 실행 조건 검토 완료`
+                        : "평가 기준 및 점수 추가 예정"
+                    }
+                  />
+                  <DetailItem
+                    icon="schedule"
+                    label="예상 실행 기간"
+                    value={selectedRecommendation.executionPeriod ?? "실행 일정 추가 예정"}
+                  />
+                  <DetailItem
+                    icon="monitoring"
+                    label="예상 공급망 영향"
+                    value={
+                      selectedRecommendation.supplyImpact ??
+                      "현재 재고 수준을 유지하면서 운영 리스크를 완화합니다."
+                    }
+                  />
                 </div>
 
                 <div className="mt-5 rounded-xl bg-surface-container-low p-4">
-                  <p className="text-[11px] font-bold text-on-surface-variant">판단 근거 및 제약 조건</p>
+                  <p className="text-[11px] font-bold text-on-surface-variant">
+                    판단 근거 및 제약 조건
+                  </p>
                   <p className="mt-2 text-xs leading-5 text-on-surface-variant">
-                    {selectedRecommendation.xai?.limitation ?? "현재 연결된 재고와 이관 경로를 기준으로 설명합니다. 비용 모델, 인력·설비 제약 및 상세 실행 조건은 데이터 업로드 후 추가 예정입니다."}
+                    {selectedRecommendation.xai?.limitation ??
+                      "현재 연결된 재고와 이관 경로를 기준으로 설명합니다. 비용 모델, 인력·설비 제약 및 상세 실행 조건은 데이터 업로드 후 추가 예정입니다."}
                   </p>
                 </div>
               </div>
@@ -1117,10 +1390,16 @@ function DmfApiCard() {
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="flex items-center justify-between gap-xs">
             <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.12em] text-scm-primary">MFDS · DMF</p>
-              <h4 className="truncate text-[13px] font-bold text-on-surface">세파졸린 원료 등록현황</h4>
+              <p className="text-[9px] font-black uppercase tracking-[0.12em] text-scm-primary">
+                MFDS · DMF
+              </p>
+              <h4 className="truncate text-[13px] font-bold text-on-surface">
+                세파졸린 원료 등록현황
+              </h4>
             </div>
-            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold ${state === "ready" ? "border-green-200 bg-green-50 text-[#318f19]" : state === "error" ? "border-red-200 bg-red-50 text-error" : "border-blue-200 bg-blue-50 text-scm-primary"}`}>
+            <span
+              className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold ${state === "ready" ? "border-green-200 bg-green-50 text-[#318f19]" : state === "error" ? "border-red-200 bg-red-50 text-error" : "border-blue-200 bg-blue-50 text-scm-primary"}`}
+            >
               {state === "loading" ? "조회 중" : state === "ready" ? "● LIVE" : "연결 대기"}
             </span>
           </div>
@@ -1128,27 +1407,45 @@ function DmfApiCard() {
             <div className="mt-2 flex min-h-0 items-center gap-3">
               <div className="shrink-0 border-r border-outline-variant/60 pr-3">
                 <div className="flex items-end gap-1">
-                  <strong className="font-data text-[22px] leading-none text-scm-primary">{totalCount.toLocaleString("ko-KR")}</strong>
+                  <strong className="font-data text-[22px] leading-none text-scm-primary">
+                    {totalCount.toLocaleString("ko-KR")}
+                  </strong>
                   <span className="mb-0.5 text-[10px] font-bold text-on-surface-variant">건</span>
                 </div>
                 <p className="mt-1 text-[9px] font-bold text-on-surface-variant">DMF 등록</p>
               </div>
               {first ? (
                 <div className="min-w-0 flex-1 space-y-1">
-                  <p className="truncate text-[11px] font-bold text-on-surface">{first.company || "업체 정보 없음"}</p>
-                  <p className="truncate text-[9px] text-on-surface-variant">{first.manufacturer || "제조소 정보 없음"}</p>
+                  <p className="truncate text-[11px] font-bold text-on-surface">
+                    {first.company || "업체 정보 없음"}
+                  </p>
+                  <p className="truncate text-[9px] text-on-surface-variant">
+                    {first.manufacturer || "제조소 정보 없음"}
+                  </p>
                   <div className="flex items-center gap-1.5">
-                    {first.country ? <span className="rounded bg-surface-container-low px-1.5 py-0.5 text-[8px] font-bold text-on-surface-variant">{first.country}</span> : null}
-                    {first.permitDate ? <span className="text-[8px] text-on-surface-variant">등록 {first.permitDate}</span> : null}
+                    {first.country ? (
+                      <span className="rounded bg-surface-container-low px-1.5 py-0.5 text-[8px] font-bold text-on-surface-variant">
+                        {first.country}
+                      </span>
+                    ) : null}
+                    {first.permitDate ? (
+                      <span className="text-[8px] text-on-surface-variant">
+                        등록 {first.permitDate}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
-              ) : <p className="text-[10px] text-on-surface-variant">등록 결과 없음</p>}
+              ) : (
+                <p className="text-[10px] text-on-surface-variant">등록 결과 없음</p>
+              )}
             </div>
           ) : (
             <div className="mt-3 rounded-lg bg-surface-container-low/80 px-3 py-2">
-            <p className={`text-[10px] leading-tight ${state === "error" ? "text-error" : "text-on-surface-variant"}`}>
-              {state === "error" ? error : "식약처 DMF 등록현황을 조회하고 있습니다."}
-            </p>
+              <p
+                className={`text-[10px] leading-tight ${state === "error" ? "text-error" : "text-on-surface-variant"}`}
+              >
+                {state === "error" ? error : "식약처 DMF 등록현황을 조회하고 있습니다."}
+              </p>
             </div>
           )}
         </div>
@@ -1200,7 +1497,11 @@ function NewsApiCard({ productName }: { productName: string }) {
             <h4 className="truncate text-sm font-bold text-on-surface">{productName} 뉴스</h4>
             <div className="flex shrink-0 items-center gap-1.5">
               <span className="api-ready-badge">
-                {newsState === "loading" ? "검색 중" : newsState === "ready" ? "연결됨" : "설정 필요"}
+                {newsState === "loading"
+                  ? "검색 중"
+                  : newsState === "ready"
+                    ? "연결됨"
+                    : "설정 필요"}
               </span>
               <button
                 type="button"
@@ -1261,8 +1562,13 @@ function NewsApiCard({ productName }: { productName: string }) {
                   <Icon name="newspaper" className="text-[18px]" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-scm-primary">NAVER NEWS</p>
-                  <h3 id="news-dialog-title" className="font-display text-lg font-bold text-on-surface">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-scm-primary">
+                    NAVER NEWS
+                  </p>
+                  <h3
+                    id="news-dialog-title"
+                    className="font-display text-lg font-bold text-on-surface"
+                  >
                     {productName} 최신 뉴스
                   </h3>
                 </div>
@@ -1279,12 +1585,7 @@ function NewsApiCard({ productName }: { productName: string }) {
             <ul className="max-h-[60vh] divide-y divide-outline-variant/50 overflow-y-auto px-6">
               {news.map((item) => (
                 <li key={`${item.url}-${item.publishedAt}`} className="py-4">
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group block"
-                  >
+                  <a href={item.url} target="_blank" rel="noreferrer" className="group block">
                     <span className="text-sm font-bold leading-6 text-on-surface group-hover:text-scm-primary group-hover:underline">
                       {item.title}
                     </span>
