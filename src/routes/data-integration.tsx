@@ -50,7 +50,7 @@ const dataTypeStyle: Record<string, string> = {
   "WMS 일별 재고 실적": "bg-amber-50 text-amber-700 border-amber-200",
 };
 
-type StockStatus = "safe" | "warning" | "danger";
+type StockStatus = "safe" | "warning" | "danger" | "critical";
 
 function getSimulationStockMeta(productKey: string, regionId: string): { ratio: number; valueLabel: string; status: StockStatus; label: string; description: string; critical: boolean } {
   const dashboard = productKey === "세파졸린"
@@ -64,7 +64,7 @@ function getSimulationStockMeta(productKey: string, regionId: string): { ratio: 
     if (rawRatio < 1) return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "danger", label: "부족", description: "안전재고 미달", critical: false };
     if (rawRatio < 3) return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "safe", label: "적정", description: "정상 운영", critical: false };
     if (rawRatio < 10) return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "warning", label: "과잉", description: "재고 과다, 모니터링 필요", critical: false };
-    return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "danger", label: "심각한 과잉", description: "생산감축 Trigger 발생", critical: true };
+    return { ratio: rawRatio, valueLabel: `${rawRatio.toFixed(1)}배`, status: "critical", label: "심각한 과잉", description: "생산감축 Trigger 발생", critical: true };
   }
 
   const ratio = Math.round(rawRatio);
