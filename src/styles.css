@@ -910,7 +910,7 @@
 .warehouse-photo-legend .danger i { background:#dc2626; }
 .warehouse-photo-legend .warning i { background:#eab308; }
 .warehouse-photo-legend .safe i { background:#16a34a; }
-.warehouse-photo-legend .critical i { background:#dc2626; animation:warehouseCriticalPulse 1.35s ease-in-out infinite; }
+.warehouse-photo-legend .critical i { background:#9333ea; animation:warehouseCriticalPulse 1.35s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .twin-live-dot,
   .block-label .status-dot {
