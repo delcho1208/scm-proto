@@ -47,6 +47,7 @@ export type ProductDashboardScenario = {
   totalInventory?: number;
   utilization?: number;
   inventoryLevel?: RiskLevel;
+  riskScore?: number;
   externalSignal?: {
     title: string;
     value: string;

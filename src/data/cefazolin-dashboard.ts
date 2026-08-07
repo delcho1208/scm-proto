@@ -123,7 +123,7 @@ const nationalMonthly = monthlyOrder.map((month) => {
   };
 });
 
-const regionalMonthly = {
+const regionalMonthly: Record<string, typeof nationalMonthly> = {
   National: nationalMonthly,
   ...monthlyByRegion,
 };

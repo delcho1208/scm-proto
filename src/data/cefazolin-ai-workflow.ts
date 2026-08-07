@@ -18,6 +18,8 @@ export type CefazolinWorkflowStep = {
   title: string;
   shortTitle: string;
   purpose: string;
+  description?: string;
+  status?: string;
   icon: string;
   ruleIds: string[];
   dataAsOf: string;
