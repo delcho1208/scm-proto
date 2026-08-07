@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Icon } from "@/components/ScmShell";
 import { regions } from "@/data/scm";
 import { infectiousRiskLabel, type InfectiousSummary } from "@/data/infectious-region-map";
 import { setInfectiousSummary, useRefreshToken } from "@/data/app-signals";
+import { loadInfectiousSummaries, useInfectiousCache } from "@/data/infectious-cache";
 
 const riskStyle: Record<string, string> = {
   normal: "border-green-200 bg-green-50 text-[#318f19]",
@@ -11,34 +12,39 @@ const riskStyle: Record<string, string> = {
 };
 
 export function InfectiousDiseaseApiCard({ regionId }: { regionId: string }) {
-  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const [summary, setSummary] = useState<InfectiousSummary | null>(null);
-  const [error, setError] = useState("");
+  const cache = useInfectiousCache();
   const refreshToken = useRefreshToken();
   const regionLabel = regions[regionId]?.name ?? "전국 통합";
 
+  // Load once when the dashboard/card first appears.
   useEffect(() => {
-    const controller = new AbortController();
-    setState("loading");
-    fetch(`/api/infectious-disease?mode=summary&region=${encodeURIComponent(regionId)}`, {
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        const payload = (await response.json()) as InfectiousSummary & { error?: string };
-        if (!response.ok) throw new Error(payload.error || "감염병 데이터를 불러오지 못했습니다.");
-        const next = { ...payload, selected_region_label: regionLabel };
-        setSummary(next);
-        setInfectiousSummary(next);
-        setState("ready");
-      })
-      .catch((requestError: unknown) => {
-        if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-        setError(requestError instanceof Error ? requestError.message : "감염병 API 연결 오류");
-        setState("error");
-      });
-    return () => controller.abort();
-  }, [regionId, refreshToken, regionLabel]);
+    loadInfectiousSummaries();
+  }, []);
 
+  // Refresh cached data when the user clicks the global "Refresh Data" button.
+  useEffect(() => {
+    loadInfectiousSummaries({ force: true, background: true });
+  }, [refreshToken]);
+
+  const summary: InfectiousSummary | null = useMemo(() => {
+    const entry = cache.data[regionId];
+    return entry?.summary ?? null;
+  }, [cache.data, regionId]);
+
+  // Expose the currently displayed summary for AI/SCM reuse.
+  useEffect(() => {
+    if (summary) {
+      setInfectiousSummary(summary);
+    }
+  }, [summary]);
+
+  const state: "loading" | "ready" | "error" = useMemo(() => {
+    if (summary) return "ready";
+    if (cache.status === "error") return "error";
+    return "loading";
+  }, [summary, cache.status]);
+
+  const error = cache.error || "감염병 API 연결 오류";
   const risk = summary?.risk_level ?? "normal";
 
   return (
