@@ -1,5 +1,18 @@
 import { useState, type ReactNode } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  LabelList,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Icon } from "@/components/ScmShell";
+
 import type { Product } from "@/data/scm";
 import {
   lipilouDashboard,
@@ -80,12 +93,14 @@ function Metric({
   note,
   icon,
   tone = "primary",
+  dense = false,
 }: {
   label: string;
   value: string;
   note: string;
   icon: string;
   tone?: "primary" | "danger" | "warning" | "success";
+  dense?: boolean;
 }) {
   const iconStyle = {
     primary: "bg-primary-container/40 text-scm-primary",
@@ -94,20 +109,29 @@ function Metric({
     success: "bg-green-50 text-green-700",
   }[tone];
   return (
-    <div className="bento-card flex min-h-[118px] flex-col justify-between p-md">
+    <div
+      className={`bento-card flex flex-col justify-between ${dense ? "min-h-0 px-3 py-2" : "min-h-[118px] p-md"}`}
+    >
       <div className="flex items-center justify-between gap-sm">
         <span className="text-[11px] font-bold text-on-surface-variant">{label}</span>
-        <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconStyle}`}>
-          <Icon name={icon} className="text-[18px]" />
+        <span
+          className={`flex items-center justify-center rounded-lg ${dense ? "h-6 w-6" : "h-8 w-8"} ${iconStyle}`}
+        >
+          <Icon name={icon} className={dense ? "text-[15px]" : "text-[18px]"} />
         </span>
       </div>
       <div>
-        <p className="font-data text-[24px] font-bold leading-tight text-on-surface">{value}</p>
-        <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">{note}</p>
+        <p
+          className={`font-data font-bold leading-tight text-on-surface ${dense ? "text-[19px]" : "text-[24px]"}`}
+        >
+          {value}
+        </p>
+        <p className="mt-0.5 text-[10px] leading-4 text-on-surface-variant">{note}</p>
       </div>
     </div>
   );
 }
+
 
 function SignalBar({
   value,
@@ -135,14 +159,18 @@ function Section({
   subtitle,
   children,
   action,
+  className = "",
+  bodyClassName = "p-md",
 }: {
   title: string;
   subtitle?: string;
   children: ReactNode;
   action?: ReactNode;
+  className?: string;
+  bodyClassName?: string;
 }) {
   return (
-    <section className="bento-card overflow-hidden">
+    <section className={`bento-card overflow-hidden ${className}`}>
       <div className="flex items-start justify-between gap-md border-b border-outline-variant/60 px-md py-sm">
         <div>
           <h3 className="font-display text-[15px] font-bold text-on-surface">{title}</h3>
@@ -150,10 +178,11 @@ function Section({
         </div>
         {action}
       </div>
-      <div className="p-md">{children}</div>
+      <div className={bodyClassName}>{children}</div>
     </section>
   );
 }
+
 
 function actionSystem(actionType: string) {
   if (actionType.includes("발주")) return "ERP";
@@ -1005,6 +1034,24 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const affectedRegionNames = shortageRegions.map((region) =>
     region.region.split("_").slice(1).join("_"),
   );
+  const regionChartData = regions.map((region) => {
+    const name = region.region.split("_").slice(1).join("_");
+    const ratio = region.stock_ratio;
+    const color =
+      region.riskLevel === "danger"
+        ? "#ef4444"
+        : region.riskLevel === "warning"
+          ? "#f59e0b"
+          : "#22c55e";
+    return {
+      id: region.id,
+      name,
+      ratio,
+      color,
+      label: `${ratio.toFixed(0)}%`,
+    };
+  });
+
   const propagationStages = [
     {
       label: "공급 이행 저하",
@@ -1098,8 +1145,13 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   };
 
   return (
-    <div className="dashboard-fixed-layout flex-1 bg-surface px-lg pb-16 pt-16">
-      <div className="flex items-end justify-between gap-lg py-lg">
+    <div
+      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-screen max-h-screen min-h-0 overflow-hidden pb-12" : "pb-16"}`}
+    >
+      <div
+        className={`flex items-end justify-between gap-lg ${tab === "impact" ? "shrink-0 py-1" : "py-lg"}`}
+      >
+
         <div>
           <div className="mb-xs flex items-center gap-2">
             <Pill tone="danger">HIGH</Pill>
@@ -1125,11 +1177,18 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               SANDBOX · SYNTHETIC DATA
             </span>
           </div>
-          <h2 className="font-display text-headline-md text-on-surface">세파졸린 의사결정 실행</h2>
-          <p className="mt-xs text-sm text-on-surface-variant">
+          <h2
+            className={`font-display text-on-surface ${tab === "impact" ? "text-[22px] font-bold leading-tight" : "text-headline-md"}`}
+          >
+            세파졸린 의사결정 실행
+          </h2>
+          <p
+            className={`text-on-surface-variant ${tab === "impact" ? "text-[11px]" : "mt-xs text-sm"}`}
+          >
             수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
             {cefazolinWorkflowRunMeta.latestSnapshotDate}
           </p>
+
         </div>
         <button
           type="button"
@@ -1142,13 +1201,15 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         </button>
       </div>
 
-      <div className="mb-md flex items-center rounded-xl border border-outline-variant bg-white p-1.5 shadow-sm">
+      <div
+        className={`shrink-0 flex items-center rounded-xl border border-outline-variant bg-white p-1 shadow-sm ${tab === "impact" ? "mb-1" : "mb-sm"}`}
+      >
         {tabItems.map((item) => (
           <button
             key={item.key}
             type="button"
             onClick={() => setTab(item.key)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-md py-2.5 text-xs font-bold transition ${tab === item.key ? "bg-scm-primary text-white shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-md text-xs font-bold transition ${tab === "impact" ? "py-1.5" : "py-2.5"} ${tab === item.key ? "bg-scm-primary text-white shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
           >
             <Icon name={item.icon} className="text-[17px]" />
             {item.label}
@@ -1156,39 +1217,42 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         ))}
       </div>
 
+
       {tab === "impact" ? (
-        <div className="space-y-md">
+        <div className="flex min-h-0 flex-1 flex-col gap-sm overflow-hidden">
           <Section
             title="Case 탐지 요약"
             subtitle="직접 공급 신호와 수급 위험 신호를 결합해 의사결정 Case로 전환"
             action={<Pill tone="danger">{nationalPolicyRisk.grade}</Pill>}
+            className="shrink-0"
+            bodyClassName="p-sm"
           >
             <div className="grid grid-cols-4 gap-sm">
-              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-sm">
+              <div className="rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1.5">
                 <p className="text-[10px] font-bold text-on-surface-variant">위험 등급 · 점수</p>
-                <div className="mt-2 flex items-end justify-between gap-sm">
-                  <strong className="font-data text-xl">{nationalPolicyRisk.score}/100</strong>
+                <div className="mt-1 flex items-end justify-between gap-sm">
+                  <strong className="font-data text-lg">{nationalPolicyRisk.score}/100</strong>
                   <span className="text-[10px] font-bold text-error">HIGH</span>
                 </div>
-                <div className="mt-2">
+                <div className="mt-1">
                   <SignalBar value={nationalPolicyRisk.score} tone="danger" />
                 </div>
               </div>
-              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-sm">
+              <div className="rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1.5">
                 <p className="text-[10px] font-bold text-on-surface-variant">Case ID</p>
-                <p className="mt-2 font-data text-[12px] font-bold text-on-surface">
+                <p className="mt-1 font-data text-[12px] font-bold text-on-surface">
                   {cefazolinDetectionContext.caseId}
                 </p>
-                <p className="mt-1 text-[10px] text-on-surface-variant">
+                <p className="text-[10px] text-on-surface-variant">
                   탐지 기준 {cefazolinDetectionContext.detectedAt}
                 </p>
               </div>
-              <div className="rounded-xl border border-error/20 bg-error-container/15 p-sm">
+              <div className="rounded-lg border border-error/20 bg-error-container/15 px-2 py-1.5">
                 <p className="text-[10px] font-bold text-on-surface-variant">직접 공급 신호</p>
-                <p className="mt-2 text-sm font-bold text-on-surface">
+                <p className="mt-1 text-[13px] font-bold text-on-surface">
                   {cefazolinDetectionContext.directSignal}
                 </p>
-                <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">
+                <p className="truncate text-[10px] leading-4 text-on-surface-variant">
                   {cefazolinDetectionContext.supplyFulfillmentPct !== null
                     ? `ERP 공급이행률 ${cefazolinDetectionContext.supplyFulfillmentPct.toFixed(1)}%`
                     : `위험 신호 ${cefazolinDetectionContext.directSignalScore}/100`}
@@ -1197,20 +1261,21 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     : ""}
                 </p>
               </div>
-              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-sm">
+              <div className="rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1.5">
                 <p className="text-[10px] font-bold text-on-surface-variant">영향 범위</p>
-                <p className="mt-2 font-data text-xl font-bold text-on-surface">
+                <p className="mt-1 font-data text-lg font-bold text-on-surface">
                   부족권역 {shortageRegions.length}개
                 </p>
-                <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-on-surface-variant">
+                <p className="truncate text-[10px] leading-4 text-on-surface-variant">
                   {affectedRegionNames.join(" · ")}
                 </p>
               </div>
             </div>
           </Section>
 
-          <div className="grid grid-cols-3 gap-sm">
+          <div className="grid shrink-0 grid-cols-3 gap-sm">
             <Metric
+              dense
               label="현재 재고"
               value={`${fmt(cefazolinDashboard.totalInventory ?? 0)} VIAL 환산`}
               note={`목표 ${fmt(national.target_stock)} VIAL 환산`}
@@ -1218,6 +1283,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               tone="danger"
             />
             <Metric
+              dense
               label="목표재고 충족률"
               value={`${national.stock_ratio.toFixed(1)}%`}
               note={`부족권역 ${shortageRegions.length}개 · 과잉권역 ${excessRegions.length}개`}
@@ -1225,6 +1291,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               tone="danger"
             />
             <Metric
+              dense
               label="목표재고 부족분"
               value={`${fmt(targetStockGap)} VIAL 환산`}
               note="전국 목표재고 대비 현재 부족량"
@@ -1233,143 +1300,168 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             />
           </div>
 
-          <div className="grid grid-cols-12 gap-md">
-            <div className="col-span-5">
-              <Section
-                title="원인·기여요인 분석"
-                subtitle="직접 공급 신호는 별도 표시 · 아래 점수는 상대 비중이 아닌 위험 신호 점수(0~100)"
-              >
-                <div className="rounded-xl border border-error/20 bg-error-container/15 p-sm">
-                  <div className="flex items-start justify-between gap-sm">
-                    <div>
-                      <p className="text-[10px] font-bold text-error">직접 공급 신호</p>
-                      <p className="mt-1 text-xs font-bold text-on-surface">
-                        {cefazolinDetectionContext.directSignal}
-                      </p>
-                      <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">
-                        {cefazolinDetectionContext.evidenceNote ?? cefazolinDetectionContext.source}
-                      </p>
-                    </div>
-                    <Pill tone="danger">공급 신호</Pill>
-                  </div>
-                </div>
-                <div className="mt-sm space-y-sm">
-                  {contributingCauses.map((cause) => (
-                    <div
-                      key={cause.label}
-                      className="rounded-xl border border-outline-variant/70 p-sm"
-                    >
-                      <div className="mb-1.5 flex items-center justify-between gap-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold text-on-surface">
-                            {cause.label}
-                          </span>
-                          <Pill tone="neutral">기여요인</Pill>
-                        </div>
-                        <span className="font-data text-[11px] font-bold text-on-surface-variant">
-                          {cause.score}/100
-                        </span>
-                      </div>
-                      <SignalBar
-                        value={cause.score}
-                        tone={
-                          cause.score >= 80 ? "danger" : cause.score >= 60 ? "warning" : "primary"
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            </div>
 
-            <div className="col-span-7">
+          <div className="grid min-h-0 flex-1 grid-cols-12 gap-sm">
+            <div className="col-span-5 flex min-h-0">
               <Section
-                title="위험 전파 경로"
-                subtitle="동일 Case Snapshot에서 관측된 공급·재고·권역·서비스 지표를 순서대로 연결"
+                title="원인 분석 및 위험 전파 경로"
+                subtitle="직접 공급 신호 → 재고 압박 → 권역 부족 → 서비스 위험"
+                className="flex min-h-0 flex-1 flex-col"
+                bodyClassName="flex min-h-0 flex-1 flex-col gap-2 p-sm"
               >
-                <div className="grid grid-cols-[minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)] items-stretch gap-xs">
+                <div className="grid grid-cols-[minmax(0,1fr)_14px_minmax(0,1fr)_14px_minmax(0,1fr)_14px_minmax(0,1fr)] items-stretch gap-0.5">
                   {propagationStages.map((stage, index) => (
                     <div key={stage.label} className="contents">
-                      <div className="rounded-xl border border-outline-variant bg-white p-sm">
-                        <Pill tone={stage.tone}>{index + 1}</Pill>
-                        <p className="mt-2 text-[10px] font-bold text-on-surface-variant">
-                          {stage.label}
+                      <div
+                        className={`rounded-lg border p-1.5 ${stage.tone === "danger" ? "border-error/25 bg-error-container/15" : "border-[#ffd591] bg-[#fff7e6]"}`}
+                      >
+                        <p className="text-[9px] font-bold text-on-surface-variant">
+                          {index + 1}. {stage.label}
                         </p>
-                        <p className="mt-1 font-data text-lg font-bold text-on-surface">
+                        <p className="mt-0.5 font-data text-[13px] font-bold leading-tight text-on-surface">
                           {stage.value}
                         </p>
-                        <p className="mt-1 break-words text-[9px] leading-4 text-on-surface-variant">
+                        <p className="mt-0.5 line-clamp-2 break-words text-[8px] leading-3 text-on-surface-variant">
                           {stage.note}
                         </p>
                       </div>
                       {index < propagationStages.length - 1 ? (
                         <div className="flex items-center justify-center text-scm-primary">
-                          <Icon name="arrow_forward" className="text-[18px]" />
+                          <Icon name="arrow_forward" className="text-[13px]" />
                         </div>
                       ) : null}
                     </div>
                   ))}
                 </div>
-                <div className="mt-sm flex items-start gap-2 rounded-xl bg-surface-container-low p-sm">
-                  <Icon name="info" className="mt-0.5 text-[16px] text-scm-primary" />
-                  <p className="text-[10px] leading-4 text-on-surface-variant">
-                    전파 경로는 사건 진단을 위한 정책형 분석 흐름이며, 개별 요인의 인과관계를
-                    확정하는 표시는 아닙니다.
-                  </p>
+
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-error/20 bg-error-container/15 px-2 py-1">
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-bold text-error">직접 공급 신호</p>
+                    <p className="truncate text-[11px] font-bold text-on-surface">
+                      {cefazolinDetectionContext.directSignal} ·{" "}
+                      <span className="font-normal text-on-surface-variant">
+                        {cefazolinDetectionContext.evidenceNote ?? cefazolinDetectionContext.source}
+                      </span>
+                    </p>
+                  </div>
+                  <Pill tone="danger">{directSupplyCause?.score ?? 0}/100</Pill>
+                </div>
+
+                <div className="flex min-h-0 flex-1 flex-col justify-between gap-0.5 overflow-hidden">
+                  {contributingCauses.map((cause) => (
+                    <div key={cause.label} className="min-h-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-[10px] font-bold text-on-surface">
+                          {cause.label}
+                        </span>
+                        <span className="font-data text-[10px] font-bold text-on-surface-variant">
+                          {cause.score}/100
+                        </span>
+                      </div>
+                      <div className="mt-0.5">
+                        <SignalBar
+                          value={cause.score}
+                          tone={
+                            cause.score >= 80 ? "danger" : cause.score >= 60 ? "warning" : "primary"
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </Section>
+            </div>
+
+            <div className="col-span-7 flex min-h-0">
+              <Section
+                title="권역별 목표재고 충족률"
+                subtitle="현재 재고 ÷ 목표 재고 · 100% 기준선 대비"
+                className="flex min-h-0 flex-1 flex-col"
+                bodyClassName="flex min-h-0 flex-1 flex-col gap-1 p-sm"
+                action={
+                  <button
+                    type="button"
+                    onClick={() => setTab("response")}
+                    className="shrink-0 rounded-lg bg-scm-primary px-3 py-1.5 text-[11px] font-bold text-white"
+                  >
+                    대응안 검토
+                  </button>
+                }
+              >
+                <div className="flex flex-wrap items-center gap-2 text-[9px] font-bold text-on-surface-variant">
+                  <span className="flex items-center gap-1">
+                    <i className="h-2 w-2 rounded-sm bg-error" /> 부족 (&lt;100%)
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <i className="h-2 w-2 rounded-sm bg-green-500" /> 적정
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <i className="h-2 w-2 rounded-sm bg-[#f59e0b]" /> 과잉
+                  </span>
+                  <span className="ml-auto">🔴 위험 권역 {shortageRegions.length}개</span>
+                </div>
+                <div className="min-h-0 flex-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={regionChartData}
+                      margin={{ top: 14, right: 8, left: -18, bottom: 0 }}
+                      barCategoryGap="22%"
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 9 }}
+                        interval={0}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 9 }}
+                        domain={[0, 140]}
+                        axisLine={false}
+                        tickLine={false}
+                        unit="%"
+                      />
+                      <Tooltip
+                        contentStyle={{ fontSize: 11, borderRadius: 8 }}
+                        formatter={(value: number) => [`${value.toFixed(1)}%`, "충족률"]}
+                      />
+                      <ReferenceLine
+                        y={100}
+                        stroke="#ef4444"
+                        strokeDasharray="5 4"
+                        label={{ value: "목표 100%", position: "insideTopRight", fontSize: 9 }}
+                      />
+                      <Bar dataKey="ratio" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+                        <LabelList
+                          dataKey="label"
+                          position="top"
+                          style={{ fontSize: 9, fontWeight: 700 }}
+                        />
+                        {regionChartData.map((row) => (
+                          <Cell key={row.id} fill={row.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {regionChartData
+                    .filter((row) => row.ratio < 100)
+                    .map((row) => (
+                      <span
+                        key={row.id}
+                        className="inline-flex items-center gap-1 rounded-full border border-error/25 bg-error-container/25 px-2 py-0.5 text-[9px] font-bold text-error"
+                      >
+                        🔴 {row.name} {row.ratio.toFixed(0)}%
+                      </span>
+                    ))}
                 </div>
               </Section>
             </div>
           </div>
 
-          <Section title="권역별 영향" subtitle="현재 재고 ÷ 목표 재고 · 100% 기준">
-            <div className="grid grid-cols-2 gap-x-lg gap-y-sm">
-              {regions.map((region) => {
-                const tone =
-                  region.riskLevel === "danger"
-                    ? "danger"
-                    : region.riskLevel === "warning"
-                      ? "warning"
-                      : "success";
-                return (
-                  <div key={region.id} className="rounded-xl border border-outline-variant/70 p-sm">
-                    <div className="mb-2 flex items-center justify-between gap-sm">
-                      <div>
-                        <p className="text-[11px] font-bold text-on-surface">
-                          {region.region.split("_").slice(1).join("_")}
-                        </p>
-                        <p className="mt-0.5 text-[9px] text-on-surface-variant">
-                          현재 {fmt(region.current_stock)} · 목표 {fmt(region.target_stock)} VIAL
-                          환산
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-data text-[11px] font-bold">
-                          {region.stock_ratio.toFixed(1)}%
-                        </span>
-                        <Pill tone={tone}>{region.riskText}</Pill>
-                      </div>
-                    </div>
-                    <SignalBar value={region.stock_ratio} tone={tone} />
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-md flex items-center justify-between rounded-xl border border-scm-primary/20 bg-primary-container/15 p-sm">
-              <div>
-                <p className="text-[10px] font-bold text-on-surface-variant">다음 단계</p>
-                <p className="mt-1 text-xs font-bold">
-                  동일 Case 기준으로 S1·S2·S3의 효과와 실행 제약을 비교합니다.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setTab("response")}
-                className="rounded-lg bg-scm-primary px-3 py-2 text-[11px] font-bold text-white"
-              >
-                대응안 검토
-              </button>
-            </div>
-          </Section>
         </div>
       ) : null}
 
