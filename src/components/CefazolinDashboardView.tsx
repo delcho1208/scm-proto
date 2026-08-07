@@ -752,7 +752,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                   className={`mt-2 grid text-center font-bold text-on-surface-variant/60 ${cefazolinData ? "grid-cols-12 text-[7px]" : "grid-cols-6 text-[9px]"}`}
                 >
                   {cefazolinData
-                    ? cefazolinData.regionalMonthly[regionId].map((metric) => (
+                    ? (cefazolinData.regionalMonthly[regionId] ?? []).map((metric) => (
                         <span key={metric.month}>{metric.month.replace("2026-", "26.")}</span>
                       ))
                     : timelineKeys.map((key, index) => (

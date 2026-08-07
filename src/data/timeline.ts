@@ -6,6 +6,7 @@ export type TimelineKey = (typeof timelineKeys)[number];
 export type TimelineRegion = {
   status: RiskLevel;
   inventory: number;
+  risk: number;
 };
 
 export type TimelinePoint = {
@@ -16,16 +17,18 @@ export type TimelinePoint = {
   utilization: number;
   stockoutRisk: number;
   roi: number;
+  riskIndex: number;
   regions: Record<string, TimelineRegion>;
 };
 
 const point = (
-  data: Omit<TimelinePoint, "regions">,
+  data: Omit<TimelinePoint, "regions" | "riskIndex">,
   regions: Array<[string, RiskLevel, number, number]>,
 ): TimelinePoint => ({
   ...data,
+  riskIndex: Math.round(data.stockoutRisk * 5),
   regions: Object.fromEntries(
-    regions.map(([id, status, inventory]) => [id, { status, inventory }]),
+    regions.map(([id, status, inventory, risk]) => [id, { status, inventory, risk }]),
   ),
 });
 
