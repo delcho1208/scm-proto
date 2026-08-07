@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Icon } from "@/components/ScmShell";
+import { CefazolinRiskFlowChart } from "@/components/CefazolinRiskFlowChart";
+import { CefazolinRegionBarplot } from "@/components/CefazolinRegionBarplot";
 import type { Product } from "@/data/scm";
 import {
   lipilouDashboard,
