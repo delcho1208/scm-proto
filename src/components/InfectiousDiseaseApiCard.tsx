@@ -62,6 +62,9 @@ export function InfectiousDiseaseApiCard({ regionId }: { regionId: string }) {
               </span>
             )}
           </div>
+          <p className="mt-0.5 truncate text-[10px] font-medium text-on-surface-variant">
+            {regionLabel}
+          </p>
 
           {state === "ready" && summary ? (
             <div className="mt-1 flex items-end gap-2">
