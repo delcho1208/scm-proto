@@ -209,6 +209,93 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
 
 type CefazolinNewsItem = { title: string; url: string; publishedAt: string };
 
+type CefazolinDmfItem = {
+  company: string;
+  manufacturer: string;
+  country: string;
+  permitDate: string;
+};
+
+function CefazolinDmfApiCard() {
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [items, setItems] = useState<CefazolinDmfItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/dmf?ingredient=세파졸린", { signal: controller.signal })
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          items?: CefazolinDmfItem[];
+          totalCount?: number;
+        };
+        if (!response.ok) throw new Error("DMF 데이터를 불러오지 못했습니다.");
+        setItems(payload.items ?? []);
+        setTotalCount(payload.totalCount ?? 0);
+        setState("ready");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setState("error");
+      });
+    return () => controller.abort();
+  }, []);
+
+  const first = items[0];
+  return (
+    <div className="bento-card relative flex min-h-0 flex-1 flex-col overflow-hidden border-scm-primary/10 bg-gradient-to-br from-white via-white to-primary-container/20 p-md">
+      <div className="relative flex h-full min-h-0 items-start gap-sm">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-scm-primary text-white">
+          <Icon name="medication" className="text-[19px]" filled />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-xs">
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-[0.12em] text-scm-primary">
+                MFDS · DMF
+              </p>
+              <h4 className="truncate text-[13px] font-bold text-on-surface">
+                세파졸린 원료 등록현황
+              </h4>
+            </div>
+            <span
+              className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold ${state === "ready" ? "border-green-200 bg-green-50 text-[#318f19]" : state === "error" ? "border-red-200 bg-red-50 text-error" : "border-blue-200 bg-blue-50 text-scm-primary"}`}
+            >
+              {state === "loading" ? "조회 중" : state === "ready" ? "● LIVE" : "연결 대기"}
+            </span>
+          </div>
+          {state === "ready" ? (
+            <div className="mt-2 flex min-h-0 items-center gap-3">
+              <div className="shrink-0 border-r border-outline-variant/60 pr-3">
+                <strong className="font-data text-[22px] leading-none text-scm-primary">
+                  {totalCount.toLocaleString("ko-KR")}
+                </strong>
+                <span className="ml-1 text-[10px] font-bold text-on-surface-variant">건</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[11px] font-bold text-on-surface">
+                  {first?.company || "등록 결과 없음"}
+                </p>
+                <p className="truncate text-[9px] text-on-surface-variant">
+                  {first?.manufacturer || "제조소 정보 없음"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p
+              className={`mt-3 text-[10px] ${state === "error" ? "text-error" : "text-on-surface-variant"}`}
+            >
+              {state === "error"
+                ? "DMF API 연결을 확인해주세요."
+                : "식약처 DMF 등록현황을 조회하고 있습니다."}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CefazolinNewsApiCard({ productName }: { productName: string }) {
   const [news, setNews] = useState<CefazolinNewsItem[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -338,7 +425,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
     top: number;
     left: number;
   } | null>(null);
-  const [recommendationChecks, setRecommendationChecks] = useState<Record<string, boolean>>({});
+  const [checkedRecommendationIndex, setCheckedRecommendationIndex] = useState<number | null>(null);
+  const [isRecommendationApplied, setIsRecommendationApplied] = useState(false);
   const [selectedRecommendationIndex, setSelectedRecommendationIndex] = useState(0);
   const [showRecommendationXai, setShowRecommendationXai] = useState(false);
   const [showScenarioComparison, setShowScenarioComparison] = useState(false);
@@ -388,6 +476,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
   );
 
   useEffect(() => {
+    setCheckedRecommendationIndex(null);
+    setIsRecommendationApplied(false);
     setSelectedRecommendationIndex(0);
     setShowRecommendationXai(false);
     setShowScenarioComparison(false);
@@ -444,10 +534,41 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
           : null;
   const cefazolinData = product.key === cefazolinDashboard.productKey ? cefazolinDashboard : null;
   const isCurrentTimeline = timelineKey === "PRES";
-  const scenarioRegion = isCurrentTimeline ? scenario?.regions[regionId] : undefined;
+  const baseScenarioRegion = isCurrentTimeline ? scenario?.regions[regionId] : undefined;
+  const appliedEvaluation =
+    isRecommendationApplied && checkedRecommendationIndex !== null
+      ? cefazolinData?.recommendationEvaluations[checkedRecommendationIndex]
+      : undefined;
+  const appliedScenario = appliedEvaluation
+    ? cefazolinData?.scenarios.find((item) =>
+        item.id.startsWith(`${appliedEvaluation.scenarioId}_`),
+      )
+    : undefined;
+  const appliedInventoryDelta = appliedScenario
+    ? appliedScenario.emergencyProcurementQuantity - appliedScenario.totalUnmetDemand
+    : 0;
+  const nationalTargetStock = cefazolinData?.regions.National?.target_stock ?? 1;
+  const getAppliedScenarioRegion = (id: string) => {
+    const baseRegion = isCurrentTimeline ? scenario?.regions[id] : undefined;
+    if (!baseRegion || !appliedScenario) return baseRegion;
+    const weight = baseRegion.target_stock / nationalTargetStock;
+    const currentStock = Math.max(0, baseRegion.current_stock + appliedInventoryDelta * weight);
+    const stockRatio = (currentStock / Math.max(baseRegion.target_stock, 1)) * 100;
+    const riskLevel: RiskLevel = stockRatio < 80 ? "danger" : stockRatio > 120 ? "warning" : "safe";
+    return {
+      ...baseRegion,
+      current_stock: currentStock,
+      stock_ratio: Number(stockRatio.toFixed(2)),
+      stockRatioLabel: `${stockRatio.toFixed(2)}%`,
+      riskLevel,
+      riskText: riskLevel === "danger" ? "부족" : riskLevel === "warning" ? "과잉" : "적정",
+    };
+  };
+  const scenarioRegion = getAppliedScenarioRegion(regionId) ?? baseScenarioRegion;
   const timelineRegion = timeline.regions[regionId];
   const region = regions[regionId];
   const nationalRiskLevel: RiskLevel =
+    getAppliedScenarioRegion("National")?.riskLevel ??
     (isCurrentTimeline ? scenario?.inventoryLevel : undefined) ??
     (timeline.riskIndex >= 85 ? "danger" : timeline.riskIndex >= 65 ? "warning" : "safe");
   const regionRiskLevel =
@@ -457,13 +578,16 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
   const risk = riskStyles[regionRiskLevel];
   const nationalRisk = riskStyles[nationalRiskLevel];
 
-  const displayedTotalInventory =
-    (isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory;
+  const displayedTotalInventory = Math.max(
+    0,
+    ((isCurrentTimeline ? scenario?.totalInventory : undefined) ?? timeline.totalInventory) +
+      (appliedScenario ? appliedInventoryDelta : 0),
+  );
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
   const panelInventory =
     scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
-  const selectedCefazolinRegion = cefazolinData?.regions[regionId];
+  const selectedCefazolinRegion = scenarioRegion ?? cefazolinData?.regions[regionId];
   const lipilouGraphRegion = product.key === "리피로우" ? getLipilouGraphRegion(regionId) : null;
   const lipilouGraph = lipilouGraphRegion ? createLipilouGraph(lipilouGraphRegion) : null;
   const tamivirForecast = product.key === "타미비어" ? tamivirForecastByRegion[regionId] : null;
@@ -599,10 +723,10 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
     0,
   );
 
-  const activeTransferRoutes = recommendations.flatMap((recommendation, index) => {
-    const checkKey = `${product.key}-${index}`;
-    return (recommendationChecks[checkKey] ?? true) ? (recommendation.routes ?? []) : [];
-  });
+  const activeTransferRoutes =
+    isRecommendationApplied && checkedRecommendationIndex !== null
+      ? (recommendations[checkedRecommendationIndex]?.routes ?? [])
+      : [];
 
   const selectedWorkflowStep =
     cefazolinWorkflowSteps[selectedWorkflowStepIndex] ?? cefazolinWorkflowSteps[0];
@@ -696,25 +820,6 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             </span>
           </div>
         </div>
-        {cefazolinData && (
-          <Link
-            to="/decision-execution"
-            className="flex items-center gap-3 rounded-xl border border-scm-primary/30 bg-white px-4 py-3 text-left shadow-sm transition-colors hover:bg-primary-container/30"
-          >
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-scm-primary text-white">
-              <Icon name="account_tree" className="text-[20px]" />
-            </span>
-            <span>
-              <span className="block text-xs font-bold text-on-surface">
-                SCM 의사결정 실행 콘솔
-              </span>
-              <span className="mt-0.5 block text-[10px] text-on-surface-variant">
-                {workflowCompletedCount}/10 단계 완료 · 권고안 검토
-              </span>
-            </span>
-            <Icon name="chevron_right" className="text-[18px] text-scm-primary" />
-          </Link>
-        )}
       </div>
 
       {/* Bento grid */}
@@ -863,6 +968,16 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             <h4 className="shrink-0 font-display text-headline-sm text-on-surface">
               지능형 권역 모니터링
             </h4>
+            <div
+              className="flex w-[145px] shrink-0 justify-start"
+              aria-hidden={!isRecommendationApplied}
+            >
+              <span
+                className={`whitespace-nowrap rounded-full border border-scm-primary/30 bg-primary-container px-2.5 py-1 text-[10px] font-black text-on-primary-container transition-opacity ${isRecommendationApplied ? "opacity-100" : "pointer-events-none opacity-0"}`}
+              >
+                AI 추천 적용 예상 결과
+              </span>
+            </div>
             <div className="time-scrubber min-w-0 flex-1">
               <div className="mb-1 flex items-center justify-between gap-sm">
                 <div className="flex items-center gap-xs">
@@ -989,8 +1104,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               {markerOrder.map((id) => {
                 const r = regions[id];
                 const markerRisk =
-                  (isCurrentTimeline ? scenario?.regions[id]?.riskLevel : undefined) ??
-                  timeline.regions[id]?.status;
+                  getAppliedScenarioRegion(id)?.riskLevel ?? timeline.regions[id]?.status;
                 if (!r.box) return null;
                 return (
                   <button
@@ -1027,7 +1141,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               <div className="pointer-events-none space-y-3">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold uppercase tracking-tight text-on-surface-variant">
-                    현재고
+                    {isRecommendationApplied ? "예상 재고" : "현재고"}
                   </span>
                   <div className="flex items-baseline gap-1">
                     <span className="font-data text-[18px] font-semibold text-scm-primary">
@@ -1082,7 +1196,7 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
 
         {/* Right column */}
         <div className="col-span-3 flex h-full min-h-0 min-w-0 flex-col gap-sm">
-          <div className="bento-card flex min-h-0 flex-[3] flex-col overflow-hidden bg-on-surface-variant/5 p-md">
+          <div className="bento-card flex min-h-0 flex-[2] flex-col overflow-hidden bg-on-surface-variant/5 p-md">
             <div className="mb-sm flex items-center gap-sm">
               <div className="flex h-6 w-6 items-center justify-center rounded bg-scm-primary text-white">
                 <Icon name="auto_awesome" className="text-[16px]" filled />
@@ -1098,9 +1212,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             <div className="min-h-0 flex-1 space-y-sm overflow-y-auto">
               {!showRecommendationXai &&
                 recommendations.map((rec, index) => {
-                  const checkKey = `${product.key}-${index}`;
-                  const checked = recommendationChecks[checkKey] ?? true;
-                  if (rec.evaluation) {
+                  const checked = checkedRecommendationIndex === index;
+                  if (!cefazolinData && rec.evaluation) {
                     const selected = selectedRecommendationIndex === index;
                     return (
                       <button
@@ -1155,24 +1268,19 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                   return (
                     <label
                       key={rec.t}
-                      className="flex cursor-pointer items-start gap-md rounded p-xs transition-colors hover:bg-white/50"
+                      className="flex cursor-pointer items-center gap-sm rounded p-xs transition-colors hover:bg-white/50"
                     >
                       <input
                         checked={checked}
-                        onChange={(event) =>
-                          setRecommendationChecks((current) => ({
-                            ...current,
-                            [checkKey]: event.target.checked,
-                          }))
-                        }
-                        className="mt-1 h-4 w-4 rounded accent-[#004ccd]"
+                        onChange={(event) => {
+                          setCheckedRecommendationIndex(event.target.checked ? index : null);
+                          setIsRecommendationApplied(false);
+                        }}
+                        className="h-4 w-4 shrink-0 rounded accent-[#004ccd]"
                         type="checkbox"
                       />
                       <div>
                         <p className="text-xs font-bold text-on-surface">{rec.t}</p>
-                        <p className="mt-0.5 text-[10px] leading-tight text-on-surface-variant">
-                          {rec.d}
-                        </p>
                       </div>
                     </label>
                   );
@@ -1233,23 +1341,42 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                 </div>
               )}
             </div>
-            {cefazolinData ? (
+            <div className="mt-md grid grid-cols-2 gap-2">
               <Link
                 to="/decision-execution"
-                className="mt-md block w-full cursor-pointer rounded-lg bg-on-surface py-sm text-center text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
+                className="cursor-pointer rounded-lg border border-on-surface bg-white py-sm text-center text-[11px] font-bold text-on-surface transition-colors hover:bg-surface-container-low active:scale-[0.98]"
               >
-                S1·S2·S3 비교 및 실행안 검토
+                실행안 검토
               </Link>
-            ) : (
-              <button
-                type="button"
-                className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
-              >
-                {scenario?.recommendations[0]?.approvalButtonText ?? "실행 계획 적용"}
-              </button>
-            )}
+              {isRecommendationApplied ? (
+                <button
+                  type="button"
+                  onClick={() => setIsRecommendationApplied(false)}
+                  className="cursor-pointer rounded-lg bg-on-surface py-sm text-[11px] font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
+                >
+                  원래 값으로 복원
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={checkedRecommendationIndex === null}
+                  title={
+                    checkedRecommendationIndex === null ? "실행안을 하나 선택해 주세요" : undefined
+                  }
+                  onClick={() => {
+                    setIsPlaying(false);
+                    setTimelineIndex(2);
+                    setIsRecommendationApplied(true);
+                  }}
+                  className="cursor-pointer rounded-lg bg-scm-primary py-sm text-[11px] font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  체크 실행안 적용
+                </button>
+              )}
+            </div>
           </div>
 
+          <CefazolinDmfApiCard />
           <CefazolinNewsApiCard productName={product.name} />
         </div>
       </div>
