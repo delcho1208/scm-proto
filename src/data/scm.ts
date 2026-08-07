@@ -42,7 +42,7 @@ export const products: Product[] = [
     name: "타미비어",
     icon: "vaccines",
     subtitle: "항바이러스제",
-    forecastTitle: "2026 타미비어 Regional Forecast",
+    forecastTitle: "타미비어 수요·재고 전망",
     annualDemand: "980,000",
     yoyGrowth: "-1.2% YoY",
     stock: "85,000",
