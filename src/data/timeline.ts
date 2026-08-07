@@ -6,6 +6,7 @@ export type TimelineKey = (typeof timelineKeys)[number];
 export type TimelineRegion = {
   status: RiskLevel;
   inventory: number;
+  risk: number;
 };
 
 export type TimelinePoint = {
@@ -16,6 +17,7 @@ export type TimelinePoint = {
   utilization: number;
   stockoutRisk: number;
   roi: number;
+  riskIndex: number;
   regions: Record<string, TimelineRegion>;
 };
 
