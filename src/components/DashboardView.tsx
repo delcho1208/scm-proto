@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
 import { lipilouDashboard, lipilouMonthlyForecastByTimelineKey, tamivirAnnualF2aTarget, tamivirDashboard, tamivirForecastByRegion, tamivirMonthlyForecastByTimelineKey } from "@/data/dashboard-scenario";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
@@ -811,15 +812,6 @@ function StandardDashboardView({ product }: { product: Product }) {
                 <Icon name="auto_awesome" className="text-[16px]" filled />
               </div>
               <h4 className="font-display text-headline-sm">AI 추천 실행안</h4>
-              {hasAiWorkflow ? (
-                <button
-                  type="button"
-                  onClick={() => setIsAiWorkflowOpen(true)}
-                  className="ml-auto cursor-pointer rounded-full border border-scm-primary/30 bg-white px-2.5 py-1 text-[10px] font-bold text-scm-primary hover:bg-primary-container/20"
-                >
-                  AI 운영흐름
-                </button>
-              ) : null}
             </div>
             <p className={`mb-xs text-[10px] font-bold ${timeline.isPrediction ? "text-[#ad6800]" : "text-scm-primary"}`}>
               {timeline.label} 시점 기준 추천 · {timeline.isPrediction ? "예측 데이터 기반" : "실측 데이터 기반"}
@@ -849,16 +841,12 @@ function StandardDashboardView({ product }: { product: Product }) {
               })}
             </div>
             <div className="mt-md grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedRecommendationIndex(0);
-                  setIsRecommendationOpen(true);
-                }}
-                className="cursor-pointer rounded-lg border border-on-surface bg-white py-sm text-[11px] font-bold text-on-surface transition-colors hover:bg-surface-container-low active:scale-[0.98]"
+              <Link
+                to="/decision-execution"
+                className="cursor-pointer rounded-lg border border-on-surface bg-white py-sm text-center text-[11px] font-bold text-on-surface transition-colors hover:bg-surface-container-low active:scale-[0.98]"
               >
-                실행안 비교
-              </button>
+                실행안 검토
+              </Link>
               {isRecommendationApplied ? (
                 <button
                   type="button"
