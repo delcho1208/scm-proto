@@ -1233,127 +1233,57 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             />
           </div>
 
-          <div className="grid grid-cols-12 gap-md">
-            <div className="col-span-5">
-              <Section
-                title="원인·기여요인 분석"
-                subtitle="직접 공급 신호는 별도 표시 · 아래 점수는 상대 비중이 아닌 위험 신호 점수(0~100)"
-              >
-                <div className="rounded-xl border border-error/20 bg-error-container/15 p-sm">
-                  <div className="flex items-start justify-between gap-sm">
-                    <div>
-                      <p className="text-[10px] font-bold text-error">직접 공급 신호</p>
-                      <p className="mt-1 text-xs font-bold text-on-surface">
-                        {cefazolinDetectionContext.directSignal}
-                      </p>
-                      <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">
-                        {cefazolinDetectionContext.evidenceNote ?? cefazolinDetectionContext.source}
-                      </p>
-                    </div>
-                    <Pill tone="danger">공급 신호</Pill>
-                  </div>
-                </div>
-                <div className="mt-sm space-y-sm">
-                  {contributingCauses.map((cause) => (
-                    <div
-                      key={cause.label}
-                      className="rounded-xl border border-outline-variant/70 p-sm"
-                    >
-                      <div className="mb-1.5 flex items-center justify-between gap-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold text-on-surface">
-                            {cause.label}
-                          </span>
-                          <Pill tone="neutral">기여요인</Pill>
-                        </div>
-                        <span className="font-data text-[11px] font-bold text-on-surface-variant">
-                          {cause.score}/100
-                        </span>
-                      </div>
-                      <SignalBar
-                        value={cause.score}
-                        tone={
-                          cause.score >= 80 ? "danger" : cause.score >= 60 ? "warning" : "primary"
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </Section>
+          <Section
+            title="[통합] 리스크 원인-전파 경로 분석"
+            subtitle="공급 신호에서 시작된 흐름이 기여요인으로 증폭되어 재고 부족·서비스 위험으로 귀결되는 경로"
+            action={<Pill tone="danger">{nationalPolicyRisk.grade}</Pill>}
+          >
+            <CefazolinRiskFlowChart
+              sourceLabel={propagationStages[0].label}
+              sourceValue={propagationStages[0].value}
+              sourceNote={cefazolinDetectionContext.directSignal}
+              causes={contributingCauses.map((cause) => ({
+                label: cause.label,
+                score: cause.score,
+              }))}
+              outcomes={[
+                {
+                  label: "목표재고 부족분",
+                  value: `${fmt(targetStockGap)} VIAL`,
+                  note: `충족률 ${national.stock_ratio.toFixed(1)}% · 부족권역 ${shortageRegions.length}개`,
+                  tone: "warning",
+                },
+                {
+                  label: "서비스 위험",
+                  value: `${baselineScenario.serviceRatePct.toFixed(1)}%`,
+                  note: "S1 무대응 예상 서비스율",
+                  tone: "danger",
+                },
+              ]}
+            />
+            <div className="mt-sm flex items-start gap-2 rounded-xl bg-surface-container-low p-sm">
+              <Icon name="info" className="mt-0.5 text-[16px] text-scm-primary" />
+              <p className="text-[10px] leading-4 text-on-surface-variant">
+                전파 경로는 사건 진단을 위한 정책형 분석 흐름이며, 개별 요인의 인과관계를 확정하는
+                표시는 아닙니다. 기여요인 점수는 상대 비중이 아닌 위험 신호 점수(0~100)입니다.
+              </p>
             </div>
+          </Section>
 
-            <div className="col-span-7">
-              <Section
-                title="위험 전파 경로"
-                subtitle="동일 Case Snapshot에서 관측된 공급·재고·권역·서비스 지표를 순서대로 연결"
-              >
-                <div className="grid grid-cols-[minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)] items-stretch gap-xs">
-                  {propagationStages.map((stage, index) => (
-                    <div key={stage.label} className="contents">
-                      <div className="rounded-xl border border-outline-variant bg-white p-sm">
-                        <Pill tone={stage.tone}>{index + 1}</Pill>
-                        <p className="mt-2 text-[10px] font-bold text-on-surface-variant">
-                          {stage.label}
-                        </p>
-                        <p className="mt-1 font-data text-lg font-bold text-on-surface">
-                          {stage.value}
-                        </p>
-                        <p className="mt-1 break-words text-[9px] leading-4 text-on-surface-variant">
-                          {stage.note}
-                        </p>
-                      </div>
-                      {index < propagationStages.length - 1 ? (
-                        <div className="flex items-center justify-center text-scm-primary">
-                          <Icon name="arrow_forward" className="text-[18px]" />
-                        </div>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-sm flex items-start gap-2 rounded-xl bg-surface-container-low p-sm">
-                  <Icon name="info" className="mt-0.5 text-[16px] text-scm-primary" />
-                  <p className="text-[10px] leading-4 text-on-surface-variant">
-                    전파 경로는 사건 진단을 위한 정책형 분석 흐름이며, 개별 요인의 인과관계를
-                    확정하는 표시는 아닙니다.
-                  </p>
-                </div>
-              </Section>
-            </div>
-          </div>
+          <Section
+            title="권역별 목표재고 충족률 현황 (barplot)"
+            subtitle="현재고 · 부족분 · 과잉분 누적 · 목표재고 100% 기준"
+          >
+            <CefazolinRegionBarplot
+              regions={regions.map((region) => ({
+                id: region.id,
+                name: region.region.split("_").slice(1).join("_"),
+                ratio: region.stock_ratio,
+                currentStock: region.current_stock,
+                targetStock: region.target_stock,
+              }))}
+            />
 
-          <Section title="권역별 영향" subtitle="현재 재고 ÷ 목표 재고 · 100% 기준">
-            <div className="grid grid-cols-2 gap-x-lg gap-y-sm">
-              {regions.map((region) => {
-                const tone =
-                  region.riskLevel === "danger"
-                    ? "danger"
-                    : region.riskLevel === "warning"
-                      ? "warning"
-                      : "success";
-                return (
-                  <div key={region.id} className="rounded-xl border border-outline-variant/70 p-sm">
-                    <div className="mb-2 flex items-center justify-between gap-sm">
-                      <div>
-                        <p className="text-[11px] font-bold text-on-surface">
-                          {region.region.split("_").slice(1).join("_")}
-                        </p>
-                        <p className="mt-0.5 text-[9px] text-on-surface-variant">
-                          현재 {fmt(region.current_stock)} · 목표 {fmt(region.target_stock)} VIAL
-                          환산
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-data text-[11px] font-bold">
-                          {region.stock_ratio.toFixed(1)}%
-                        </span>
-                        <Pill tone={tone}>{region.riskText}</Pill>
-                      </div>
-                    </div>
-                    <SignalBar value={region.stock_ratio} tone={tone} />
-                  </div>
-                );
-              })}
-            </div>
             <div className="mt-md flex items-center justify-between rounded-xl border border-scm-primary/20 bg-primary-container/15 p-sm">
               <div>
                 <p className="text-[10px] font-bold text-on-surface-variant">다음 단계</p>
