@@ -16,6 +16,7 @@ import { createLipilouGraph, getLipilouGraphRegion } from "@/data/lipilou-graph"
 import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
 import { CefazolinDashboardView } from "@/components/CefazolinDashboardView";
+import { InfectiousDiseaseApiCard } from "@/components/InfectiousDiseaseApiCard";
 
 const riskStyles: Record<RiskLevel, { dot: string; badge: string; text: string; bullet: string }> =
   {
