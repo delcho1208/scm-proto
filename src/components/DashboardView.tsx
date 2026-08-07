@@ -16,6 +16,7 @@ import { createLipilouGraph, getLipilouGraphRegion } from "@/data/lipilou-graph"
 import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
 import { CefazolinDashboardView } from "@/components/CefazolinDashboardView";
+import { InfectiousDiseaseApiCard } from "@/components/InfectiousDiseaseApiCard";
 
 const riskStyles: Record<RiskLevel, { dot: string; badge: string; text: string; bullet: string }> =
   {
@@ -1059,6 +1060,8 @@ function StandardDashboardView({ product }: { product: Product }) {
 
           {product.key === "세파졸린" ? (
             <DmfApiCard />
+          ) : product.key === "타미비어" ? (
+            <InfectiousDiseaseApiCard regionId={regionId} />
           ) : (
             <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
               <div className="flex items-start gap-sm">
