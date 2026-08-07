@@ -1059,6 +1059,8 @@ function StandardDashboardView({ product }: { product: Product }) {
 
           {product.key === "세파졸린" ? (
             <DmfApiCard />
+          ) : product.key === "타미비어" ? (
+            <InfectiousDiseaseApiCard regionId={regionId} />
           ) : (
             <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
               <div className="flex items-start gap-sm">
