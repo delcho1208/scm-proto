@@ -144,7 +144,11 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
             <button className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant">
               <Icon name="notifications" />
             </button>
-            <button className="cursor-pointer rounded-lg bg-scm-primary px-md py-1.5 text-white transition-opacity hover:opacity-90 active:scale-95">
+            <button
+              type="button"
+              onClick={() => triggerDataRefresh()}
+              className="cursor-pointer rounded-lg bg-scm-primary px-md py-1.5 text-white transition-opacity hover:opacity-90 active:scale-95"
+            >
               Refresh Data
             </button>
             <div className="h-8 w-8 overflow-hidden rounded-full bg-outline-variant">
