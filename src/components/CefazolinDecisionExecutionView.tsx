@@ -1146,7 +1146,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
   return (
     <div
-      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-screen max-h-screen min-h-0 overflow-hidden pb-3" : "pb-16"}`}
+      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-screen max-h-screen min-h-0 overflow-hidden pb-12" : "pb-16"}`}
     >
       <div
         className={`flex items-end justify-between gap-lg ${tab === "impact" ? "shrink-0 py-1" : "py-lg"}`}
