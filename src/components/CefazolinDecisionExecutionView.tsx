@@ -32,17 +32,6 @@ const tabItems: Array<{ key: TabKey; label: string; icon: string }> = [
   { key: "execution", label: "실행·성과", icon: "play_circle" },
 ];
 
-const checklistItems: Array<{ key: ChecklistKey; label: string; detail: string }> = [
-  { key: "cost", label: "추가 조달비 검토", detail: "S1 대비 증분 조달비와 예산 범위 확인" },
-  { key: "supplier", label: "공급사 입고 일정 확인", detail: "긴급조달 최초·최종 입고 일정 검토" },
-  { key: "quality", label: "품질 승인 전제 확인", detail: "대체 원료 사용 전 품질 승인 필요" },
-  {
-    key: "transfer",
-    label: "권역 재배분 가능량 확인",
-    detail: "과잉권역 이관 후 안전재고 유지 확인",
-  },
-];
-
 const initialChecklist: Record<ChecklistKey, boolean> = {
   cost: false,
   supplier: false,
@@ -176,6 +165,30 @@ function actionUnit(unit: string) {
   if (unit === "완제품 환산단위") return "VIAL 환산";
   if (unit === "API 환산단위") return "API 환산";
   return "PLAN";
+}
+
+function ProductNotConnected({ product }: { product: Product }) {
+  return (
+    <div className="dashboard-fixed-layout flex-1 bg-surface px-lg pb-16 pt-16">
+      <div className="py-lg">
+        <h2 className="font-display text-headline-md text-on-surface">의사결정 실행</h2>
+        <p className="mt-xs text-sm text-on-surface-variant">{product.name} 의사결정 상태</p>
+      </div>
+      <div className="bento-card flex min-h-[260px] items-center justify-center p-xl text-center">
+        <div>
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant">
+            <Icon name="link_off" />
+          </span>
+          <h3 className="mt-md font-display text-lg font-bold text-on-surface">
+            의사결정 상세 미연결
+          </h3>
+          <p className="mt-xs text-sm text-on-surface-variant">
+            선택한 제품의 상세 실행 데이터가 아직 연결되지 않았습니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function scenarioShortTitle(productKey: Product["key"], index: number, fallback: string) {
@@ -952,7 +965,7 @@ function ProductDecisionExecution({
   );
 }
 
-export function CefazolinDecisionExecutionView({ product }: { product: Product }) {
+function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const [tab, setTab] = useState<TabKey>("impact");
   const [showWorkflow, setShowWorkflow] = useState(false);
   const [hitlStatus, setHitlStatus] = useState<HitlStatus>("pending");
@@ -963,12 +976,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
   const [checklist, setChecklist] = useState<Record<ChecklistKey, boolean>>(initialChecklist);
   const [lastUpdatedAt, setLastUpdatedAt] = useState(cefazolinWorkflowRunMeta.latestSnapshotDate);
 
-  if (product.key === "리피로우" && lipilouDashboard) {
-    return <ProductDecisionExecution product={product} dashboard={lipilouDashboard} />;
-  }
-  if (product.key === "타미비어") {
-    return <ProductDecisionExecution product={product} dashboard={tamivirDashboard} />;
-  }
+  if (product.key !== "세파졸린") return <ProductNotConnected product={product} />;
 
   const national = cefazolinDashboard.regions.National;
   const nationalPolicyRisk = cefazolinDashboard.policyRiskByRegion.National;
@@ -984,6 +992,9 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
     scenarioRows.find((scenario) => scenario.id === recommendedScenarioId) ?? scenarioRows.at(-1)!;
   const baselineScenario =
     scenarioRows.find((scenario) => scenario.id === "S1_무대응") ?? scenarioRows[0];
+  const directSupplyCause = riskCauses.find(
+    (cause) => cause.label === cefazolinDetectionContext.directSignal,
+  );
   const contributingCauses = riskCauses.filter(
     (cause) => cause.label !== cefazolinDetectionContext.directSignal,
   );
@@ -991,14 +1002,48 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
     0,
     national.target_stock - (cefazolinDashboard.totalInventory ?? 0),
   );
-  const baselineSource = cefazolinDashboard.scenarios.find(
-    (scenario) => scenario.id === "S1_무대응",
+  const affectedRegionNames = shortageRegions.map((region) =>
+    region.region.split("_").slice(1).join("_"),
   );
+  const propagationStages = [
+    {
+      label: "공급 이행 저하",
+      value:
+        cefazolinDetectionContext.supplyFulfillmentPct !== null
+          ? `${cefazolinDetectionContext.supplyFulfillmentPct.toFixed(1)}%`
+          : `${directSupplyCause?.score ?? 0}/100`,
+      note: cefazolinDetectionContext.eventId
+        ? `${cefazolinDetectionContext.eventId} 공급 신호`
+        : "ERP 공급 신호",
+      tone: "danger" as const,
+    },
+    {
+      label: "재고 압박",
+      value: `${national.stock_ratio.toFixed(1)}%`,
+      note: "목표재고 충족률",
+      tone: "warning" as const,
+    },
+    {
+      label: "권역 부족",
+      value: `${shortageRegions.length}개`,
+      note: affectedRegionNames.join(" · "),
+      tone: "warning" as const,
+    },
+    {
+      label: "서비스 위험",
+      value: `${baselineScenario.serviceRatePct.toFixed(1)}%`,
+      note: "S1 무대응 예상 서비스율",
+      tone: "danger" as const,
+    },
+  ];
   const recommendedEvaluation =
     cefazolinDashboard.recommendationEvaluations.find((item) => item.recommended) ??
     cefazolinDashboard.recommendationEvaluations.find(
       (item) => item.scenarioId === recommendedScenario.displayId,
     );
+  const qualityCondition =
+    recommendedEvaluation?.xai.conditions.find((item) => item.includes("품질")) ??
+    "MES 품질검사·출하승인 완료 여부 확인";
   const approvalChecklistItems: Array<{ key: ChecklistKey; label: string; detail: string }> = [
     {
       key: "cost",
@@ -1010,13 +1055,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
       label: "공급사 입고 일정 확인",
       detail: recommendedEvaluation?.executionPeriod ?? "긴급조달 입고 일정 확인",
     },
-    {
-      key: "quality",
-      label: "MES 품질 승인 전제 확인",
-      detail:
-        recommendedEvaluation?.xai.conditions.find((item) => item.includes("품질")) ??
-        "MES 품질검사·출하승인 완료 여부 확인",
-    },
+    { key: "quality", label: "MES 품질 승인 전제 확인", detail: qualityCondition },
     {
       key: "transfer",
       label: "권역 재배분 가능량 확인",
@@ -1137,7 +1176,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
               </div>
               <div className="rounded-xl border border-outline-variant bg-surface-container-low p-sm">
                 <p className="text-[10px] font-bold text-on-surface-variant">Case ID</p>
-                <p className="mt-2 font-data text-[12px] font-bold">
+                <p className="mt-2 font-data text-[12px] font-bold text-on-surface">
                   {cefazolinDetectionContext.caseId}
                 </p>
                 <p className="mt-1 text-[10px] text-on-surface-variant">
@@ -1146,39 +1185,33 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
               </div>
               <div className="rounded-xl border border-error/20 bg-error-container/15 p-sm">
                 <p className="text-[10px] font-bold text-on-surface-variant">직접 공급 신호</p>
-                <p className="mt-2 text-sm font-bold">{cefazolinDetectionContext.directSignal}</p>
+                <p className="mt-2 text-sm font-bold text-on-surface">
+                  {cefazolinDetectionContext.directSignal}
+                </p>
                 <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">
-                  {cefazolinDetectionContext.evidenceNote ?? cefazolinDetectionContext.source}
+                  {cefazolinDetectionContext.supplyFulfillmentPct !== null
+                    ? `ERP 공급이행률 ${cefazolinDetectionContext.supplyFulfillmentPct.toFixed(1)}%`
+                    : `위험 신호 ${cefazolinDetectionContext.directSignalScore}/100`}
+                  {cefazolinDetectionContext.eventId
+                    ? ` · ${cefazolinDetectionContext.eventId}`
+                    : ""}
                 </p>
               </div>
               <div className="rounded-xl border border-outline-variant bg-surface-container-low p-sm">
                 <p className="text-[10px] font-bold text-on-surface-variant">영향 범위</p>
-                <p className="mt-2 font-data text-xl font-bold">
+                <p className="mt-2 font-data text-xl font-bold text-on-surface">
                   부족권역 {shortageRegions.length}개
                 </p>
-                <p className="mt-1 text-[10px] text-on-surface-variant">
-                  목표재고 부족 {fmt(targetStockGap)} VIAL 환산
+                <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-on-surface-variant">
+                  {affectedRegionNames.join(" · ")}
                 </p>
               </div>
             </div>
-            <div className="mt-sm grid grid-cols-3 gap-sm">
-              {contributingCauses.slice(0, 3).map((cause) => (
-                <div key={cause.label} className="rounded-xl border border-outline-variant p-sm">
-                  <div className="mb-2 flex justify-between gap-sm text-[10px] font-bold">
-                    <span>{cause.label}</span>
-                    <span>{cause.score}/100</span>
-                  </div>
-                  <SignalBar
-                    value={cause.score}
-                    tone={cause.score >= 80 ? "danger" : cause.score >= 60 ? "warning" : "primary"}
-                  />
-                </div>
-              ))}
-            </div>
           </Section>
-          <div className="grid grid-cols-6 gap-sm">
+
+          <div className="grid grid-cols-3 gap-sm">
             <Metric
-              label="현재고"
+              label="현재 재고"
               value={`${fmt(cefazolinDashboard.totalInventory ?? 0)} VIAL 환산`}
               note={`목표 ${fmt(national.target_stock)} VIAL 환산`}
               icon="inventory_2"
@@ -1187,143 +1220,156 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
             <Metric
               label="목표재고 충족률"
               value={`${national.stock_ratio.toFixed(1)}%`}
-              note={`부족권역 ${shortageRegions.length}개`}
-              icon="monitoring"
+              note={`부족권역 ${shortageRegions.length}개 · 과잉권역 ${excessRegions.length}개`}
+              icon="donut_large"
               tone="danger"
             />
             <Metric
-              label="최초 부족 주차"
-              value={baselineSource?.firstShortageWeek ?? "-"}
-              note={`무대응 기준 ${baselineScenario.shortageWeeks}주`}
-              icon="event_busy"
+              label="목표재고 부족분"
+              value={`${fmt(targetStockGap)} VIAL 환산`}
+              note="전국 목표재고 대비 현재 부족량"
+              icon="inventory"
               tone="warning"
-            />
-            <Metric
-              label="연간 예측수요"
-              value={`${fmt(cefazolinDashboard.annualForecastDemand)} VIAL 환산`}
-              note="8개 권역 합계"
-              icon="query_stats"
-            />
-            <Metric
-              label="재배분 가능"
-              value={`${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산`}
-              note={`과잉권역 ${excessRegions.length}개`}
-              icon="local_shipping"
-              tone="warning"
-            />
-            <Metric
-              label="MES 가동률"
-              value={`${cefazolinDashboard.utilization?.toFixed(1) ?? "-"}%`}
-              note="전국 평균"
-              icon="precision_manufacturing"
             />
           </div>
 
           <div className="grid grid-cols-12 gap-md">
-            <div className="col-span-8">
-              <Section title="권역 재고 영향" subtitle="WMS 현재고 · 목표재고 · 충족률 기준">
-                <div className="overflow-hidden rounded-xl border border-outline-variant">
-                  <table className="w-full text-left text-[12px]">
-                    <thead className="bg-surface-container-low text-[10px] uppercase text-on-surface-variant">
-                      <tr>
-                        <th className="px-sm py-xs">권역</th>
-                        <th className="px-sm py-xs text-right">현재고</th>
-                        <th className="px-sm py-xs text-right">목표재고</th>
-                        <th className="px-sm py-xs text-right">충족률</th>
-                        <th className="px-sm py-xs">판정</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {regions.map((region) => (
-                        <tr key={region.id} className="border-t border-outline-variant/40">
-                          <td className="px-sm py-xs font-bold text-on-surface">
-                            {region.region.split("_").slice(1).join("_")}
-                          </td>
-                          <td className="px-sm py-xs text-right font-data">
-                            {fmt(region.current_stock)} VIAL 환산
-                          </td>
-                          <td className="px-sm py-xs text-right font-data">
-                            {fmt(region.target_stock)} VIAL 환산
-                          </td>
-                          <td className="px-sm py-xs text-right font-data font-bold">
-                            {region.stock_ratio.toFixed(1)}%
-                          </td>
-                          <td className="px-sm py-xs">
-                            <Pill
-                              tone={
-                                region.riskLevel === "danger"
-                                  ? "danger"
-                                  : region.riskLevel === "warning"
-                                    ? "warning"
-                                    : "success"
-                              }
-                            >
-                              {region.riskText}
-                            </Pill>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            <div className="col-span-5">
+              <Section
+                title="원인·기여요인 분석"
+                subtitle="직접 공급 신호는 별도 표시 · 아래 점수는 상대 비중이 아닌 위험 신호 점수(0~100)"
+              >
+                <div className="rounded-xl border border-error/20 bg-error-container/15 p-sm">
+                  <div className="flex items-start justify-between gap-sm">
+                    <div>
+                      <p className="text-[10px] font-bold text-error">직접 공급 신호</p>
+                      <p className="mt-1 text-xs font-bold text-on-surface">
+                        {cefazolinDetectionContext.directSignal}
+                      </p>
+                      <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">
+                        {cefazolinDetectionContext.evidenceNote ?? cefazolinDetectionContext.source}
+                      </p>
+                    </div>
+                    <Pill tone="danger">공급 신호</Pill>
+                  </div>
                 </div>
-              </Section>
-            </div>
-            <div className="col-span-4 space-y-md">
-              <Section title="핵심 병목">
-                <div className="space-y-xs">
-                  {[
-                    [
-                      "inventory",
-                      "재고",
-                      `전국 목표재고 충족률 ${national.stock_ratio.toFixed(1)}%`,
-                    ],
-                    [
-                      "factory",
-                      "조달",
-                      `S3 긴급조달 ${fmt(recommendedScenario.emergencyProcurementQuantity)} API 환산`,
-                    ],
-                    [
-                      "precision_manufacturing",
-                      "생산",
-                      `MES 평균 가동률 ${cefazolinDashboard.utilization?.toFixed(1) ?? "-"}%`,
-                    ],
-                    [
-                      "local_shipping",
-                      "물류",
-                      `재배분 가능 ${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산`,
-                    ],
-                  ].map(([icon, label, value]) => (
+                <div className="mt-sm space-y-sm">
+                  {contributingCauses.map((cause) => (
                     <div
-                      key={label}
-                      className="flex items-center gap-sm rounded-xl border border-outline-variant p-sm"
+                      key={cause.label}
+                      className="rounded-xl border border-outline-variant/70 p-sm"
                     >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-container/40 text-scm-primary">
-                        <Icon name={icon} className="text-[17px]" />
-                      </span>
-                      <div>
-                        <p className="text-[10px] font-bold text-on-surface-variant">{label}</p>
-                        <p className="mt-0.5 text-xs font-bold text-on-surface">{value}</p>
+                      <div className="mb-1.5 flex items-center justify-between gap-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold text-on-surface">
+                            {cause.label}
+                          </span>
+                          <Pill tone="neutral">기여요인</Pill>
+                        </div>
+                        <span className="font-data text-[11px] font-bold text-on-surface-variant">
+                          {cause.score}/100
+                        </span>
                       </div>
+                      <SignalBar
+                        value={cause.score}
+                        tone={
+                          cause.score >= 80 ? "danger" : cause.score >= 60 ? "warning" : "primary"
+                        }
+                      />
                     </div>
                   ))}
                 </div>
               </Section>
-              <Section title="의사결정 상태">
-                <div className="grid grid-cols-2 gap-xs text-center">
-                  <div className="rounded-lg bg-surface-container-low p-sm">
-                    <p className="text-[10px] text-on-surface-variant">현재 단계</p>
-                    <p className="mt-1 text-xs font-bold">{activeStep}단계</p>
-                  </div>
-                  <div className="rounded-lg bg-surface-container-low p-sm">
-                    <p className="text-[10px] text-on-surface-variant">권고안</p>
-                    <p className="mt-1 text-xs font-bold text-scm-primary">
-                      {recommendedScenario.displayId}
-                    </p>
-                  </div>
+            </div>
+
+            <div className="col-span-7">
+              <Section
+                title="위험 전파 경로"
+                subtitle="동일 Case Snapshot에서 관측된 공급·재고·권역·서비스 지표를 순서대로 연결"
+              >
+                <div className="grid grid-cols-[minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)] items-stretch gap-xs">
+                  {propagationStages.map((stage, index) => (
+                    <div key={stage.label} className="contents">
+                      <div className="rounded-xl border border-outline-variant bg-white p-sm">
+                        <Pill tone={stage.tone}>{index + 1}</Pill>
+                        <p className="mt-2 text-[10px] font-bold text-on-surface-variant">
+                          {stage.label}
+                        </p>
+                        <p className="mt-1 font-data text-lg font-bold text-on-surface">
+                          {stage.value}
+                        </p>
+                        <p className="mt-1 break-words text-[9px] leading-4 text-on-surface-variant">
+                          {stage.note}
+                        </p>
+                      </div>
+                      {index < propagationStages.length - 1 ? (
+                        <div className="flex items-center justify-center text-scm-primary">
+                          <Icon name="arrow_forward" className="text-[18px]" />
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-sm flex items-start gap-2 rounded-xl bg-surface-container-low p-sm">
+                  <Icon name="info" className="mt-0.5 text-[16px] text-scm-primary" />
+                  <p className="text-[10px] leading-4 text-on-surface-variant">
+                    전파 경로는 사건 진단을 위한 정책형 분석 흐름이며, 개별 요인의 인과관계를
+                    확정하는 표시는 아닙니다.
+                  </p>
                 </div>
               </Section>
             </div>
           </div>
+
+          <Section title="권역별 영향" subtitle="현재 재고 ÷ 목표 재고 · 100% 기준">
+            <div className="grid grid-cols-2 gap-x-lg gap-y-sm">
+              {regions.map((region) => {
+                const tone =
+                  region.riskLevel === "danger"
+                    ? "danger"
+                    : region.riskLevel === "warning"
+                      ? "warning"
+                      : "success";
+                return (
+                  <div key={region.id} className="rounded-xl border border-outline-variant/70 p-sm">
+                    <div className="mb-2 flex items-center justify-between gap-sm">
+                      <div>
+                        <p className="text-[11px] font-bold text-on-surface">
+                          {region.region.split("_").slice(1).join("_")}
+                        </p>
+                        <p className="mt-0.5 text-[9px] text-on-surface-variant">
+                          현재 {fmt(region.current_stock)} · 목표 {fmt(region.target_stock)} VIAL
+                          환산
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-data text-[11px] font-bold">
+                          {region.stock_ratio.toFixed(1)}%
+                        </span>
+                        <Pill tone={tone}>{region.riskText}</Pill>
+                      </div>
+                    </div>
+                    <SignalBar value={region.stock_ratio} tone={tone} />
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-md flex items-center justify-between rounded-xl border border-scm-primary/20 bg-primary-container/15 p-sm">
+              <div>
+                <p className="text-[10px] font-bold text-on-surface-variant">다음 단계</p>
+                <p className="mt-1 text-xs font-bold">
+                  동일 Case 기준으로 S1·S2·S3의 효과와 실행 제약을 비교합니다.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTab("response")}
+                className="rounded-lg bg-scm-primary px-3 py-2 text-[11px] font-bold text-white"
+              >
+                대응안 검토
+              </button>
+            </div>
+          </Section>
         </div>
       ) : null}
 
@@ -1370,16 +1416,23 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
           <Section
             title="S1·S2·S3 대응안 비교"
             subtitle="서비스율 · 부족기간 · 권역 서비스 · 비용 · 제약조건"
+            action={
+              <button
+                type="button"
+                onClick={() => setTab("approval")}
+                className="rounded-lg bg-scm-primary px-3 py-2 text-[11px] font-bold text-white"
+              >
+                추천안 승인 검토
+              </button>
+            }
           >
             <div className="grid grid-cols-3 gap-sm">
               {scenarioRows.map((scenario) => {
                 const recommended = scenario.id === recommendedScenarioId;
                 return (
-                  <button
+                  <article
                     key={scenario.id}
-                    type="button"
-                    onClick={() => scenario.id === recommendedScenarioId && setTab("approval")}
-                    className={`rounded-xl border p-md text-left transition ${recommended ? "border-scm-primary bg-primary-container/20 shadow-sm" : "border-outline-variant bg-white"}`}
+                    className={`rounded-xl border p-md ${recommended ? "border-scm-primary bg-primary-container/20 shadow-sm" : "border-outline-variant bg-white"}`}
                   >
                     <div className="flex items-start justify-between gap-sm">
                       <div>
@@ -1398,13 +1451,21 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                         </Pill>
                       )}
                     </div>
-                    <dl className="mt-md grid grid-cols-2 gap-xs text-[11px]">
-                      <div className="rounded-lg bg-surface-container-low p-xs">
-                        <dt className="text-on-surface-variant">서비스율</dt>
-                        <dd className="mt-1 font-data font-bold">
+                    <div className="mt-md rounded-lg bg-surface-container-low p-xs">
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <span className="text-[10px] text-on-surface-variant">서비스율</span>
+                        <strong className="font-data text-xs">
                           {scenario.serviceRatePct.toFixed(1)}%
-                        </dd>
+                        </strong>
                       </div>
+                      <SignalBar
+                        value={scenario.serviceRatePct}
+                        tone={
+                          recommended ? "success" : scenario.constraintPassed ? "primary" : "danger"
+                        }
+                      />
+                    </div>
+                    <dl className="mt-xs grid grid-cols-3 gap-xs text-[11px]">
                       <div className="rounded-lg bg-surface-container-low p-xs">
                         <dt className="text-on-surface-variant">최저 권역</dt>
                         <dd className="mt-1 font-data font-bold">
@@ -1414,8 +1475,9 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                       <div className="rounded-lg bg-surface-container-low p-xs">
                         <dt className="text-on-surface-variant">미충족</dt>
                         <dd className="mt-1 font-data font-bold">
-                          {fmt(scenario.totalUnmetDemand)} VIAL 환산
+                          {fmt(scenario.totalUnmetDemand)}
                         </dd>
+                        <span className="text-[9px] text-on-surface-variant">VIAL 환산</span>
                       </div>
                       <div className="rounded-lg bg-surface-container-low p-xs">
                         <dt className="text-on-surface-variant">부족기간</dt>
@@ -1428,13 +1490,104 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                         {fmtKrw(scenario.totalProcurementCostKrw)}
                       </strong>
                     </div>
-                  </button>
+                  </article>
                 );
               })}
             </div>
           </Section>
 
-          <Section title="S3 실행 항목" subtitle="추천 시나리오에서 생성되는 시스템별 작업">
+          <Section
+            title="실행가능성·제약조건"
+            subtitle="추천안 실행 전 재고·생산·조달·품질 조건 확인"
+          >
+            <div className="grid grid-cols-4 gap-sm">
+              <div className="rounded-xl border border-outline-variant p-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-on-surface-variant">
+                    WMS 재고 재배분
+                  </span>
+                  <Pill tone="success">물량 확인</Pill>
+                </div>
+                <p className="mt-2 font-data text-lg font-bold">
+                  {fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산
+                </p>
+                <p className="mt-1 text-[10px] text-on-surface-variant">
+                  과잉권역 {excessRegions.length}개 · 부족권역 {shortageRegions.length}개
+                </p>
+              </div>
+              <div className="rounded-xl border border-outline-variant p-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-on-surface-variant">
+                    MES 생산 조건
+                  </span>
+                  <Pill tone="warning">확인 필요</Pill>
+                </div>
+                <p className="mt-2 font-data text-lg font-bold">
+                  가동률 {cefazolinDashboard.utilization?.toFixed(1) ?? "-"}%
+                </p>
+                <p className="mt-1 text-[10px] text-on-surface-variant">
+                  추가 원료 입고 후 생산계획 재산정
+                </p>
+              </div>
+              <div className="rounded-xl border border-outline-variant p-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-on-surface-variant">
+                    ERP 긴급조달
+                  </span>
+                  <Pill tone="warning">일정 확인</Pill>
+                </div>
+                <p className="mt-2 font-data text-lg font-bold">
+                  {fmt(recommendedScenario.emergencyProcurementQuantity)} API 환산
+                </p>
+                <p className="mt-1 text-[10px] text-on-surface-variant">
+                  {recommendedEvaluation?.executionPeriod ?? "공급사 입고 일정 확인"}
+                </p>
+              </div>
+              <div className="rounded-xl border border-outline-variant p-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-on-surface-variant">
+                    MES 품질·출하
+                  </span>
+                  <Pill tone="warning">선행조건</Pill>
+                </div>
+                <p className="mt-2 text-sm font-bold leading-5 text-on-surface">
+                  품질검사·출하승인
+                </p>
+                <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">
+                  {qualityCondition}
+                </p>
+              </div>
+            </div>
+            <div className="mt-sm grid grid-cols-2 gap-sm">
+              <div className="rounded-xl bg-surface-container-low p-sm">
+                <p className="text-[10px] font-bold text-on-surface-variant">실행 조건</p>
+                <ul className="mt-2 space-y-1.5 text-[11px] leading-4 text-on-surface">
+                  {(recommendedEvaluation?.xai.conditions ?? []).map((condition) => (
+                    <li key={condition} className="flex gap-2">
+                      <span className="text-scm-primary">•</span>
+                      <span>{condition}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl bg-surface-container-low p-sm">
+                <p className="text-[10px] font-bold text-on-surface-variant">제약·주의사항</p>
+                <ul className="mt-2 space-y-1.5 text-[11px] leading-4 text-on-surface">
+                  {(recommendedEvaluation?.xai.constraints ?? []).map((constraint) => (
+                    <li key={constraint} className="flex gap-2">
+                      <span className="text-[#ad6800]">•</span>
+                      <span>{constraint}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Section>
+
+          <Section
+            title={`${recommendedScenario.displayId} 실행계획`}
+            subtitle="시스템별 실행 항목 · 대상 · 수량 · 산출 기준"
+          >
             <div className="overflow-hidden rounded-xl border border-outline-variant">
               <table className="w-full text-left text-[12px]">
                 <thead className="bg-surface-container-low text-[10px] uppercase text-on-surface-variant">
@@ -1492,9 +1645,9 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                   </p>
                 </div>
                 <div className="rounded-xl bg-surface-container-low p-sm">
-                  <p className="text-[10px] text-on-surface-variant">긴급조달</p>
+                  <p className="text-[10px] text-on-surface-variant">증분 조달비</p>
                   <p className="mt-1 font-data text-lg font-bold">
-                    {fmt(recommendedScenario.emergencyProcurementQuantity)} API 환산
+                    {fmtKrw(cefazolinWorkflowEffect.procurementCostDeltaKrw)}
                   </p>
                 </div>
                 <div className="rounded-xl bg-surface-container-low p-sm">
@@ -1504,7 +1657,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
               </div>
             </Section>
 
-            <Section title="필수 검토사항">
+            <Section title="승인 조건" subtitle="추천안 실행 전 필수 확인 항목">
               <div className="space-y-xs">
                 {approvalChecklistItems.map((item) => (
                   <label
@@ -1522,9 +1675,16 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                       }
                       className="mt-1 h-4 w-4 accent-[var(--scm-primary)]"
                     />
-                    <span>
-                      <span className="block text-xs font-bold text-on-surface">{item.label}</span>
-                      <span className="mt-0.5 block text-[10px] text-on-surface-variant">
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center justify-between gap-sm">
+                        <span className="block text-xs font-bold text-on-surface">
+                          {item.label}
+                        </span>
+                        <Pill tone={checklist[item.key] ? "success" : "neutral"}>
+                          {checklist[item.key] ? "확인" : "미확인"}
+                        </Pill>
+                      </span>
+                      <span className="mt-0.5 block text-[10px] leading-4 text-on-surface-variant">
                         {item.detail}
                       </span>
                     </span>
@@ -1595,7 +1755,12 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                 </div>
                 {!approvalReady ? (
                   <p className="text-[10px] text-on-surface-variant">
-                    승인자 입력과 필수 검토 4건 완료 후 승인할 수 있습니다.
+                    최종 승인: 승인자 입력과 필수 검토 4건 완료가 필요합니다.
+                  </p>
+                ) : null}
+                {!holdReady ? (
+                  <p className="text-[10px] text-on-surface-variant">
+                    보완 요청: 승인자와 검토 의견을 입력해야 합니다.
                   </p>
                 ) : null}
               </div>
@@ -1651,7 +1816,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
               label="실행 상태"
               value={
                 executionStatus === "executed"
-                  ? "처리 완료"
+                  ? "전송 완료"
                   : executionStatus === "ready"
                     ? "전송 준비"
                     : "승인 대기"
@@ -1698,7 +1863,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
 
           <Section
             title="시스템 실행지시"
-            subtitle="승인 완료 후 ERP·MES·WMS 작업을 생성합니다."
+            subtitle="ERP · MES · WMS 실행지시 전송 상태"
             action={
               <button
                 type="button"
@@ -1706,7 +1871,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                 onClick={execute}
                 className="rounded-lg bg-scm-primary px-3 py-2 text-[11px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
-                실행지시 처리
+                실행지시 전송
               </button>
             }
           >
@@ -1717,6 +1882,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                     <th className="px-sm py-xs">시스템</th>
                     <th className="px-sm py-xs">지시 ID</th>
                     <th className="px-sm py-xs">실행 항목</th>
+                    <th className="px-sm py-xs">대상</th>
                     <th className="px-sm py-xs text-right">수량</th>
                     <th className="px-sm py-xs">상태</th>
                   </tr>
@@ -1729,6 +1895,9 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                       </td>
                       <td className="px-sm py-xs font-data text-[10px]">{action.id}</td>
                       <td className="px-sm py-xs font-bold">{action.title}</td>
+                      <td className="px-sm py-xs text-[10px] text-on-surface-variant">
+                        {action.target}
+                      </td>
                       <td className="px-sm py-xs text-right font-data">
                         {action.quantity === null
                           ? "재산정"
@@ -1745,7 +1914,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                           }
                         >
                           {executionStatus === "executed"
-                            ? "처리 완료"
+                            ? "전송 완료"
                             : executionStatus === "ready"
                               ? "전송 준비"
                               : "잠금"}
@@ -1758,10 +1927,10 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
             </div>
           </Section>
 
-          <Section title="계획 대비 효과">
+          <Section title="계획 대비 효과" subtitle="S1 기준 대비 추천 시나리오의 계획 KPI">
             <div className="grid grid-cols-4 gap-sm">
               <div className="rounded-xl border border-outline-variant p-md">
-                <p className="text-[10px] font-bold text-on-surface-variant">서비스율 개선</p>
+                <p className="text-[10px] font-bold text-on-surface-variant">서비스율 변화</p>
                 <p className="mt-2 font-data text-xl font-bold text-green-700">
                   +
                   {(
@@ -1772,7 +1941,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                 </p>
               </div>
               <div className="rounded-xl border border-outline-variant p-md">
-                <p className="text-[10px] font-bold text-on-surface-variant">미충족 감소</p>
+                <p className="text-[10px] font-bold text-on-surface-variant">미충족 수요 변화</p>
                 <p className="mt-2 font-data text-xl font-bold text-green-700">
                   -
                   {fmt(
@@ -1789,7 +1958,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                 </p>
               </div>
               <div className="rounded-xl border border-outline-variant p-md">
-                <p className="text-[10px] font-bold text-on-surface-variant">처리 시각</p>
+                <p className="text-[10px] font-bold text-on-surface-variant">최근 전송 시각</p>
                 <p className="mt-2 font-data text-sm font-bold">
                   {executionStatus === "executed"
                     ? new Date(lastUpdatedAt).toLocaleString("ko-KR")
@@ -1813,9 +1982,9 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
             <header className="sticky top-0 z-10 flex items-start justify-between border-b border-outline-variant bg-white px-lg py-md">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-scm-primary">
-                  Workflow trace
+                  Workflow Status
                 </p>
-                <h3 className="font-display text-lg font-bold">10단계 처리상태</h3>
+                <h3 className="font-display text-lg font-bold">10단계 처리 상태</h3>
               </div>
               <button
                 type="button"
@@ -1839,7 +2008,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                         : status === "approved"
                           ? "승인 완료"
                           : status === "executed"
-                            ? "처리 완료"
+                            ? "전송 완료"
                             : status === "held"
                               ? "보완 요청"
                               : "잠금";
@@ -1881,4 +2050,14 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
       ) : null}
     </div>
   );
+}
+
+export function CefazolinDecisionExecutionView({ product }: { product: Product }) {
+  if (product.key === "리피로우" && lipilouDashboard) {
+    return <ProductDecisionExecution product={product} dashboard={lipilouDashboard} />;
+  }
+  if (product.key === "타미비어") {
+    return <ProductDecisionExecution product={product} dashboard={tamivirDashboard} />;
+  }
+  return <CefazolinOnlyDecisionExecutionView product={product} />;
 }
