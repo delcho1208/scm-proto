@@ -6,10 +6,10 @@ import { selectRecommendedScenario } from "@/services/scm-workflow-orchestrator"
 export type ScmQuantityType = "demand" | "finishedInventory" | "transfer" | "apiProcurement";
 
 const scmQuantityUnits: Record<ScmQuantityType, string> = {
-  demand: "수요 환산단위",
-  finishedInventory: "완제품 환산단위",
-  transfer: "완제품 환산단위",
-  apiProcurement: "API 환산단위",
+  demand: "VIAL 환산",
+  finishedInventory: "VIAL 환산",
+  transfer: "VIAL 환산",
+  apiProcurement: "API 환산",
 };
 
 export function getScmQuantityUnit(quantityType: ScmQuantityType): string {
@@ -39,16 +39,21 @@ function toIntegrationStatus(status: string): SystemRecord["status"] {
   return "동기화 완료";
 }
 
-function createChartPath(values: number[], allValues: number[]): string {
+function createChartPath(
+  points: Array<{ index: number; value: number }>,
+  allValues: number[],
+  totalPointCount: number,
+): string {
   const min = Math.min(...allValues);
   const max = Math.max(...allValues);
   const range = max - min || 1;
+  const divisor = Math.max(totalPointCount - 1, 1);
 
-  return values
-    .map((value, index) => {
-      const x = (index / Math.max(values.length - 1, 1)) * 400;
-      const y = 170 - ((value - min) / range) * 130;
-      return `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+  return points
+    .map((point, pointIndex) => {
+      const x = (point.index / divisor) * 400;
+      const y = 170 - ((point.value - min) / range) * 130;
+      return `${pointIndex === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
 }
@@ -128,19 +133,68 @@ const regionalMonthly: Record<string, typeof nationalMonthly> = {
   ...monthlyByRegion,
 };
 
-const chartByRegion = Object.fromEntries(
+export type CefazolinTrendPoint = {
+  period: string;
+  sourceMonth: string;
+  value: number;
+  type: "reference" | "forecast";
+};
+
+export type CefazolinTrend = {
+  actual: string;
+  prediction: string;
+  ticks: string[];
+  points: CefazolinTrendPoint[];
+};
+
+const cefazolinTrendPeriods = [
+  { period: "26.08", month: "2026-08", type: "reference" as const },
+  { period: "26.09", month: "2026-09", type: "reference" as const },
+  { period: "26.10", month: "2026-10", type: "reference" as const },
+  { period: "26.11", month: "2026-11", type: "forecast" as const },
+  { period: "26.12", month: "2026-12", type: "forecast" as const },
+];
+
+const trendByRegion = Object.fromEntries(
   Object.entries(regionalMonthly).map(([regionId, metrics]) => {
-    const forecast = metrics.map((item) => item.forecastDemand);
-    const target = metrics.map((item) => item.targetStock);
-    const values = [...forecast, ...target];
+    const metricByMonth = Object.fromEntries(metrics.map((item) => [item.month, item]));
+    const points: CefazolinTrendPoint[] = cefazolinTrendPeriods.map((period) => {
+      const metric = metricByMonth[period.month];
+      if (!metric) throw new Error(`${regionId} ${period.month} 수요 추이 데이터가 없습니다.`);
+      return {
+        period: period.period,
+        sourceMonth: period.month,
+        value: metric.forecastDemand,
+        type: period.type,
+      };
+    });
+    const values = points.map((point) => point.value);
+    const referencePoints = points
+      .map((point, index) => ({ ...point, index }))
+      .filter((point) => point.type === "reference")
+      .map((point) => ({ index: point.index, value: point.value }));
+    const firstForecastIndex = points.findIndex((point) => point.type === "forecast");
+    const forecastPoints = points
+      .map((point, index) => ({ ...point, index }))
+      .filter((point) => point.index >= Math.max(0, firstForecastIndex - 1))
+      .map((point) => ({ index: point.index, value: point.value }));
     return [
       regionId,
       {
-        actual: createChartPath(forecast, values),
-        prediction: createChartPath(target, values),
-      },
+        actual: createChartPath(referencePoints, values, points.length),
+        prediction: createChartPath(forecastPoints, values, points.length),
+        ticks: points.map((point) => point.period),
+        points,
+      } satisfies CefazolinTrend,
     ];
   }),
+) as Record<string, CefazolinTrend>;
+
+const chartByRegion = Object.fromEntries(
+  Object.entries(trendByRegion).map(([regionId, trend]) => [
+    regionId,
+    { actual: trend.actual, prediction: trend.prediction },
+  ]),
 ) as Record<string, { actual: string; prediction: string }>;
 const emergencyProcurement = rawDashboard.overview.integratedResponse.emergencyProcurementQuantity;
 const s1 = rawDashboard.scenarios.find((scenario) => scenario.id === "S1_무대응");
@@ -238,6 +292,7 @@ export const cefazolinDashboard = {
   ),
   chart: chartByRegion.National,
   chartByRegion,
+  trendByRegion,
   regionalMonthly,
   monthlyFlow: rawDashboard.monthlyFlow,
   scenarios: rawDashboard.scenarios,

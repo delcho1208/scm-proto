@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { markerOrder, regions, type Product, type RiskLevel } from "@/data/scm";
-import { lipilouDashboard, tamivirDashboard } from "@/data/dashboard-scenario";
+import {
+  lipilouDashboard,
+  tamivirDashboard,
+  tamivirForecastByRegion,
+} from "@/data/dashboard-scenario";
+import { createLipilouGraph, getLipilouGraphRegion } from "@/data/lipilou-graph";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
 import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
@@ -258,7 +264,12 @@ function CefazolinNewsApiCard({ productName }: { productName: string }) {
               <ul className="space-y-1.5">
                 {news.slice(0, 2).map((item) => (
                   <li key={`${item.url}-${item.publishedAt}`}>
-                    <a href={item.url} target="_blank" rel="noreferrer" className="line-clamp-1 text-[10px] font-semibold text-on-surface hover:text-scm-primary hover:underline">
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="line-clamp-1 text-[10px] font-semibold text-on-surface hover:text-scm-primary hover:underline"
+                    >
                       {item.title}
                     </a>
                   </li>
@@ -272,14 +283,31 @@ function CefazolinNewsApiCard({ productName }: { productName: string }) {
       </div>
 
       {isOpen ? (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/45 p-6 backdrop-blur-[2px]" onMouseDown={() => setIsOpen(false)}>
-          <section role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl">
+        <div
+          className="fixed inset-0 z-[500] flex items-center justify-center bg-black/45 p-6 backdrop-blur-[2px]"
+          onMouseDown={() => setIsOpen(false)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            onMouseDown={(event) => event.stopPropagation()}
+            className="w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl"
+          >
             <header className="flex items-center justify-between border-b border-outline-variant px-6 py-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-scm-primary">NAVER NEWS</p>
-                <h3 className="font-display text-lg font-bold text-on-surface">{productName} 최신 뉴스</h3>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-scm-primary">
+                  NAVER NEWS
+                </p>
+                <h3 className="font-display text-lg font-bold text-on-surface">
+                  {productName} 최신 뉴스
+                </h3>
               </div>
-              <button type="button" aria-label="닫기" onClick={() => setIsOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low">
+              <button
+                type="button"
+                aria-label="닫기"
+                onClick={() => setIsOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-container-low"
+              >
                 <Icon name="close" className="text-[20px]" />
               </button>
             </header>
@@ -287,8 +315,12 @@ function CefazolinNewsApiCard({ productName }: { productName: string }) {
               {news.map((item) => (
                 <li key={`${item.url}-${item.publishedAt}`} className="py-4">
                   <a href={item.url} target="_blank" rel="noreferrer" className="group block">
-                    <span className="text-sm font-bold leading-6 text-on-surface group-hover:text-scm-primary group-hover:underline">{item.title}</span>
-                    <span className="mt-1 block text-[10px] text-on-surface-variant">{new Date(item.publishedAt).toLocaleDateString("ko-KR")}</span>
+                    <span className="text-sm font-bold leading-6 text-on-surface group-hover:text-scm-primary group-hover:underline">
+                      {item.title}
+                    </span>
+                    <span className="mt-1 block text-[10px] text-on-surface-variant">
+                      {new Date(item.publishedAt).toLocaleDateString("ko-KR")}
+                    </span>
                   </a>
                 </li>
               ))}
@@ -432,29 +464,65 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
   const panelInventory =
     scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
   const selectedCefazolinRegion = cefazolinData?.regions[regionId];
-  const forecastInventory = selectedCefazolinRegion?.current_stock ?? displayedTotalInventory;
+  const lipilouGraphRegion = product.key === "리피로우" ? getLipilouGraphRegion(regionId) : null;
+  const lipilouGraph = lipilouGraphRegion ? createLipilouGraph(lipilouGraphRegion) : null;
+  const tamivirForecast = product.key === "타미비어" ? tamivirForecastByRegion[regionId] : null;
+  const cefazolinTrend = cefazolinData?.trendByRegion[regionId];
+  const forecastInventory = Math.round(
+    selectedCefazolinRegion?.current_stock ??
+      lipilouGraphRegion?.current_stock_box ??
+      tamivirForecast?.currentStock ??
+      displayedTotalInventory,
+  );
   const forecastRateValue =
     cefazolinData && regionId !== "National"
       ? (selectedCefazolinRegion?.stock_ratio ?? 0)
-      : displayedUtilization;
+      : (lipilouGraphRegion?.operating_rate_pct ??
+        tamivirForecast?.operationRate ??
+        displayedUtilization);
   const forecastRateLabel =
     cefazolinData && regionId !== "National"
-      ? "목표재고 충족률 (권역)"
+      ? "목표재고 충족률"
       : cefazolinData
-        ? "공장 가동률 (전국 MES)"
-        : "가동률 (Operating Rate)";
+        ? "공장 가동률"
+        : "공장 가동률";
   const annualDemand = cefazolinData
     ? Math.round(
         cefazolinData.annualForecastDemandByRegion[regionId] ?? cefazolinData.annualForecastDemand,
       ).toLocaleString("ko-KR")
-    : product.annualDemand;
+    : product.key === "리피로우" && lipilouGraphRegion
+      ? Math.round(lipilouGraphRegion.annual_demand_box).toLocaleString("ko-KR")
+      : product.annualDemand;
   const trendText = cefazolinData
-    ? regionId === "National"
-      ? `S3 서비스율 ${cefazolinData.serviceRatePct.toFixed(2)}%`
-      : `목표재고 충족률 ${selectedCefazolinRegion?.stockRatioLabel ?? `${selectedCefazolinRegion?.stock_ratio ?? 0}%`}`
-    : product.yoyGrowth;
-  const chartPaths =
-    cefazolinData?.chartByRegion[regionId] ?? cefazolinData?.chart ?? product.paths;
+    ? "기준수요 8~10월 · 향후예측 11~12월"
+    : product.key === "리피로우" && lipilouGraphRegion
+      ? `전년 대비 ${lipilouGraphRegion.yoy_pct >= 0 ? "+" : ""}${lipilouGraphRegion.yoy_pct.toFixed(1)}%`
+      : product.key === "타미비어" && tamivirForecast
+        ? `전년 대비 ${tamivirForecast.yoy >= 0 ? "+" : ""}${tamivirForecast.yoy.toFixed(1)}%`
+        : product.yoyGrowth;
+  const chartPaths = cefazolinData
+    ? (cefazolinTrend ?? cefazolinData.chart)
+    : product.key === "리피로우" && lipilouGraph
+      ? lipilouGraph
+      : product.key === "타미비어" && tamivirForecast
+        ? tamivirForecast.paths
+        : product.paths;
+  const chartTicks = cefazolinData
+    ? (cefazolinTrend?.ticks ?? ["26.08", "26.09", "26.10", "26.11", "26.12"])
+    : product.key === "리피로우" && lipilouGraph
+      ? lipilouGraph.ticks
+      : timelineKeys.map((key) => timelineData[key].tick);
+  const chartCurrentIndex = cefazolinData
+    ? Math.max(0, cefazolinTrend?.points.map((point) => point.type).lastIndexOf("reference") ?? 2)
+    : product.key === "리피로우" && lipilouGraph
+      ? Math.max(0, lipilouGraph.points.map((point) => point.type).lastIndexOf("actual"))
+      : product.key === "타미비어" && tamivirForecast
+        ? 2
+        : timelineIndex;
+  const chartMarkerX = chartCurrentIndex * (400 / Math.max(chartTicks.length - 1, 1));
+  const chartReferenceLabel = cefazolinData ? "기준수요" : "실적";
+  const chartPredictionLabel = cefazolinData ? "향후예측" : "예측";
+  const inventoryUnit = cefazolinData ? getScmQuantityUnit("finishedInventory") : "BOX";
   const riskText =
     regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
   const nationalRiskText =
@@ -629,9 +697,8 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
           </div>
         </div>
         {cefazolinData && (
-          <button
-            type="button"
-            onClick={() => openAiWorkflow(workflowRunState.currentStep - 1)}
+          <Link
+            to="/decision-execution"
             className="flex items-center gap-3 rounded-xl border border-scm-primary/30 bg-white px-4 py-3 text-left shadow-sm transition-colors hover:bg-primary-container/30"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-scm-primary text-white">
@@ -642,18 +709,11 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                 SCM 의사결정 실행 콘솔
               </span>
               <span className="mt-0.5 block text-[10px] text-on-surface-variant">
-                {workflowCompletedCount}/10 단계 완료 ·{" "}
-                {virtualExecutionStatus === "executed"
-                  ? "가상 실행 완료"
-                  : hitlStatus === "approved"
-                    ? "승인 완료"
-                    : hitlStatus === "held"
-                      ? "보류"
-                      : "권고안 검토"}
+                {workflowCompletedCount}/10 단계 완료 · 권고안 검토
               </span>
             </span>
             <Icon name="chevron_right" className="text-[18px] text-scm-primary" />
-          </button>
+          </Link>
         )}
       </div>
 
@@ -690,20 +750,16 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
             <div className="mt-sm flex h-[170px] shrink-0 flex-col justify-between rounded-xl border border-outline-variant/30 bg-surface-container-low p-sm">
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-tight text-on-surface-variant">
-                  Monthly Trends
+                  월별 추이
                 </span>
                 <div className="flex gap-2">
                   <div className="flex items-center gap-1">
                     <span className="h-0.5 w-2 bg-scm-primary" />
-                    <span className="text-[9px] font-bold">
-                      {cefazolinData ? "예측수요" : "Actual"}
-                    </span>
+                    <span className="text-[9px] font-bold">{chartReferenceLabel}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="h-0.5 w-2 border-b border-dashed bg-error" />
-                    <span className="text-[9px] font-bold">
-                      {cefazolinData ? "목표재고" : "Pred."}
-                    </span>
+                    <span className="text-[9px] font-bold">{chartPredictionLabel}</span>
                   </div>
                 </div>
               </div>
@@ -722,64 +778,47 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                       y2={y}
                     />
                   ))}
-                  {!cefazolinData && (
-                    <line
-                      className="timeline-chart-marker"
-                      strokeWidth="2"
-                      x1={timelineIndex * 80}
-                      x2={timelineIndex * 80}
-                      y1="20"
-                      y2="180"
-                    />
-                  )}
+                  <line
+                    className="timeline-chart-marker"
+                    strokeWidth="2"
+                    x1={chartMarkerX}
+                    x2={chartMarkerX}
+                    y1="20"
+                    y2="180"
+                  />
                   <path className="path-actual" d={chartPaths.actual} />
                   <path className="path-prediction" d={chartPaths.prediction} />
-                  {!cefazolinData && (
-                    <>
-                      <circle className="chart-dot" cx="0" cy={product.dots[0]} r="3" />
-                      <circle className="chart-dot" cx="120" cy={product.dots[1]} r="3" />
-                      <circle className="chart-dot" cx="300" cy={product.dots[2]} r="3" />
-                      <circle
-                        className="chart-dot chart-dot-prediction"
-                        cx="380"
-                        cy={product.dots[3]}
-                        r="3"
-                      />
-                    </>
-                  )}
                 </svg>
                 <div
-                  className={`mt-2 grid text-center font-bold text-on-surface-variant/60 ${cefazolinData ? "grid-cols-12 text-[7px]" : "grid-cols-6 text-[9px]"}`}
+                  className="mt-2 grid text-center text-[9px] font-bold text-on-surface-variant/60"
+                  style={{ gridTemplateColumns: `repeat(${chartTicks.length}, minmax(0, 1fr))` }}
                 >
-                  {cefazolinData
-                    ? (cefazolinData.regionalMonthly[regionId] ?? []).map((metric) => (
-                        <span key={metric.month}>{metric.month.replace("2026-", "26.")}</span>
-                      ))
-                    : timelineKeys.map((key, index) => (
-                        <span
-                          key={key}
-                          className={
-                            index === timelineIndex
-                              ? timeline.isPrediction
-                                ? "text-[#ad6800]"
-                                : "text-scm-primary"
-                              : ""
-                          }
-                        >
-                          {timelineData[key].tick}
-                        </span>
-                      ))}
+                  {chartTicks.map((tick, index) => (
+                    <span
+                      key={`${tick}-${index}`}
+                      className={
+                        index === chartCurrentIndex
+                          ? "text-scm-primary"
+                          : index > chartCurrentIndex
+                            ? "text-[#ad6800]"
+                            : ""
+                      }
+                    >
+                      {tick}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
             <div className="mt-sm grid min-h-0 flex-1 grid-rows-3 gap-xs">
               <div className="forecast-kpi-row">
                 <div>
-                  <p>
-                    현재 재고 ({cefazolinData ? getScmQuantityUnit("finishedInventory") : "BOX"})
-                  </p>
-                  <strong>
+                  <p>현재고</p>
+                  <strong className="flex items-baseline gap-1">
                     <AnimatedNumber value={forecastInventory} />
+                    <span className="text-[10px] font-bold text-on-surface-variant">
+                      {inventoryUnit}
+                    </span>
                   </strong>
                 </div>
                 <Icon name="inventory_2" className="text-[18px] text-scm-primary" />
@@ -988,15 +1027,13 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               <div className="pointer-events-none space-y-3">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold uppercase tracking-tight text-on-surface-variant">
-                    현재 재고
+                    현재고
                   </span>
                   <div className="flex items-baseline gap-1">
                     <span className="font-data text-[18px] font-semibold text-scm-primary">
-                      <AnimatedNumber value={panelInventory} decimals={cefazolinData ? 3 : 0} />
+                      <AnimatedNumber value={Math.round(panelInventory)} decimals={0} />
                     </span>
-                    <span className="text-[10px] font-bold">
-                      {cefazolinData ? getScmQuantityUnit("finishedInventory") : "BOX"}
-                    </span>
+                    <span className="text-[10px] font-bold">{inventoryUnit}</span>
                   </div>
                 </div>
                 <div className="flex flex-col">
@@ -1196,20 +1233,21 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                 </div>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (!cefazolinData) return;
-                setSelectedRecommendationIndex(recommendedEvaluationIndex);
-                setShowRecommendationXai(false);
-                setShowScenarioComparison(true);
-              }}
-              className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
-            >
-              {cefazolinData
-                ? "S1·S2·S3 비교 및 실행안 검토"
-                : (scenario?.recommendations[0]?.approvalButtonText ?? "실행 계획 적용")}
-            </button>
+            {cefazolinData ? (
+              <Link
+                to="/decision-execution"
+                className="mt-md block w-full cursor-pointer rounded-lg bg-on-surface py-sm text-center text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
+              >
+                S1·S2·S3 비교 및 실행안 검토
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="mt-md w-full cursor-pointer rounded-lg bg-on-surface py-sm text-xs font-bold text-white shadow-md transition-opacity hover:opacity-90 active:scale-[0.98]"
+              >
+                {scenario?.recommendations[0]?.approvalButtonText ?? "실행 계획 적용"}
+              </button>
+            )}
           </div>
 
           <CefazolinNewsApiCard productName={product.name} />
@@ -2292,14 +2330,13 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
                   {selectedEvaluation.xai.limitation}
                 </p>
                 {selectedEvaluation.recommended && (
-                  <button
-                    type="button"
-                    onClick={() => openAiWorkflow(7)}
+                  <Link
+                    to="/decision-execution"
                     className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-scm-primary px-4 py-3 text-sm font-bold text-white shadow-sm hover:opacity-90"
                   >
                     <Icon name="verified_user" className="text-[18px]" />
-                    HITL 검토·승인 단계로 이동
-                  </button>
+                    의사결정 실행 페이지로 이동
+                  </Link>
                 )}
               </div>
             </div>

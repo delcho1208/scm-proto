@@ -534,7 +534,7 @@ const transferableRegions = usesTransfer
 const procurementActions: VirtualExecutionAction[] = procurementPlans.map((plan) => ({
   id: `VPO-${plan.supplierId}`,
   actionType: "가상 원료발주",
-  title: `${plan.supplierId} 원료 추가 발주`,
+  title: `공급사 ${plan.supplierId} 원료 추가 발주`,
   source: `공급사 ${plan.supplierId}`,
   target: "천안공장 원료 입고",
   quantity: plan.totalReceiptQuantity,

@@ -33,6 +33,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
   const topNav = [
     { to: "/simulation", label: "시뮬레이션" },
     { to: "/data-integration", label: "데이터 통합" },
+    { to: "/decision-execution", label: "의사결정 실행" },
   ];
 
   return (
@@ -117,10 +118,15 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
                           <Icon name={p.icon} className="text-[20px] text-scm-primary" />
                           <div className="flex flex-col">
                             <span className="text-sm font-bold text-on-surface">{p.name}</span>
-                            <span className="text-[10px] text-on-surface-variant">{p.subtitle}</span>
+                            <span className="text-[10px] text-on-surface-variant">
+                              {p.subtitle}
+                            </span>
                           </div>
                           {p.key === productKey && (
-                            <Icon name="check_circle" className="ml-auto text-[20px] text-scm-primary" />
+                            <Icon
+                              name="check_circle"
+                              className="ml-auto text-[20px] text-scm-primary"
+                            />
                           )}
                         </button>
                       ))}

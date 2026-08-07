@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DataIntegrationRouteImport } from './routes/data-integration'
+import { Route as DecisionExecutionRouteImport } from './routes/decision-execution'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as SimulationRouteImport } from './routes/simulation'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -27,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
 const DataIntegrationRoute = DataIntegrationRouteImport.update({
   id: '/data-integration',
   path: '/data-integration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DecisionExecutionRoute = DecisionExecutionRouteImport.update({
+  id: '/decision-execution',
+  path: '/decision-execution',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -71,6 +77,7 @@ const Char91DotmcpChar93InvokeToolToolRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/data-integration': typeof DataIntegrationRoute
+  '/decision-execution': typeof DecisionExecutionRoute
   '/mcp': typeof McpRoute
   '/simulation': typeof SimulationRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/data-integration': typeof DataIntegrationRoute
+  '/decision-execution': typeof DecisionExecutionRoute
   '/mcp': typeof McpRoute
   '/simulation': typeof SimulationRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/data-integration': typeof DataIntegrationRoute
+  '/decision-execution': typeof DecisionExecutionRoute
   '/mcp': typeof McpRoute
   '/simulation': typeof SimulationRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/data-integration'
+    | '/decision-execution'
     | '/mcp'
     | '/simulation'
     | '/.mcp/list-tools'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/data-integration'
+    | '/decision-execution'
     | '/mcp'
     | '/simulation'
     | '/.mcp/list-tools'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/data-integration'
+    | '/decision-execution'
     | '/mcp'
     | '/simulation'
     | '/.mcp/list-tools'
@@ -141,6 +153,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DataIntegrationRoute: typeof DataIntegrationRoute
+  DecisionExecutionRoute: typeof DecisionExecutionRoute
   McpRoute: typeof McpRoute
   SimulationRoute: typeof SimulationRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -164,6 +177,13 @@ declare module '@tanstack/react-router' {
       path: '/data-integration'
       fullPath: '/data-integration'
       preLoaderRoute: typeof DataIntegrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/decision-execution': {
+      id: '/decision-execution'
+      path: '/decision-execution'
+      fullPath: '/decision-execution'
+      preLoaderRoute: typeof DecisionExecutionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -221,6 +241,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DataIntegrationRoute: DataIntegrationRoute,
+  DecisionExecutionRoute: DecisionExecutionRoute,
   McpRoute: McpRoute,
   SimulationRoute: SimulationRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
