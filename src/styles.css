@@ -798,6 +798,7 @@
 .warehouse-photo-zone:nth-child(8) { left: 67.0%; top: 44.5%; }
 .warehouse-photo-zone[data-status="warning"] { --zone-color: #eab308; }
 .warehouse-photo-zone[data-status="danger"] { --zone-color: #dc2626; }
+.warehouse-photo-zone[data-status="critical"] { --zone-color: #9333ea; }
 .warehouse-photo-outline {
   position: absolute;
   inset: 17% 1% 1%;
