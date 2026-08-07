@@ -879,14 +879,14 @@
 .warehouse-photo-zone:nth-child(-n+4) .warehouse-photo-status { bottom: 4px; }
 .warehouse-photo-zone.critical .warehouse-photo-outline,
 .warehouse-photo-zone.critical.active .warehouse-photo-outline {
-  border-color:#dc2626;
-  background:rgba(220,38,38,.14);
+  border-color:#9333ea;
+  background:rgba(147,51,234,.14);
   animation:warehouseCriticalPulse 1.35s ease-in-out infinite;
 }
 .warehouse-photo-zone.critical .warehouse-photo-status,
-.warehouse-photo-zone.critical.active .warehouse-photo-status { background:#dc2626; }
+.warehouse-photo-zone.critical.active .warehouse-photo-status { background:#9333ea; }
 @keyframes warehouseCriticalPulse {
-  50% { box-shadow:0 0 0 4px rgba(254,226,226,.92),0 0 26px rgba(220,38,38,.9),inset 0 0 16px rgba(220,38,38,.3); }
+  50% { box-shadow:0 0 0 4px rgba(243,232,255,.92),0 0 26px rgba(147,51,234,.9),inset 0 0 16px rgba(147,51,234,.3); }
 }
 .warehouse-photo-legend {
   position:absolute;
