@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      infectious_disease: {
+        Row: {
+          date: string
+          id: number
+          inpatient_patients: number
+          month: number
+          outpatient_patients: number
+          region_code: number
+          region_name: string
+          total_patients: number
+          year: number
+        }
+        Insert: {
+          date: string
+          id?: number
+          inpatient_patients?: number
+          month: number
+          outpatient_patients?: number
+          region_code: number
+          region_name: string
+          total_patients?: number
+          year: number
+        }
+        Update: {
+          date?: string
+          id?: number
+          inpatient_patients?: number
+          month?: number
+          outpatient_patients?: number
+          region_code?: number
+          region_name?: string
+          total_patients?: number
+          year?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
