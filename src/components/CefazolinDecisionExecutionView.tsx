@@ -11,6 +11,7 @@ import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
 import {
   cefazolinDecisionEvidence,
+  cefazolinDetectionContext,
   cefazolinScenarioComparison,
   cefazolinScenarioRecommendation,
   cefazolinVirtualExecutionActions,
@@ -25,7 +26,7 @@ type TabKey = "impact" | "response" | "approval" | "execution";
 type ChecklistKey = "cost" | "supplier" | "quality" | "transfer";
 
 const tabItems: Array<{ key: TabKey; label: string; icon: string }> = [
-  { key: "impact", label: "상황·영향", icon: "monitoring" },
+  { key: "impact", label: "탐지·영향", icon: "radar" },
   { key: "response", label: "대응안 검토", icon: "compare_arrows" },
   { key: "approval", label: "승인", icon: "verified_user" },
   { key: "execution", label: "실행·성과", icon: "play_circle" },
@@ -119,6 +120,27 @@ function Metric({
   );
 }
 
+function SignalBar({
+  value,
+  tone = "primary",
+}: {
+  value: number;
+  tone?: "primary" | "danger" | "warning" | "success";
+}) {
+  const width = Math.max(0, Math.min(value, 100));
+  const barStyle = {
+    primary: "bg-scm-primary",
+    danger: "bg-error",
+    warning: "bg-[#f59e0b]",
+    success: "bg-green-500",
+  }[tone];
+  return (
+    <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-container-high">
+      <div className={`h-full rounded-full ${barStyle}`} style={{ width: `${width}%` }} />
+    </div>
+  );
+}
+
 function Section({
   title,
   subtitle,
@@ -145,7 +167,7 @@ function Section({
 }
 
 function actionSystem(actionType: string) {
-  if (actionType.includes("원료발주")) return "ERP";
+  if (actionType.includes("발주")) return "ERP";
   if (actionType.includes("생산")) return "MES";
   return "WMS";
 }
@@ -931,7 +953,7 @@ function ProductDecisionExecution({
 }
 
 export function CefazolinDecisionExecutionView({ product }: { product: Product }) {
-  const [tab, setTab] = useState<TabKey>("response");
+  const [tab, setTab] = useState<TabKey>("impact");
   const [showWorkflow, setShowWorkflow] = useState(false);
   const [hitlStatus, setHitlStatus] = useState<HitlStatus>("pending");
   const [executionStatus, setExecutionStatus] = useState<ExecutionStatus>("locked");
@@ -949,6 +971,8 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
   }
 
   const national = cefazolinDashboard.regions.National;
+  const nationalPolicyRisk = cefazolinDashboard.policyRiskByRegion.National;
+  const riskCauses = [...nationalPolicyRisk.causes].sort((a, b) => b.score - a.score);
   const regions = Object.values(cefazolinDashboard.regions).filter(
     (region) => region.id !== "National",
   );
@@ -960,11 +984,48 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
     scenarioRows.find((scenario) => scenario.id === recommendedScenarioId) ?? scenarioRows.at(-1)!;
   const baselineScenario =
     scenarioRows.find((scenario) => scenario.id === "S1_무대응") ?? scenarioRows[0];
+  const contributingCauses = riskCauses.filter(
+    (cause) => cause.label !== cefazolinDetectionContext.directSignal,
+  );
+  const targetStockGap = Math.max(
+    0,
+    national.target_stock - (cefazolinDashboard.totalInventory ?? 0),
+  );
   const baselineSource = cefazolinDashboard.scenarios.find(
     (scenario) => scenario.id === "S1_무대응",
   );
-  const checklistComplete = checklistItems.every((item) => checklist[item.key]);
+  const recommendedEvaluation =
+    cefazolinDashboard.recommendationEvaluations.find((item) => item.recommended) ??
+    cefazolinDashboard.recommendationEvaluations.find(
+      (item) => item.scenarioId === recommendedScenario.displayId,
+    );
+  const approvalChecklistItems: Array<{ key: ChecklistKey; label: string; detail: string }> = [
+    {
+      key: "cost",
+      label: "증분 조달비 확인",
+      detail: `S1 대비 ${fmtKrw(cefazolinWorkflowEffect.procurementCostDeltaKrw)} 증가분 및 예산 범위 확인`,
+    },
+    {
+      key: "supplier",
+      label: "공급사 입고 일정 확인",
+      detail: recommendedEvaluation?.executionPeriod ?? "긴급조달 입고 일정 확인",
+    },
+    {
+      key: "quality",
+      label: "MES 품질 승인 전제 확인",
+      detail:
+        recommendedEvaluation?.xai.conditions.find((item) => item.includes("품질")) ??
+        "MES 품질검사·출하승인 완료 여부 확인",
+    },
+    {
+      key: "transfer",
+      label: "권역 재배분 가능량 확인",
+      detail: `${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산 · 과잉권역 ${excessRegions.length}개`,
+    },
+  ];
+  const checklistComplete = approvalChecklistItems.every((item) => checklist[item.key]);
   const approvalReady = reviewer.trim().length > 0 && checklistComplete;
+  const holdReady = reviewer.trim().length > 0 && reviewNote.trim().length > 0;
   const workflow = getCefazolinWorkflowRunState({ hitlStatus, executionStatus, lastUpdatedAt });
   const activeStep = Math.max(1, workflow.currentStep);
 
@@ -983,6 +1044,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
   };
 
   const hold = () => {
+    if (!holdReady) return;
     const now = new Date().toISOString();
     setHitlStatus("held");
     setExecutionStatus("locked");
@@ -1020,10 +1082,13 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
             <span className="font-data text-[10px] text-on-surface-variant">
               CEFA-SUPPLY-20261028-01
             </span>
+            <span className="rounded-full border border-outline-variant bg-surface-container-low px-2 py-0.5 text-[9px] font-bold text-on-surface-variant">
+              SANDBOX · SYNTHETIC DATA
+            </span>
           </div>
           <h2 className="font-display text-headline-md text-on-surface">세파졸린 의사결정 실행</h2>
           <p className="mt-xs text-sm text-on-surface-variant">
-            API 공급 차질 · 전국 목표재고 미달 · 데이터 기준{" "}
+            수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
             {cefazolinWorkflowRunMeta.latestSnapshotDate}
           </p>
         </div>
@@ -1054,6 +1119,63 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
 
       {tab === "impact" ? (
         <div className="space-y-md">
+          <Section
+            title="Case 탐지 요약"
+            subtitle="직접 공급 신호와 수급 위험 신호를 결합해 의사결정 Case로 전환"
+            action={<Pill tone="danger">{nationalPolicyRisk.grade}</Pill>}
+          >
+            <div className="grid grid-cols-4 gap-sm">
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-sm">
+                <p className="text-[10px] font-bold text-on-surface-variant">위험 등급 · 점수</p>
+                <div className="mt-2 flex items-end justify-between gap-sm">
+                  <strong className="font-data text-xl">{nationalPolicyRisk.score}/100</strong>
+                  <span className="text-[10px] font-bold text-error">HIGH</span>
+                </div>
+                <div className="mt-2">
+                  <SignalBar value={nationalPolicyRisk.score} tone="danger" />
+                </div>
+              </div>
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-sm">
+                <p className="text-[10px] font-bold text-on-surface-variant">Case ID</p>
+                <p className="mt-2 font-data text-[12px] font-bold">
+                  {cefazolinDetectionContext.caseId}
+                </p>
+                <p className="mt-1 text-[10px] text-on-surface-variant">
+                  탐지 기준 {cefazolinDetectionContext.detectedAt}
+                </p>
+              </div>
+              <div className="rounded-xl border border-error/20 bg-error-container/15 p-sm">
+                <p className="text-[10px] font-bold text-on-surface-variant">직접 공급 신호</p>
+                <p className="mt-2 text-sm font-bold">{cefazolinDetectionContext.directSignal}</p>
+                <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">
+                  {cefazolinDetectionContext.evidenceNote ?? cefazolinDetectionContext.source}
+                </p>
+              </div>
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-sm">
+                <p className="text-[10px] font-bold text-on-surface-variant">영향 범위</p>
+                <p className="mt-2 font-data text-xl font-bold">
+                  부족권역 {shortageRegions.length}개
+                </p>
+                <p className="mt-1 text-[10px] text-on-surface-variant">
+                  목표재고 부족 {fmt(targetStockGap)} VIAL 환산
+                </p>
+              </div>
+            </div>
+            <div className="mt-sm grid grid-cols-3 gap-sm">
+              {contributingCauses.slice(0, 3).map((cause) => (
+                <div key={cause.label} className="rounded-xl border border-outline-variant p-sm">
+                  <div className="mb-2 flex justify-between gap-sm text-[10px] font-bold">
+                    <span>{cause.label}</span>
+                    <span>{cause.score}/100</span>
+                  </div>
+                  <SignalBar
+                    value={cause.score}
+                    tone={cause.score >= 80 ? "danger" : cause.score >= 60 ? "warning" : "primary"}
+                  />
+                </div>
+              ))}
+            </div>
+          </Section>
           <div className="grid grid-cols-6 gap-sm">
             <Metric
               label="현재고"
@@ -1384,7 +1506,7 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
 
             <Section title="필수 검토사항">
               <div className="space-y-xs">
-                {checklistItems.map((item) => (
+                {approvalChecklistItems.map((item) => (
                   <label
                     key={item.key}
                     className="flex cursor-pointer items-start gap-sm rounded-xl border border-outline-variant p-sm hover:border-scm-primary/40"
@@ -1457,7 +1579,8 @@ export function CefazolinDecisionExecutionView({ product }: { product: Product }
                   <button
                     type="button"
                     onClick={hold}
-                    className="flex-1 rounded-xl border border-[#ffd591] bg-[#fff7e6] px-sm py-2.5 text-xs font-bold text-[#ad6800]"
+                    disabled={!holdReady}
+                    className="flex-1 rounded-xl border border-[#ffd591] bg-[#fff7e6] px-sm py-2.5 text-xs font-bold text-[#ad6800] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     보완 요청
                   </button>

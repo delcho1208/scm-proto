@@ -33,8 +33,8 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
 
   const topNav = [
     { to: "/simulation", label: "시뮬레이션" },
-    { to: "/data-integration", label: "데이터 연동" },
     { to: "/decision-execution", label: "실행관리" },
+    { to: "/data-integration", label: "데이터 연동" },
   ];
 
   return (

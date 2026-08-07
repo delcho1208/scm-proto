@@ -9,7 +9,8 @@ import {
   type ScenarioMetrics,
 } from "@/services/scm-workflow-orchestrator";
 
-export type WorkflowGroup = "데이터 준비" | "분석·시뮬레이션" | "의사결정" | "승인·실행";
+export type WorkflowGroup =
+  "데이터 준비" | "탐지·영향" | "분석·시뮬레이션" | "의사결정" | "승인·실행";
 
 export type CefazolinWorkflowStep = {
   id: string;
@@ -46,7 +47,7 @@ export type ScenarioComparisonRow = ScenarioMetrics & {
 
 export type VirtualExecutionAction = {
   id: string;
-  actionType: "가상 원료발주" | "가상 생산계획" | "가상 재고이동";
+  actionType: "원료 긴급발주" | "생산계획 재산정" | "재고이동";
   title: string;
   source: string;
   target: string;
@@ -60,6 +61,13 @@ export type VirtualExecutionAction = {
 const national = rawDashboard.regions.find((region) => region.id === "National");
 const regionalRows = rawDashboard.regions.filter((region) => region.id !== "National");
 const s1 = rawDashboard.scenarios.find((scenario) => scenario.id === "S1_무대응");
+const shortageRegionCount = regionalRows.filter(
+  (region) => region.stockStatusCode === "danger",
+).length;
+const topRiskCauses = [...(national?.policyRisk.causes ?? [])]
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 3);
+const caseId = "CEFA-SUPPLY-20261028-01";
 
 if (!national || !s1) {
   throw new Error("SCM 실행 콘솔 구성에 필요한 전국·S1 데이터가 없습니다.");
@@ -277,6 +285,37 @@ export const cefazolinDataQualitySummary = {
   warnings: integrationDates.length > 1 ? [`시스템별 기준일 차이: ${systemDateSummary}`] : [],
 };
 
+const supplyRiskCause = national.policyRisk.causes.find((cause) =>
+  cause.label.includes("원자재 공급 차질"),
+);
+const supplyEvidenceRecord = rawDashboard.integration.find(
+  (record) => record.system === "ERP" && record.note.includes("공급이행률"),
+);
+const supplyFulfillmentMatch = supplyEvidenceRecord?.note.match(/공급이행률\s*([\d.]+)%/);
+const supplyEventIdMatch = supplyEvidenceRecord?.note.match(/EVT-\d+/);
+
+export const cefazolinDetectionContext = {
+  caseId,
+  detectedAt: latestDataAsOf,
+  directSignal: supplyRiskCause?.label ?? "원자재 공급 상태 이상",
+  directSignalScore: supplyRiskCause?.score ?? 0,
+  eventId: supplyEventIdMatch?.[0] ?? null,
+  supplyFulfillmentPct: supplyFulfillmentMatch ? Number(supplyFulfillmentMatch[1]) : null,
+  source: "ERP 공급 배분 · 정책형 수급 위험 신호",
+  evidenceNote:
+    [
+      supplyEventIdMatch?.[0] ?? null,
+      supplyEvidenceRecord?.note.includes("부분회복") ? "부분회복 반영" : null,
+      supplyFulfillmentMatch ? `공급이행률 ${Number(supplyFulfillmentMatch[1]).toFixed(1)}%` : null,
+    ]
+      .filter((item): item is string => Boolean(item))
+      .join(" · ") || null,
+  affectedRegions: regionalRows
+    .filter((region) => region.stockStatusCode === "danger")
+    .map((region) => region.name),
+  synthetic: true as const,
+};
+
 const forecastMonths = [...new Set(rawDashboard.regionalMonthly.map((row) => row.month))].sort();
 
 export const cefazolinForecastRiskSummary = {
@@ -364,45 +403,51 @@ export const cefazolinWorkflowSteps: CefazolinWorkflowStep[] = [
     synthetic: true,
   },
   {
-    id: "FLOW-03-READINESS",
+    id: "FLOW-03-DETECTION",
     order: 3,
-    group: "데이터 준비",
-    title: "분석 준비성 검증",
-    shortTitle: "준비성 검증",
-    purpose: "7개 규칙 검사를 통해 분석 가능·조건부 가능·중단 여부를 판정합니다.",
-    icon: "fact_check",
-    ruleIds: cefazolinReadinessChecks.map((check) => check.id),
-    dataAsOf: dataAsOfLabel,
+    group: "탐지·영향",
+    title: "수급 이상 탐지·Case 생성",
+    shortTitle: "위험 탐지",
+    purpose:
+      "통합된 수요·재고·생산·공급 신호를 종합해 수급 이상을 판정하고 의사결정 Case를 생성합니다.",
+    icon: "radar",
+    ruleIds: ["RULE-RISK-DETECTION-001", ...cefazolinReadinessChecks.map((check) => check.id)],
+    dataAsOf: national.policyRisk.asOf,
     evidence: [
-      `판정 ${cefazolinAnalysisReadiness.verdict}`,
-      `통과 ${readinessPassCount} · 경고 ${readinessWarningCount} · 실패 ${readinessFailureCount}`,
+      `직접 공급 신호 ${cefazolinDetectionContext.directSignal}${cefazolinDetectionContext.eventId ? ` · ${cefazolinDetectionContext.eventId}` : ""}`,
+      cefazolinDetectionContext.supplyFulfillmentPct !== null
+        ? `ERP 공급이행률 ${cefazolinDetectionContext.supplyFulfillmentPct.toFixed(1)}%`
+        : `공급 위험 신호 ${cefazolinDetectionContext.directSignalScore}/100`,
+      `전국 수급 위험 ${national.policyRisk.score}/100 · ${national.policyRisk.grade}`,
+      `Case ${caseId}`,
     ],
     warnings: cefazolinReadinessChecks
-      .filter((check) => check.status !== "pass")
+      .filter((check) => check.status === "fail")
       .map((check) => `${check.label}: ${check.evidence}`),
-    nextAction:
-      readinessFailureCount > 0
-        ? "실패 항목을 수정한 뒤 분석을 다시 실행합니다."
-        : "예측·위험 분석 결과를 확인합니다.",
+    nextAction: "생성된 Case의 권역·재고·수요 영향을 확인합니다.",
     synthetic: true,
   },
   {
-    id: "FLOW-04-MODEL",
+    id: "FLOW-04-IMPACT",
     order: 4,
-    group: "분석·시뮬레이션",
-    title: "수요예측·부족위험 분석",
-    shortTitle: "예측·위험 분석",
-    purpose: "권역별 수요예측 범위와 XGBoost·TreeSHAP 부족위험 검증 결과를 구분해 확인합니다.",
-    icon: "model_training",
-    ruleIds: ["RULE-MODEL-VALID-001", "RULE-SHAP-TRACE-001"],
+    group: "탐지·영향",
+    title: "Case 영향 분석",
+    shortTitle: "영향 분석",
+    purpose:
+      "탐지된 수급 이상이 권역별 재고와 목표재고 충족률, 영향 범위에 미치는 결과를 사건 단위로 정리합니다.",
+    icon: "monitoring",
+    ruleIds: ["RULE-MODEL-VALID-001", "RULE-SHAP-TRACE-001", "RULE-CASE-IMPACT-001"],
     dataAsOf: latestDataAsOf,
     evidence: [
-      `예측 대상 ${cefazolinForecastRiskSummary.forecast.target}`,
-      `기간 ${cefazolinForecastRiskSummary.forecast.period} · ${regionalRows.length}개 권역`,
-      `ROC-AUC ${rawDashboard.modelValidation.rocAuc.toFixed(3)} · F1 ${rawDashboard.modelValidation.f1.toFixed(3)}`,
+      `영향 권역 ${shortageRegionCount}개 · 전국 목표재고 충족률 ${national.targetStockCoveragePct.toFixed(2)}%`,
+      `현재 재고 ${formatScmQuantity(rawDashboard.overview.nationalCurrentStock, "finishedInventory")} · 목표재고 ${formatScmQuantity(rawDashboard.overview.nationalTargetStock, "finishedInventory")}`,
+      "위험 전파 경로: 공급 이행 저하 → 재고 압박 → 권역 부족 → 서비스 위험",
+      ...topRiskCauses
+        .filter((cause) => cause.label !== cefazolinDetectionContext.directSignal)
+        .map((cause) => `${cause.label} ${cause.score}/100`),
     ],
-    warnings: ["모델 버전·실행 ID는 원천 데이터에 없습니다."],
-    nextAction: "S0~S3 시뮬레이션 결과를 동일 기준으로 비교합니다.",
+    warnings: [],
+    nextAction: "동일 Case Snapshot을 기준으로 S0~S3 대응 시나리오를 실행합니다.",
     synthetic: true,
   },
   {
@@ -533,7 +578,7 @@ const transferableRegions = usesTransfer
 
 const procurementActions: VirtualExecutionAction[] = procurementPlans.map((plan) => ({
   id: `VPO-${plan.supplierId}`,
-  actionType: "가상 원료발주",
+  actionType: "원료 긴급발주",
   title: `공급사 ${plan.supplierId} 원료 추가 발주`,
   source: `공급사 ${plan.supplierId}`,
   target: "천안공장 원료 입고",
@@ -548,7 +593,7 @@ const productionActions: VirtualExecutionAction[] =
     ? [
         {
           id: `VPROD-${recommendedScenario.id.split("_")[0]}`,
-          actionType: "가상 생산계획",
+          actionType: "생산계획 재산정",
           title: "추가 원료 기준 생산계획 재산정",
           source: "승인된 API 환산 수량",
           target: "천안공장 MES 생산계획",
@@ -562,7 +607,7 @@ const productionActions: VirtualExecutionAction[] =
     : [];
 const transferActions: VirtualExecutionAction[] = transferableRegions.map((region) => ({
   id: `VTR-${region.id}`,
-  actionType: "가상 재고이동",
+  actionType: "재고이동",
   title: `${region.name} 과잉재고 우선배분`,
   source: region.name,
   target: "부족 권역 우선배분 풀",
