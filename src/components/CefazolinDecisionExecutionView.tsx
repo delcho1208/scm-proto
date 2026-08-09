@@ -1541,7 +1541,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   >
                     <div className="flex items-start justify-between gap-sm">
                       <div>
-                        <p className="text-[10px] font-bold uppercase text-on-surface-variant">
+                        <p className="text-[9px] font-bold uppercase text-on-surface-variant">
                           {scenario.response}
                         </p>
                         <h4 className="mt-0.5 font-display text-sm font-bold text-on-surface">
@@ -1556,7 +1556,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         </Pill>
                       )}
                     </div>
-                    <div className="mt-sm rounded-lg bg-surface-container-low p-xs">
+                    <div className="mt-1.5 rounded-lg bg-surface-container-low px-2 py-1">
                       <div className="mb-1 flex items-center justify-between">
                         <span className="text-[10px] text-on-surface-variant">서비스율</span>
                         <strong className="font-data text-xs">
@@ -1570,23 +1570,23 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         }
                       />
                     </div>
-                    <dl className="mt-xs grid grid-cols-3 gap-xs text-[11px]">
-                      <div className="rounded-lg bg-surface-container-low p-xs">
+                    <dl className="mt-1 grid grid-cols-3 gap-1 text-[10px]">
+                      <div className="rounded-lg bg-surface-container-low px-2 py-1">
                         <dt className="text-on-surface-variant">최저 권역</dt>
-                        <dd className="mt-1 font-data font-bold">
+                        <dd className="font-data font-bold">
                           {scenario.minimumRegionalServiceRatePct.toFixed(1)}%
                         </dd>
                       </div>
-                      <div className="rounded-lg bg-surface-container-low p-xs">
+                      <div className="rounded-lg bg-surface-container-low px-2 py-1">
                         <dt className="text-on-surface-variant">미충족</dt>
-                        <dd className="mt-1 font-data font-bold">
+                        <dd className="font-data font-bold">
                           {fmt(scenario.totalUnmetDemand)}
                         </dd>
                         <span className="text-[9px] text-on-surface-variant">VIAL 환산</span>
                       </div>
-                      <div className="rounded-lg bg-surface-container-low p-xs">
+                      <div className="rounded-lg bg-surface-container-low px-2 py-1">
                         <dt className="text-on-surface-variant">부족기간</dt>
-                        <dd className="mt-1 font-data font-bold">{scenario.shortageWeeks}주</dd>
+                        <dd className="font-data font-bold">{scenario.shortageWeeks}주</dd>
                       </div>
                     </dl>
                     <div className="mt-xs border-t border-outline-variant/50 pt-xs">
