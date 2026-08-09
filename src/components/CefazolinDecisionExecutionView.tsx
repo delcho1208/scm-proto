@@ -197,6 +197,18 @@ function actionUnit(unit: string) {
   return "PLAN";
 }
 
+function actionFeasibility(
+  system: string,
+  title: string,
+): { label: string; tone: "success" | "warning" | "neutral" } {
+  if (title.includes("품질") || title.includes("출하")) return { label: "선행조건", tone: "neutral" };
+  if (system === "ERP") return { label: "일정확인", tone: "warning" };
+  if (system === "MES") return { label: "확인필요", tone: "warning" };
+  return { label: "수량확인", tone: "success" };
+}
+
+
+
 function ProductNotConnected({ product }: { product: Product }) {
   return (
     <div className="dashboard-fixed-layout flex-1 bg-surface px-lg pb-16 pt-16">
