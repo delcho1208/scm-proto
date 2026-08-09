@@ -1471,8 +1471,9 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       ) : null}
 
       {tab === "response" ? (
-        <div className="space-y-md">
-          <div className="grid grid-cols-5 gap-sm">
+        <div className="flex min-h-0 flex-1 flex-col gap-sm">
+          <div className="grid shrink-0 grid-cols-5 gap-sm">
+
             <Metric
               label="추천 시나리오"
               value={recommendedScenario.displayId}
