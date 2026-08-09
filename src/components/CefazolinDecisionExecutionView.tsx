@@ -1472,8 +1472,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       ) : null}
 
       {tab === "response" ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-sm">
-          <div className="grid shrink-0 grid-cols-5 gap-sm">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <div className="grid shrink-0 grid-cols-5 gap-2">
 
             <Metric
               label="추천 시나리오"
@@ -1618,12 +1618,12 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               <table className="w-full text-left text-[11px]">
                 <thead className="bg-surface-container-low text-[10px] uppercase text-on-surface-variant">
                   <tr>
-                    <th className="px-sm py-1">시스템</th>
-                    <th className="px-sm py-1">작업</th>
-                    <th className="px-sm py-1">대상</th>
-                    <th className="px-sm py-1 text-right">수량</th>
-                    <th className="px-sm py-1">실행상태</th>
-                    <th className="px-sm py-1">산출 기준</th>
+                    <th className="px-sm py-0.5">시스템</th>
+                    <th className="px-sm py-0.5">작업</th>
+                    <th className="px-sm py-0.5">대상</th>
+                    <th className="px-sm py-0.5 text-right">수량</th>
+                    <th className="px-sm py-0.5">실행상태</th>
+                    <th className="px-sm py-0.5">산출 기준</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1631,20 +1631,20 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     const feasibility = actionFeasibility(action.system, action.title);
                     return (
                       <tr key={action.id} className="border-t border-outline-variant/40">
-                        <td className="px-sm py-1">
+                        <td className="px-sm py-0.5">
                           <Pill tone="primary">{action.system}</Pill>
                         </td>
-                        <td className="px-sm py-1 font-bold">{action.title}</td>
-                        <td className="px-sm py-1 text-on-surface-variant">{action.target}</td>
-                        <td className="px-sm py-1 text-right font-data font-bold">
+                        <td className="px-sm py-0.5 font-bold">{action.title}</td>
+                        <td className="px-sm py-0.5 text-on-surface-variant">{action.target}</td>
+                        <td className="px-sm py-0.5 text-right font-data font-bold">
                           {action.quantity === null
                             ? "계획 재산정"
                             : `${fmt(action.quantity)} ${actionUnit(action.unit)}`}
                         </td>
-                        <td className="px-sm py-1">
+                        <td className="px-sm py-0.5">
                           <Pill tone={feasibility.tone}>{feasibility.label}</Pill>
                         </td>
-                        <td className="max-w-[300px] px-sm py-1 text-[10px] leading-4 text-on-surface-variant">
+                        <td className="max-w-[280px] px-sm py-0.5 text-[9px] leading-3 text-on-surface-variant">
                           {action.basis}
                         </td>
                       </tr>
