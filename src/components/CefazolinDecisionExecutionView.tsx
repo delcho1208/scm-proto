@@ -1582,132 +1582,59 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           </Section>
 
           <Section
-            title="실행가능성·제약조건"
-            subtitle="추천안 실행 전 재고·생산·조달·품질 조건 확인"
-          >
-            <div className="grid grid-cols-4 gap-sm">
-              <div className="rounded-xl border border-outline-variant p-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-on-surface-variant">
-                    WMS 재고 재배분
-                  </span>
-                  <Pill tone="success">물량 확인</Pill>
-                </div>
-                <p className="mt-2 font-data text-lg font-bold">
-                  {fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산
-                </p>
-                <p className="mt-1 text-[10px] text-on-surface-variant">
-                  과잉권역 {excessRegions.length}개 · 부족권역 {shortageRegions.length}개
-                </p>
-              </div>
-              <div className="rounded-xl border border-outline-variant p-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-on-surface-variant">
-                    MES 생산 조건
-                  </span>
-                  <Pill tone="warning">확인 필요</Pill>
-                </div>
-                <p className="mt-2 font-data text-lg font-bold">
-                  가동률 {cefazolinDashboard.utilization?.toFixed(1) ?? "-"}%
-                </p>
-                <p className="mt-1 text-[10px] text-on-surface-variant">
-                  추가 원료 입고 후 생산계획 재산정
-                </p>
-              </div>
-              <div className="rounded-xl border border-outline-variant p-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-on-surface-variant">
-                    ERP 긴급조달
-                  </span>
-                  <Pill tone="warning">일정 확인</Pill>
-                </div>
-                <p className="mt-2 font-data text-lg font-bold">
-                  {fmt(recommendedScenario.emergencyProcurementQuantity)} API 환산
-                </p>
-                <p className="mt-1 text-[10px] text-on-surface-variant">
-                  {recommendedEvaluation?.executionPeriod ?? "공급사 입고 일정 확인"}
-                </p>
-              </div>
-              <div className="rounded-xl border border-outline-variant p-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-on-surface-variant">
-                    MES 품질·출하
-                  </span>
-                  <Pill tone="warning">선행조건</Pill>
-                </div>
-                <p className="mt-2 text-sm font-bold leading-5 text-on-surface">
-                  품질검사·출하승인
-                </p>
-                <p className="mt-1 text-[10px] leading-4 text-on-surface-variant">
-                  {qualityCondition}
-                </p>
-              </div>
-            </div>
-            <div className="mt-sm grid grid-cols-2 gap-sm">
-              <div className="rounded-xl bg-surface-container-low p-sm">
-                <p className="text-[10px] font-bold text-on-surface-variant">실행 조건</p>
-                <ul className="mt-2 space-y-1.5 text-[11px] leading-4 text-on-surface">
-                  {(recommendedEvaluation?.xai.conditions ?? []).map((condition) => (
-                    <li key={condition} className="flex gap-2">
-                      <span className="text-scm-primary">•</span>
-                      <span>{condition}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="rounded-xl bg-surface-container-low p-sm">
-                <p className="text-[10px] font-bold text-on-surface-variant">제약·주의사항</p>
-                <ul className="mt-2 space-y-1.5 text-[11px] leading-4 text-on-surface">
-                  {(recommendedEvaluation?.xai.constraints ?? []).map((constraint) => (
-                    <li key={constraint} className="flex gap-2">
-                      <span className="text-[#ad6800]">•</span>
-                      <span>{constraint}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </Section>
-
-          <Section
             title={`${recommendedScenario.displayId} 실행계획`}
-            subtitle="시스템별 실행 항목 · 대상 · 수량 · 산출 기준"
+            subtitle="시스템별 실행 항목 · 대상 · 수량 · 실행상태"
+            className="flex min-h-0 flex-1 flex-col"
+            bodyClassName="flex min-h-0 flex-1 flex-col p-sm"
           >
-            <div className="overflow-hidden rounded-xl border border-outline-variant">
-              <table className="w-full text-left text-[12px]">
+            <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-outline-variant">
+              <table className="w-full text-left text-[11px]">
                 <thead className="bg-surface-container-low text-[10px] uppercase text-on-surface-variant">
                   <tr>
-                    <th className="px-sm py-xs">시스템</th>
-                    <th className="px-sm py-xs">작업</th>
-                    <th className="px-sm py-xs">대상</th>
-                    <th className="px-sm py-xs text-right">수량</th>
-                    <th className="px-sm py-xs">산출 기준</th>
+                    <th className="px-sm py-1">시스템</th>
+                    <th className="px-sm py-1">작업</th>
+                    <th className="px-sm py-1">대상</th>
+                    <th className="px-sm py-1 text-right">수량</th>
+                    <th className="px-sm py-1">실행상태</th>
+                    <th className="px-sm py-1">산출 기준</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {executionRows.map((action) => (
-                    <tr key={action.id} className="border-t border-outline-variant/40">
-                      <td className="px-sm py-xs">
-                        <Pill tone="primary">{action.system}</Pill>
-                      </td>
-                      <td className="px-sm py-xs font-bold">{action.title}</td>
-                      <td className="px-sm py-xs text-on-surface-variant">{action.target}</td>
-                      <td className="px-sm py-xs text-right font-data font-bold">
-                        {action.quantity === null
-                          ? "계획 재산정"
-                          : `${fmt(action.quantity)} ${actionUnit(action.unit)}`}
-                      </td>
-                      <td className="max-w-[320px] px-sm py-xs text-[10px] leading-4 text-on-surface-variant">
-                        {action.basis}
-                      </td>
-                    </tr>
-                  ))}
+                  {executionRows.map((action) => {
+                    const feasibility = actionFeasibility(action.system, action.title);
+                    return (
+                      <tr key={action.id} className="border-t border-outline-variant/40">
+                        <td className="px-sm py-1">
+                          <Pill tone="primary">{action.system}</Pill>
+                        </td>
+                        <td className="px-sm py-1 font-bold">{action.title}</td>
+                        <td className="px-sm py-1 text-on-surface-variant">{action.target}</td>
+                        <td className="px-sm py-1 text-right font-data font-bold">
+                          {action.quantity === null
+                            ? "계획 재산정"
+                            : `${fmt(action.quantity)} ${actionUnit(action.unit)}`}
+                        </td>
+                        <td className="px-sm py-1">
+                          <Pill tone={feasibility.tone}>{feasibility.label}</Pill>
+                        </td>
+                        <td className="max-w-[300px] px-sm py-1 text-[10px] leading-4 text-on-surface-variant">
+                          {action.basis}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
+            <p className="mt-1.5 shrink-0 truncate text-[10px] leading-4 text-on-surface-variant">
+              <span className="font-bold text-[#ad6800]">제약·주의</span>{" "}
+              {(recommendedEvaluation?.xai.constraints ?? []).join(" · ") ||
+                `S1 대비 조달비 ${fmtKrw(cefazolinWorkflowEffect.procurementCostDeltaKrw)} 증가`}
+            </p>
           </Section>
         </div>
       ) : null}
+
 
       {tab === "approval" ? (
         <div className="grid grid-cols-12 gap-md">
