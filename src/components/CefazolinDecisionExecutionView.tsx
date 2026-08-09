@@ -1157,12 +1157,13 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     setLastUpdatedAt(now);
   };
 
+  const compact = tab === "impact" || tab === "response";
   return (
     <div
-      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" || tab === "response" ? "h-screen max-h-screen min-h-0 overflow-hidden pb-12" : "pb-16"}`}
+      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${compact ? "h-screen max-h-screen min-h-0 overflow-hidden pb-12" : "pb-16"}`}
     >
       <div
-        className={`flex items-end justify-between gap-lg ${tab === "impact" ? "shrink-0 py-1" : "py-lg"}`}
+        className={`flex items-end justify-between gap-lg ${compact ? "shrink-0 py-1" : "py-lg"}`}
       >
 
         <div>
@@ -1191,12 +1192,12 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             </span>
           </div>
           <h2
-            className={`font-display text-on-surface ${tab === "impact" ? "text-[22px] font-bold leading-tight" : "text-headline-md"}`}
+            className={`font-display text-on-surface ${compact ? "text-[22px] font-bold leading-tight" : "text-headline-md"}`}
           >
             세파졸린 의사결정 실행
           </h2>
           <p
-            className={`text-on-surface-variant ${tab === "impact" ? "text-[11px]" : "mt-xs text-sm"}`}
+            className={`text-on-surface-variant ${compact ? "text-[11px]" : "mt-xs text-sm"}`}
           >
             수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
             {cefazolinWorkflowRunMeta.latestSnapshotDate}
@@ -1215,14 +1216,14 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       </div>
 
       <div
-        className={`shrink-0 flex items-center rounded-xl border border-outline-variant bg-white p-1 shadow-sm ${tab === "impact" ? "mb-1" : "mb-sm"}`}
+        className={`shrink-0 flex items-center rounded-xl border border-outline-variant bg-white p-1 shadow-sm ${compact ? "mb-1" : "mb-sm"}`}
       >
         {tabItems.map((item) => (
           <button
             key={item.key}
             type="button"
             onClick={() => setTab(item.key)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-md text-xs font-bold transition ${tab === "impact" ? "py-1.5" : "py-2.5"} ${tab === item.key ? "bg-scm-primary text-white shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-md text-xs font-bold transition ${compact ? "py-1.5" : "py-2.5"} ${tab === item.key ? "bg-scm-primary text-white shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
           >
             <Icon name={item.icon} className="text-[17px]" />
             {item.label}
