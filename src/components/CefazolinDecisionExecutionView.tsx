@@ -1159,7 +1159,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
   return (
     <div
-      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-screen max-h-screen min-h-0 overflow-hidden pb-12" : "pb-16"}`}
+      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" || tab === "response" ? "h-screen max-h-screen min-h-0 overflow-hidden pb-12" : "pb-16"}`}
     >
       <div
         className={`flex items-end justify-between gap-lg ${tab === "impact" ? "shrink-0 py-1" : "py-lg"}`}
@@ -1517,13 +1517,15 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           </div>
 
           <Section
+            className="shrink-0"
+            bodyClassName="p-sm"
             title="S1·S2·S3 대응안 비교"
             subtitle="서비스율 · 부족기간 · 권역 서비스 · 비용 · 제약조건"
             action={
               <button
                 type="button"
                 onClick={() => setTab("approval")}
-                className="rounded-lg bg-scm-primary px-3 py-2 text-[11px] font-bold text-white"
+                className="rounded-lg bg-scm-primary px-3 py-1.5 text-[11px] font-bold text-white"
               >
                 추천안 승인 검토
               </button>
@@ -1535,14 +1537,14 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 return (
                   <article
                     key={scenario.id}
-                    className={`rounded-xl border p-md ${recommended ? "border-scm-primary bg-primary-container/20 shadow-sm" : "border-outline-variant bg-white"}`}
+                    className={`rounded-xl border p-sm ${recommended ? "border-scm-primary bg-primary-container/20 shadow-sm" : "border-outline-variant bg-white"}`}
                   >
                     <div className="flex items-start justify-between gap-sm">
                       <div>
                         <p className="text-[10px] font-bold uppercase text-on-surface-variant">
                           {scenario.response}
                         </p>
-                        <h4 className="mt-1 font-display text-base font-bold text-on-surface">
+                        <h4 className="mt-0.5 font-display text-sm font-bold text-on-surface">
                           {scenario.displayId}
                         </h4>
                       </div>
@@ -1554,8 +1556,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         </Pill>
                       )}
                     </div>
-                    <div className="mt-md rounded-lg bg-surface-container-low p-xs">
-                      <div className="mb-1.5 flex items-center justify-between">
+                    <div className="mt-sm rounded-lg bg-surface-container-low p-xs">
+                      <div className="mb-1 flex items-center justify-between">
                         <span className="text-[10px] text-on-surface-variant">서비스율</span>
                         <strong className="font-data text-xs">
                           {scenario.serviceRatePct.toFixed(1)}%
@@ -1587,7 +1589,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         <dd className="mt-1 font-data font-bold">{scenario.shortageWeeks}주</dd>
                       </div>
                     </dl>
-                    <div className="mt-sm border-t border-outline-variant/50 pt-sm">
+                    <div className="mt-xs border-t border-outline-variant/50 pt-xs">
                       <span className="text-[10px] text-on-surface-variant">총 조달비</span>
                       <strong className="ml-2 font-data text-xs">
                         {fmtKrw(scenario.totalProcurementCostKrw)}
