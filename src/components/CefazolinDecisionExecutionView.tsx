@@ -1357,12 +1357,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         </span>
                       </div>
                       <div className="mt-0.5">
-                        <SignalBar
-                          value={cause.score}
-                          tone={
-                            cause.score >= 80 ? "danger" : cause.score >= 60 ? "warning" : "primary"
-                          }
-                        />
+                        <SignalBar value={cause.score} tone="muted" />
                       </div>
                     </div>
                   ))}
