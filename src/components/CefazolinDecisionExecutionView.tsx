@@ -1480,6 +1480,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               note="제약 통과 기준"
               icon="recommend"
               tone="success"
+              dense
             />
             <Metric
               label="예상 서비스율"
@@ -1487,6 +1488,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               note={`S1 ${baselineScenario.serviceRatePct.toFixed(1)}%`}
               icon="trending_up"
               tone="success"
+              dense
             />
             <Metric
               label="미충족 수요"
@@ -1494,6 +1496,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               note={`S1 ${fmt(baselineScenario.totalUnmetDemand)} VIAL 환산`}
               icon="production_quantity_limits"
               tone="success"
+              dense
             />
             <Metric
               label="긴급조달"
@@ -1501,6 +1504,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               note="S3 실행 조건"
               icon="shopping_cart"
               tone="warning"
+              dense
             />
             <Metric
               label="증분 조달비"
@@ -1508,6 +1512,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               note="S1 대비"
               icon="payments"
               tone="warning"
+              dense
             />
           </div>
 
