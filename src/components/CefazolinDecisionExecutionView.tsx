@@ -1321,9 +1321,6 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         <p className="mt-0.5 font-data text-[13px] font-bold leading-tight text-on-surface">
                           {stage.value}
                         </p>
-                        <p className="mt-0.5 line-clamp-2 break-words text-[8px] leading-3 text-on-surface-variant">
-                          {stage.note}
-                        </p>
                       </div>
                       {index < propagationStages.length - 1 ? (
                         <div className="flex items-center justify-center text-scm-primary">
