@@ -138,7 +138,7 @@ function SignalBar({
   tone = "primary",
 }: {
   value: number;
-  tone?: "primary" | "danger" | "warning" | "success";
+  tone?: "primary" | "danger" | "warning" | "success" | "muted";
 }) {
   const width = Math.max(0, Math.min(value, 100));
   const barStyle = {
@@ -146,6 +146,7 @@ function SignalBar({
     danger: "bg-error",
     warning: "bg-[#f59e0b]",
     success: "bg-green-500",
+    muted: "bg-slate-500",
   }[tone];
   return (
     <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-container-high">
@@ -1321,9 +1322,6 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         <p className="mt-0.5 font-data text-[13px] font-bold leading-tight text-on-surface">
                           {stage.value}
                         </p>
-                        <p className="mt-0.5 line-clamp-2 break-words text-[8px] leading-3 text-on-surface-variant">
-                          {stage.note}
-                        </p>
                       </div>
                       {index < propagationStages.length - 1 ? (
                         <div className="flex items-center justify-center text-scm-primary">
@@ -1359,12 +1357,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         </span>
                       </div>
                       <div className="mt-0.5">
-                        <SignalBar
-                          value={cause.score}
-                          tone={
-                            cause.score >= 80 ? "danger" : cause.score >= 60 ? "warning" : "primary"
-                          }
-                        />
+                        <SignalBar value={cause.score} tone="muted" />
                       </div>
                     </div>
                   ))}
