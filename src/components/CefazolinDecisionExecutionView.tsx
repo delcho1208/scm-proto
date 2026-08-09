@@ -138,7 +138,7 @@ function SignalBar({
   tone = "primary",
 }: {
   value: number;
-  tone?: "primary" | "danger" | "warning" | "success";
+  tone?: "primary" | "danger" | "warning" | "success" | "muted";
 }) {
   const width = Math.max(0, Math.min(value, 100));
   const barStyle = {
@@ -146,6 +146,7 @@ function SignalBar({
     danger: "bg-error",
     warning: "bg-[#f59e0b]",
     success: "bg-green-500",
+    muted: "bg-slate-500",
   }[tone];
   return (
     <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-container-high">
