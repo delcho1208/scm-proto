@@ -227,48 +227,74 @@ export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
           : lipilouTotalInventory >= lipilouTotalTarget * 1.3
             ? "warning"
             : "safe",
-      recommendations: (lipilouLatest.ai_solutions ?? []).map((solution) => ({
-        id: solution.id,
-        title: solution.summary ?? solution.title,
-        description: solution.xai_explanation ?? solution.reason,
-        fromRegion: solution.from_region ? toRegionId(solution.from_region) : undefined,
-        toRegion: solution.to_region ? toRegionId(solution.to_region) : undefined,
-        transferAmount: solution.transfer_amount,
-        costReduction: solution.id === "SOLUTION-01" ? "5~8%" : "3~6%",
-        feasibility: solution.id === "SOLUTION-01" ? 96 : 82,
-        executionPeriod: solution.id === "SOLUTION-01" ? "2~3일" : "1~2주",
-        supplyImpact:
-          solution.id === "SOLUTION-01"
-            ? "제주에 1,000 BOX를 보충해 목표재고 미달을 해소하고 서울 안전재고는 유지"
-            : "B라인 증산으로 A라인 품질 재검사 기간의 공급 공백을 보완",
-        xai: {
-          summary: solution.xai_explanation ?? solution.reason,
-          evidence:
-            solution.id === "SOLUTION-01"
-              ? [
-                  "서울은 이관 후에도 자체 안전재고를 유지할 수 있는 유일한 권역",
-                  "제주 부족분 1,000 BOX를 권역 간 재배치만으로 충당",
-                  "추가 생산보다 실행 기간과 비용 부담이 낮음",
-                ]
-              : [
-                  "A라인 품질 재검사로 출하가 7일 지연될 가능성",
-                  "B라인 가용 생산능력을 활용해 공급 회복력을 확보",
-                  "권역 간 이관만으로 부족이 해소되지 않을 때 적용 가능한 보완안",
-                ],
-          limitation:
-            solution.id === "SOLUTION-01"
-              ? "서울 출고 승인과 제주 운송편 확보가 필요하며, 운송 중 재고는 가용재고에서 제외합니다."
-              : "B라인 설비·원료·품질 인력의 실제 가용 여부를 확인한 뒤 생산계획을 확정해야 합니다.",
+      externalSignal: {
+        title: "2026년 건강검진 대상자 수",
+        value: "21,794,755명",
+        detail: "20세 이상 인구수의 50%",
+      },
+      recommendations: [
+        {
+          id: "SOLUTION-00",
+          title: "현행유지",
+          description: "A라인 품질 재검사 완료까지 기존 권역별 재고 배분을 유지합니다.",
+          costReduction: "추가 비용 없음",
+          feasibility: 100,
+          executionPeriod: "현행 유지",
+          supplyImpact: "제주 목표재고 미달이 지속될 수 있어 비교 기준으로만 사용합니다.",
+          xai: {
+            summary: "추가 이관이나 생산 조정 없이 현재 계획을 유지하는 비교 기준안입니다.",
+            evidence: [
+              `전국 현재고 ${lipilouTotalInventory.toLocaleString("ko-KR")} BOX 유지`,
+              "ERP·MES·WMS 계획 변경 없음",
+              "제주 목표재고 미달 상태 지속",
+            ],
+            limitation: "품질 재검사 지연과 제주 부족 위험을 해소하지 못합니다.",
+          },
+          approvalButtonText: "현행 유지",
         },
-        projectedTotalInventory: solution.expected_after_transfer
-          ? lipilouTotalInventory
-          : undefined,
-        affectedRegions: solution.expected_after_transfer
-          ? [solution.expected_after_transfer.from_region.region, solution.expected_after_transfer.to_region.region].map(toRegionId)
-          : undefined,
-        projectedRegions: getLipilouProjectedRegions(solution.expected_after_transfer),
-        approvalButtonText: solution.approval_action.initial_button_text,
-      })),
+        ...(lipilouLatest.ai_solutions ?? []).map((solution) => ({
+          id: solution.id,
+          title: solution.summary ?? solution.title,
+          description: solution.xai_explanation ?? solution.reason,
+          fromRegion: solution.from_region ? toRegionId(solution.from_region) : undefined,
+          toRegion: solution.to_region ? toRegionId(solution.to_region) : undefined,
+          transferAmount: solution.transfer_amount,
+          costReduction: solution.id === "SOLUTION-01" ? "5~8%" : "3~6%",
+          feasibility: solution.id === "SOLUTION-01" ? 96 : 82,
+          executionPeriod: solution.id === "SOLUTION-01" ? "2~3일" : "1~2주",
+          supplyImpact:
+            solution.id === "SOLUTION-01"
+              ? "제주에 1,000 BOX를 보충해 목표재고 미달을 해소하고 서울 안전재고는 유지"
+              : "B라인 증산으로 A라인 품질 재검사 기간의 공급 공백을 보완",
+          xai: {
+            summary: solution.xai_explanation ?? solution.reason,
+            evidence:
+              solution.id === "SOLUTION-01"
+                ? [
+                    "서울은 이관 후에도 자체 안전재고를 유지할 수 있는 유일한 권역",
+                    "제주 부족분 1,000 BOX를 권역 간 재배치만으로 충당",
+                    "추가 생산보다 실행 기간과 비용 부담이 낮음",
+                  ]
+                : [
+                    "A라인 품질 재검사로 출하가 7일 지연될 가능성",
+                    "B라인 가용 생산능력을 활용해 공급 회복력을 확보",
+                    "권역 간 이관만으로 부족이 해소되지 않을 때 적용 가능한 보완안",
+                  ],
+            limitation:
+              solution.id === "SOLUTION-01"
+                ? "서울 출고 승인과 제주 운송편 확보가 필요하며, 운송 중 재고는 가용재고에서 제외합니다."
+                : "B라인 설비·원료·품질 인력의 실제 가용 여부를 확인한 뒤 생산계획을 확정해야 합니다.",
+          },
+          projectedTotalInventory: solution.expected_after_transfer
+            ? lipilouTotalInventory
+            : undefined,
+          affectedRegions: solution.expected_after_transfer
+            ? [solution.expected_after_transfer.from_region.region, solution.expected_after_transfer.to_region.region].map(toRegionId)
+            : undefined,
+          projectedRegions: getLipilouProjectedRegions(solution.expected_after_transfer),
+          approvalButtonText: solution.approval_action.initial_button_text,
+        })),
+      ],
     }
   : null;
 

@@ -109,7 +109,7 @@ type ChartPoint = { x: number; y: number };
 function simulationScenarioTitle(productKey: Product["key"], index: number, fallback: string) {
   if (/^S\d+\s/.test(fallback)) return fallback;
   const titles: Partial<Record<Product["key"], string[]>> = {
-    리피로우: ["재고 이관", "타 생산라인 물량 추가"],
+    리피로우: ["현행유지", "재고 이관", "타 라인 증산"],
     타미비어: ["현행유지", "핀셋 감축", "CDC 이송"],
   };
   return `S${index + 1} ${titles[productKey]?.[index] ?? fallback}`;
@@ -1114,29 +1114,48 @@ function StandardDashboardView({ product }: { product: Product }) {
           ) : product.key === "타미비어" ? (
             <InfectiousDiseaseApiCard regionId={regionId} />
           ) : (
-            <div className="bento-card flex min-h-0 flex-1 flex-col p-md">
-              <div className="flex items-start gap-sm">
-                <div className="api-placeholder-icon">
-                  <Icon name={productApi.icon} className="text-[18px]" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-xs">
+            <div className="bento-card flex min-h-0 flex-1 flex-col overflow-hidden p-sm">
+              <div className="flex items-center justify-between gap-xs">
+                <div className="flex min-w-0 items-center gap-sm">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-container text-scm-primary">
+                    <Icon name={productApi.icon} className="text-[16px]" />
+                  </div>
+                  <div className="min-w-0">
                     <h4 className="truncate text-sm font-bold text-on-surface">
                       {productApi.title}
                     </h4>
-                    <span className="api-ready-badge">
-                      {scenario?.externalSignal ? "데이터 연결" : "연결 대기"}
-                    </span>
                   </div>
-                  <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">
-                    {scenario?.externalSignal
-                      ? `${scenario.externalSignal.title} · ${scenario.externalSignal.value} · ${scenario.externalSignal.detail}`
-                      : productApi.description}
-                  </p>
-                  <code className="mt-2 block truncate rounded bg-surface-container-low px-2 py-1 text-[9px] text-scm-primary">
-                    {productApi.endpoint}
-                  </code>
                 </div>
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[8px] font-bold text-green-700">
+                  <i className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                  API 연동 정상
+                </span>
+              </div>
+
+              <div className="mt-xs grid grid-cols-[minmax(0,1.15fr)_minmax(90px,0.85fr)] items-center rounded-lg border border-scm-primary/10 bg-primary-container/25 px-sm py-1.5">
+                <div className="min-w-0 pr-sm">
+                  <p className="truncate text-[8px] font-bold leading-none text-on-surface-variant">
+                    2026년 건강검진 대상자
+                  </p>
+                  <p className="mt-1 whitespace-nowrap font-data text-[16px] font-black leading-none tracking-[-0.02em] text-scm-primary tabular-nums">
+                    {scenario?.externalSignal?.value ?? "-"}
+                  </p>
+                </div>
+                <div className="min-w-0 border-l border-outline-variant/70 pl-sm text-right">
+                  <p className="text-[8px] leading-none text-on-surface-variant">산출 기준</p>
+                  <p className="mt-1 whitespace-nowrap text-[8px] font-bold leading-none text-on-surface">
+                    20세 이상 인구의
+                  </p>
+                  <p className="mt-1 font-data text-[10px] font-black leading-none text-scm-primary">50%</p>
+                </div>
+              </div>
+
+              <div className="mt-1 flex items-center gap-1.5 rounded bg-surface-container-low px-2 py-0.5">
+                <Icon name="api" className="shrink-0 text-[11px] text-scm-primary" />
+                <code className="min-w-0 flex-1 truncate text-[8px] leading-none text-on-surface-variant">
+                  GET {productApi.endpoint}?year=2026
+                </code>
+                <span className="shrink-0 font-data text-[8px] font-bold leading-none text-green-700">200 OK</span>
               </div>
             </div>
           )}
