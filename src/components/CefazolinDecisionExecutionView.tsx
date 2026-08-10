@@ -1492,13 +1492,13 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         {
           id: "TAMI-WMS-001",
           actionType: "재고이동",
-          title: "경기/인천·영남권 잉여재고 CDC 이송",
+          title: "권역별 안전재고 적정 수준으로 유지",
           source: "과잉 권역 창고",
           target: "중앙 CDC",
           quantity: 800_000,
           unit: "완제품 환산단위",
           ruleId: "RULE-TRANSFER-001",
-          basis: "권역창고 포화 해소와 장기체화 재고 분리 보관",
+          basis: "미래 면역약화 대비 재고 확보",
         },
       ]
     : isLipilou
