@@ -1392,7 +1392,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
                     <BarChart
                       width={760}
-                      height={220}
+                      height={260}
                       data={regionChartData}
                       margin={{ top: 10, right: 8, left: -18, bottom: 12 }}
                       barCategoryGap="22%"
