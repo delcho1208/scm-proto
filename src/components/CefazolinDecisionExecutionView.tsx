@@ -1687,6 +1687,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     <th className="px-sm py-1">시스템</th>
                     <th className="px-sm py-1">작업</th>
                     <th className="px-sm py-1 text-right">수량·기준</th>
+                    <th className="px-sm py-1">추천 근거 / 산출 기준</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1698,6 +1699,9 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                       <td className="px-sm py-1 font-bold">{row.task}</td>
                       <td className="px-sm py-1 text-right font-data font-bold">
                         {row.quantity}
+                      </td>
+                      <td className="px-sm py-1 text-[10px] leading-tight text-on-surface-variant">
+                        {row.rationale}
                       </td>
                     </tr>
                   ))}
