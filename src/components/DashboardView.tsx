@@ -620,9 +620,9 @@ function StandardDashboardView({ product }: { product: Product }) {
                 </span>
                 <span className="mb-1 text-on-surface-variant">BOX</span>
               </div>
-              <div className="mt-2 flex items-center gap-xs font-medium text-on-surface-variant/80">
-                <Icon name="history" className="text-[14px]" />
-                <span className="text-[11px] leading-tight">{forecastYoy}</span>
+              <div className="mt-2 flex items-center gap-xs font-bold text-scm-primary">
+                <Icon name="trending_up" className="text-[16px]" />
+                <span className="text-sm">{forecastYoy}</span>
               </div>
             </div>
             <div className="mt-sm flex h-[170px] shrink-0 flex-col justify-between rounded-xl border border-outline-variant/30 bg-surface-container-low p-sm">
