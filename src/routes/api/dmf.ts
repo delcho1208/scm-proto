@@ -24,10 +24,13 @@ export const Route = createFileRoute("/api/dmf")({
         const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim();
 
         if (!serviceKey) {
-          return Response.json(
-            { error: "공공데이터포털 인증키가 설정되지 않았습니다." },
-            { status: 503 },
-          );
+          return Response.json({
+            ingredient,
+            available: false,
+            totalCount: 0,
+            items: [],
+            error: "공공데이터포털 인증키가 설정되지 않았습니다.",
+          });
         }
 
         const apiUrl = new URL(
@@ -53,18 +56,24 @@ export const Route = createFileRoute("/api/dmf")({
           } | null;
 
           if (!response.ok || !payload) {
-            return Response.json(
-              { error: `식약처 DMF API 요청에 실패했습니다. (${response.status})` },
-              { status: response.ok ? 502 : response.status },
-            );
+            return Response.json({
+              ingredient,
+              available: false,
+              totalCount: 0,
+              items: [],
+              error: `식약처 DMF API 요청에 실패했습니다. (${response.status})`,
+            });
           }
 
           const resultCode = payload.header?.resultCode;
           if (resultCode && resultCode !== "00") {
-            return Response.json(
-              { error: payload.header?.resultMsg || `DMF API 오류 (${resultCode})` },
-              { status: 502 },
-            );
+            return Response.json({
+              ingredient,
+              available: false,
+              totalCount: 0,
+              items: [],
+              error: payload.header?.resultMsg || `DMF API 오류 (${resultCode})`,
+            });
           }
 
           const rawItems = Array.isArray(payload.body?.items)
@@ -84,14 +93,18 @@ export const Route = createFileRoute("/api/dmf")({
 
           return Response.json({
             ingredient,
+            available: true,
             totalCount: payload.body?.totalCount ?? items.length,
             items,
           });
         } catch {
-          return Response.json(
-            { error: "식약처 DMF API에 연결할 수 없습니다." },
-            { status: 502 },
-          );
+          return Response.json({
+            ingredient,
+            available: false,
+            totalCount: 0,
+            items: [],
+            error: "식약처 DMF API에 연결할 수 없습니다.",
+          });
         }
       },
     },

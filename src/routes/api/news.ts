@@ -29,10 +29,12 @@ export const Route = createFileRoute("/api/news")({
         const clientId = process.env.NAVER_API_HUB_CLIENT_ID;
         const clientSecret = process.env.NAVER_API_HUB_CLIENT_SECRET;
         if (!clientId || !clientSecret) {
-          return Response.json(
-            { error: "네이버 Open API 인증 정보가 설정되지 않았습니다." },
-            { status: 503 },
-          );
+          return Response.json({
+            query,
+            available: false,
+            items: [],
+            error: "네이버 Open API 인증 정보가 설정되지 않았습니다.",
+          });
         }
 
         const naverUrl = new URL("https://naverapihub.apigw.ntruss.com/search/v1/news");
@@ -55,12 +57,12 @@ export const Route = createFileRoute("/api/news")({
             const detail = [errorBody?.errorCode, errorBody?.errorMessage]
               .filter(Boolean)
               .join(" · ");
-            return Response.json(
-              {
-                error: `네이버 뉴스 API 요청에 실패했습니다. (${response.status})${detail ? ` · ${detail}` : ""}`,
-              },
-              { status: response.status },
-            );
+            return Response.json({
+              query,
+              available: false,
+              items: [],
+              error: `네이버 뉴스 API 요청에 실패했습니다. (${response.status})${detail ? ` · ${detail}` : ""}`,
+            });
           }
 
           const data = (await response.json()) as { items?: NaverNewsItem[] };
@@ -69,9 +71,14 @@ export const Route = createFileRoute("/api/news")({
             url: item.originallink || item.link,
             publishedAt: item.pubDate,
           }));
-          return Response.json({ query, items });
+          return Response.json({ query, available: true, items });
         } catch {
-          return Response.json({ error: "네이버 뉴스 API에 연결할 수 없습니다." }, { status: 502 });
+          return Response.json({
+            query,
+            available: false,
+            items: [],
+            error: "네이버 뉴스 API에 연결할 수 없습니다.",
+          });
         }
       },
     },

@@ -1117,7 +1117,7 @@ function StandardDashboardView({ product }: { product: Product }) {
             <div className="bento-card flex min-h-0 flex-1 flex-col overflow-hidden p-sm">
               <div className="flex items-center justify-between gap-xs">
                 <div className="flex min-w-0 items-center gap-sm">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-container text-scm-primary">
+                  <div className="api-placeholder-icon h-7 w-7 shrink-0">
                     <Icon name={productApi.icon} className="text-[16px]" />
                   </div>
                   <div className="min-w-0">
@@ -1437,9 +1437,15 @@ function DmfApiCard() {
         const payload = (await response.json()) as {
           items?: DmfItem[];
           totalCount?: number;
+          available?: boolean;
           error?: string;
         };
         if (!response.ok) throw new Error(payload.error || "DMF 데이터를 불러오지 못했습니다.");
+        if (payload.available === false) {
+          setError(payload.error || "DMF API 연결 오류");
+          setState("error");
+          return;
+        }
         setItems(payload.items ?? []);
         setTotalCount(payload.totalCount ?? 0);
         setState("ready");
@@ -1545,8 +1551,14 @@ function NewsApiCard({ productName }: { productName: string }) {
     setNewsError("");
     fetch(`/api/news?query=${encodeURIComponent(productName)}`, { signal: controller.signal })
       .then(async (response) => {
-        const payload = (await response.json()) as { items?: NewsItem[]; error?: string };
+        const payload = (await response.json()) as { items?: NewsItem[]; available?: boolean; error?: string };
         if (!response.ok) throw new Error(payload.error ?? "뉴스를 불러오지 못했습니다.");
+        if (payload.available === false) {
+          setNews([]);
+          setNewsError(payload.error ?? "뉴스 API 연결 오류");
+          setNewsState("error");
+          return;
+        }
         setNews(payload.items ?? []);
         setNewsState("ready");
       })
