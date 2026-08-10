@@ -1693,14 +1693,16 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 <tbody>
                   {consolidatedExecutionRows.map((row) => (
                     <tr key={row.system} className="border-t border-outline-variant/40">
-                      <td className="px-sm py-1">
+                      <td className="px-sm py-0.5">
                         <Pill tone="primary">{row.system}</Pill>
                       </td>
-                      <td className="px-sm py-1 font-bold">{row.task}</td>
-                      <td className="px-sm py-1 text-right font-data font-bold">
+                      <td className="px-sm py-0.5 text-[11px] font-bold leading-tight">
+                        {row.task}
+                      </td>
+                      <td className="px-sm py-0.5 text-right font-data font-bold">
                         {row.quantity}
                       </td>
-                      <td className="px-sm py-1 text-[10px] leading-tight text-on-surface-variant">
+                      <td className="px-sm py-0.5 text-[10px] leading-tight text-on-surface-variant">
                         {row.rationale}
                       </td>
                     </tr>
