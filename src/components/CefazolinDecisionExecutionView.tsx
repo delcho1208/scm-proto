@@ -1681,23 +1681,27 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   {recommendedScenario.displayId} 실행계획
                 </p>
               </div>
-              <table className="w-full text-left text-[12px]">
+              <table className="w-full table-fixed text-left text-[12px]">
                 <thead className="bg-surface-container-low text-[10px] uppercase text-on-surface-variant">
                   <tr>
-                    <th className="px-sm py-1">시스템</th>
+                    <th className="w-[72px] px-sm py-1">시스템</th>
                     <th className="px-sm py-1">작업</th>
-                    <th className="px-sm py-1 text-right">수량·기준</th>
+                    <th className="w-[140px] px-sm py-1 text-right">수량·기준</th>
+                    <th className="px-sm py-1">추천 근거 / 산출 기준</th>
                   </tr>
                 </thead>
                 <tbody>
                   {consolidatedExecutionRows.map((row) => (
                     <tr key={row.system} className="border-t border-outline-variant/40">
-                      <td className="px-sm py-1">
+                      <td className="px-sm py-1 align-top">
                         <Pill tone="primary">{row.system}</Pill>
                       </td>
-                      <td className="px-sm py-1 font-bold">{row.task}</td>
-                      <td className="px-sm py-1 text-right font-data font-bold">
+                      <td className="px-sm py-1 align-top font-bold">{row.task}</td>
+                      <td className="px-sm py-1 align-top text-right font-data font-bold">
                         {row.quantity}
+                      </td>
+                      <td className="px-sm py-1 align-top text-[11px] leading-4 text-on-surface-variant">
+                        {row.rationale}
                       </td>
                     </tr>
                   ))}
