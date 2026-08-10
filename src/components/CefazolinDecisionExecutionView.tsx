@@ -1167,7 +1167,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" || tab === "response" ? "h-[912px] min-h-[912px] max-h-[912px] overflow-hidden pb-12" : "pb-16"}`}
     >
       <div
-        className={`flex items-end justify-between gap-lg ${tab === "response" ? "py-2" : "py-lg"}`}
+        className={`flex items-end justify-between gap-lg ${tab === "response" ? "py-1" : "py-lg"}`}
       >
 
         <div>
@@ -1597,7 +1597,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             bodyClassName="flex min-h-0 flex-1 flex-col gap-sm p-sm"
           >
             <div className="grid shrink-0 grid-cols-4 gap-sm">
-              <div className="rounded-xl border border-outline-variant p-2">
+              <div className="rounded-xl border border-outline-variant px-2 py-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-on-surface-variant">
                     WMS 재고 재배분
@@ -1611,7 +1611,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   과잉권역 {excessRegions.length}개 · 부족권역 {shortageRegions.length}개
                 </p>
               </div>
-              <div className="rounded-xl border border-outline-variant p-2">
+              <div className="rounded-xl border border-outline-variant px-2 py-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-on-surface-variant">
                     MES 생산 조건
@@ -1625,7 +1625,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   추가 원료 입고 일정 및 품질재검사 일정 조정
                 </p>
               </div>
-              <div className="rounded-xl border border-outline-variant p-2">
+              <div className="rounded-xl border border-outline-variant px-2 py-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-on-surface-variant">
                     ERP 긴급조달
@@ -1639,7 +1639,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   {recommendedEvaluation?.executionPeriod ?? "공급사 입고 일정 확인"}
                 </p>
               </div>
-              <div className="rounded-xl border border-outline-variant p-2">
+              <div className="rounded-xl border border-outline-variant px-2 py-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-on-surface-variant">
                     제약·주의사항
@@ -1665,7 +1665,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             </div>
 
             <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-outline-variant">
-              <div className="border-b border-outline-variant/60 bg-surface-container-low px-sm py-1">
+              <div className="border-b border-outline-variant/60 bg-surface-container-low px-sm py-0.5">
                 <p className="text-[11px] font-bold text-on-surface">
                   {recommendedScenario.displayId} 실행계획
                 </p>
@@ -1681,11 +1681,11 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 <tbody>
                   {consolidatedExecutionRows.map((row) => (
                     <tr key={row.system} className="border-t border-outline-variant/40">
-                      <td className="px-sm py-1.5">
+                      <td className="px-sm py-1">
                         <Pill tone="primary">{row.system}</Pill>
                       </td>
-                      <td className="px-sm py-1.5 font-bold">{row.task}</td>
-                      <td className="px-sm py-1.5 text-right font-data font-bold">
+                      <td className="px-sm py-1 font-bold">{row.task}</td>
+                      <td className="px-sm py-1 text-right font-data font-bold">
                         {row.quantity}
                       </td>
                     </tr>
