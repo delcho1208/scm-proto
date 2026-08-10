@@ -20,16 +20,16 @@ import {
   type ProductDashboardScenario,
 } from "@/data/dashboard-scenario";
 import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
-import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
+import { cefazolinDashboard as cefazolinDashboardSource } from "@/data/cefazolin-dashboard";
 import {
-  cefazolinDecisionEvidence,
-  cefazolinDetectionContext,
-  cefazolinScenarioComparison,
-  cefazolinScenarioRecommendation,
-  cefazolinVirtualExecutionActions,
-  cefazolinWorkflowEffect,
-  cefazolinWorkflowRunMeta,
-  cefazolinWorkflowSteps,
+  cefazolinDecisionEvidence as cefazolinDecisionEvidenceSource,
+  cefazolinDetectionContext as cefazolinDetectionContextSource,
+  cefazolinScenarioComparison as cefazolinScenarioComparisonSource,
+  cefazolinScenarioRecommendation as cefazolinScenarioRecommendationSource,
+  cefazolinVirtualExecutionActions as cefazolinVirtualExecutionActionsSource,
+  cefazolinWorkflowEffect as cefazolinWorkflowEffectSource,
+  cefazolinWorkflowRunMeta as cefazolinWorkflowRunMetaSource,
+  cefazolinWorkflowSteps as cefazolinWorkflowStepsSource,
   getCefazolinWorkflowRunState,
 } from "@/data/cefazolin-ai-workflow";
 import type { ExecutionStatus, HitlStatus } from "@/services/scm-workflow-orchestrator";
@@ -235,7 +235,8 @@ function ProductDecisionExecution({
   product: Product;
   dashboard: ProductDashboardScenario;
 }) {
-  const [tab, setTab] = useState<TabKey>("response");
+  const isTamivir = product.key === "타미비어";
+  const [tab, setTab] = useState<TabKey>(isTamivir ? "impact" : "response");
   const selectedId = dashboard.recommendations[0]?.id ?? "";
   const [reviewer, setReviewer] = useState("");
   const [reviewerRole, setReviewerRole] = useState("SCM 운영");
@@ -269,6 +270,7 @@ function ProductDecisionExecution({
   const projectedInventory = selected?.projectedTotalInventory ?? dashboard.totalInventory ?? 0;
   const projectedRegions = selected?.projectedRegions ?? dashboard.regions;
   const approvalReady = reviewer.trim().length > 0 && Object.values(checks).every(Boolean);
+  const holdReady = reviewer.trim().length > 0 && reviewNote.trim().length > 0;
   const unit = product.key === "타미비어" ? "EA" : "BOX";
   const workflowSteps =
     product.key === "리피로우"
@@ -303,7 +305,13 @@ function ProductDecisionExecution({
         }));
 
   return (
-    <div className="dashboard-fixed-layout flex-1 bg-surface px-lg pb-16 pt-16">
+    <div
+      className={`dashboard-fixed-layout flex-1 bg-surface px-lg pt-16 ${
+        isTamivir && (tab === "impact" || tab === "response")
+          ? "flex min-h-[912px] flex-col pb-12"
+          : "pb-16"
+      }`}
+    >
       <header className="flex items-end justify-between gap-lg py-lg">
         <div>
           <div className="mb-xs flex items-center gap-2">
@@ -321,12 +329,18 @@ function ProductDecisionExecution({
               {product.key === "리피로우" ? "LIPI" : "TAMI"}-DECISION-
               {dashboard.date.replaceAll("-", "")}
             </span>
+            {isTamivir ? (
+              <span className="rounded-full border border-outline-variant bg-surface-container-low px-2 py-0.5 text-[9px] font-bold text-on-surface-variant">
+                SANDBOX · SYNTHETIC DATA
+              </span>
+            ) : null}
           </div>
           <h2 className="font-display text-headline-md text-on-surface">
             {product.name} 의사결정 실행
           </h2>
           <p className="mt-xs text-sm text-on-surface-variant">
-            {dashboard.sceneName} · 데이터 기준 {dashboard.date}
+            {isTamivir ? "수요 이상 탐지 · Case 영향 분석" : dashboard.sceneName} · 데이터 기준{" "}
+            {dashboard.date}
           </p>
         </div>
         <button
@@ -342,7 +356,9 @@ function ProductDecisionExecution({
         </button>
       </header>
 
-      <nav className="mb-md flex items-center rounded-xl border border-outline-variant bg-white p-1.5 shadow-sm">
+      <nav
+        className={`${isTamivir ? "mb-sm p-1" : "mb-md p-1.5"} flex shrink-0 items-center rounded-xl border border-outline-variant bg-white shadow-sm`}
+      >
         {tabItems.map((item) => (
           <button
             key={item.key}
@@ -357,7 +373,34 @@ function ProductDecisionExecution({
       </nav>
 
       {tab === "impact" ? (
-        <div className="space-y-md">
+        <div className={isTamivir ? "flex flex-col gap-md" : "space-y-md"}>
+          {isTamivir ? (
+            <Section
+              title="Case 탐지 요약"
+              subtitle="수요 급감 신호와 권역별 재고 과잉을 결합해 의사결정 Case로 전환"
+              action={<Pill tone={excessRegions.length ? "warning" : "success"}>{excessRegions.length ? "재고 과잉" : "정상"}</Pill>}
+              bodyClassName="p-sm"
+            >
+              <div className="grid grid-cols-4 gap-sm text-[11px]">
+                <div className="rounded-xl bg-surface-container-low p-sm">
+                  <p className="text-on-surface-variant">Case ID</p>
+                  <p className="mt-1 font-data font-bold">TAMI-DEMAND-{dashboard.date.replaceAll("-", "")}</p>
+                </div>
+                <div className="rounded-xl bg-surface-container-low p-sm">
+                  <p className="text-on-surface-variant">직접 수요 신호</p>
+                  <p className="mt-1 font-bold">인플루엔자 수요 급감 예측</p>
+                </div>
+                <div className="rounded-xl bg-surface-container-low p-sm">
+                  <p className="text-on-surface-variant">영향 범위</p>
+                  <p className="mt-1 font-bold">과잉 권역 {excessRegions.length}개</p>
+                </div>
+                <div className="rounded-xl bg-surface-container-low p-sm">
+                  <p className="text-on-surface-variant">분석 상태</p>
+                  <p className="mt-1 font-bold text-scm-primary">조치안 검토 가능</p>
+                </div>
+              </div>
+            </Section>
+          ) : null}
           <div className="grid grid-cols-6 gap-sm">
             <Metric
               label="현재고"
@@ -694,17 +737,28 @@ function ProductDecisionExecution({
                 </div>
               </div>
             </Section>
-            <Section title="필수 검토사항">
+            <Section
+              title={isTamivir ? "승인 조건" : "필수 검토사항"}
+              subtitle={isTamivir ? "추천안 실행 전 필수 확인 항목" : undefined}
+            >
               <div className="space-y-xs">
-                {[
-                  ["cost", "추가 조달비·비용 효과 확인"],
-                  ["supplier", "공급사·입고 일정 확인"],
-                  ["quality", "품질 승인 전제 확인"],
-                  ["transfer", "권역 재배분 가능량 확인"],
-                ].map(([key, label]) => (
+                {(isTamivir
+                  ? [
+                      ["cost", "비용 효과 확인", selected?.costReduction ?? "비용 영향 확인"],
+                      ["supplier", "발주 보류 범위 확인", selected?.executionPeriod ?? "적용 일정 확인"],
+                      ["quality", "수요 예측 근거 확인", dashboard.externalSignal?.detail ?? "예측 근거 확인"],
+                      ["transfer", "CDC 이송 가능량 확인", `${selected?.affectedRegions?.length ?? 0}개 권역 · ${fmt(selected?.transferAmount ?? 0)} ${unit}`],
+                    ]
+                  : [
+                      ["cost", "추가 조달비·비용 효과 확인", "추천안 비용 영향 확인"],
+                      ["supplier", "공급사·입고 일정 확인", "실행 일정 및 공급 조건 확인"],
+                      ["quality", "품질 승인 전제 확인", "품질 승인 조건 확인"],
+                      ["transfer", "권역 재배분 가능량 확인", "권역별 이관 가능 재고 확인"],
+                    ]
+                ).map(([key, label, detail]) => (
                   <label
                     key={key}
-                    className="flex items-center gap-sm rounded-xl border border-outline-variant p-sm text-xs"
+                    className="flex cursor-pointer items-start gap-sm rounded-xl border border-outline-variant p-sm hover:border-scm-primary/40"
                   >
                     <input
                       type="checkbox"
@@ -712,9 +766,19 @@ function ProductDecisionExecution({
                       onChange={(event) =>
                         setChecks((current) => ({ ...current, [key]: event.target.checked }))
                       }
-                      className="accent-[#004ccd]"
+                      className="mt-1 h-4 w-4 accent-[var(--scm-primary)]"
                     />
-                    {label}
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center justify-between gap-sm">
+                        <span className="block text-xs font-bold text-on-surface">{label}</span>
+                        <Pill tone={checks[key as keyof typeof checks] ? "success" : "neutral"}>
+                          {checks[key as keyof typeof checks] ? "확인" : "미확인"}
+                        </Pill>
+                      </span>
+                      <span className="mt-0.5 block text-[10px] leading-4 text-on-surface-variant">
+                        {detail}
+                      </span>
+                    </span>
                   </label>
                 ))}
               </div>
@@ -770,7 +834,8 @@ function ProductDecisionExecution({
                 <button
                   type="button"
                   onClick={() => setApproved(false)}
-                  className="flex-1 rounded-lg border border-[#ffd591] bg-[#fff7e6] py-sm text-xs font-bold text-[#ad6800]"
+                  disabled={isTamivir && !holdReady}
+                  className="flex-1 rounded-lg border border-[#ffd591] bg-[#fff7e6] py-sm text-xs font-bold text-[#ad6800] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   보완 요청
                 </button>
@@ -786,6 +851,22 @@ function ProductDecisionExecution({
                   최종 승인
                 </button>
               </div>
+              {isTamivir ? (
+                <div className="mt-sm h-9 space-y-1" aria-live="polite">
+                  <p className={`text-[10px] font-medium ${approvalReady ? "text-green-700" : "text-red-600"}`}>
+                    <span className="mr-1" aria-hidden="true">{approvalReady ? "✓" : "*"}</span>
+                    {approvalReady
+                      ? "최종 승인: 승인 조건이 모두 충족되었습니다."
+                      : "최종 승인: 승인자 입력과 필수 검토 4건 완료가 필요합니다."}
+                  </p>
+                  <p className={`text-[10px] font-medium ${holdReady ? "text-green-700" : "text-red-600"}`}>
+                    <span className="mr-1" aria-hidden="true">{holdReady ? "✓" : "*"}</span>
+                    {holdReady
+                      ? "보완 요청: 승인자와 검토 의견이 입력되었습니다."
+                      : "보완 요청: 승인자와 검토 의견을 입력해야 합니다."}
+                  </p>
+                </div>
+              ) : null}
             </Section>
             <Section title="추적 정보">
               <dl className="space-y-xs text-xs">
@@ -995,6 +1076,226 @@ function ProductDecisionExecution({
 }
 
 function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
+  const isTamivir = product.key === "타미비어";
+  const tamivirRegionalRows = Object.values(tamivirDashboard.regions).filter(
+    (region) => region.id !== "National",
+  );
+  const tamivirSourceTargetTotal = tamivirRegionalRows.reduce(
+    (sum, region) => sum + region.target_stock,
+    0,
+  );
+  const tamivirTargetScale = tamivirAnnualF2aTarget / Math.max(tamivirSourceTargetTotal, 1);
+  const tamivirTemplateRegions = Object.fromEntries(
+    Object.entries(tamivirDashboard.regions).map(([id, region]) => {
+      const targetStock =
+        id === "National"
+          ? tamivirAnnualF2aTarget
+          : Math.round(region.target_stock * tamivirTargetScale);
+      const stockRatio = ((region.current_stock ?? 0) / Math.max(targetStock, 1)) * 100;
+      const riskLevel = stockRatio < 100 ? "danger" : stockRatio > 120 ? "warning" : "safe";
+      return [
+        id,
+        {
+          ...region,
+          target_stock: targetStock,
+          stock_ratio: stockRatio,
+          riskLevel,
+          riskText: riskLevel === "danger" ? "부족" : riskLevel === "warning" ? "과잉" : "적정",
+        },
+      ];
+    }),
+  );
+  const tamivirScenarios = [
+    {
+      id: "S1_무대응",
+      displayId: "S1 무대응",
+      response: "기존 생산계획 유지",
+      baseline: false,
+      comparisonTarget: true,
+      constraintPassed: false,
+      serviceRatePct: 45.1,
+      minimumRegionalServiceRatePct: 4.2,
+      totalUnmetDemand: 1_556_256,
+      shortageWeeks: 16,
+      emergencyProcurementQuantity: 0,
+      totalProcurementCostKrw: 0,
+    },
+    {
+      id: "S2_내부대응",
+      displayId: "S2 내부대응",
+      response: "권역 재고 재배분·생산 증대",
+      baseline: false,
+      comparisonTarget: true,
+      constraintPassed: true,
+      serviceRatePct: 82.0,
+      minimumRegionalServiceRatePct: 68.0,
+      totalUnmetDemand: 510_666,
+      shortageWeeks: 6,
+      emergencyProcurementQuantity: 0,
+      totalProcurementCostKrw: 1_200_000_000,
+    },
+    {
+      id: "S3_통합대응",
+      displayId: "S3 통합대응",
+      response: "긴급 생산·권역 재배분",
+      baseline: false,
+      comparisonTarget: true,
+      constraintPassed: true,
+      serviceRatePct: 98.5,
+      minimumRegionalServiceRatePct: 94.0,
+      totalUnmetDemand: 42_555,
+      shortageWeeks: 1,
+      emergencyProcurementQuantity: 1_100_000,
+      totalProcurementCostKrw: 3_100_000_000,
+    },
+  ];
+  const tamivirTemplateDashboard = {
+    ...tamivirDashboard,
+    regions: tamivirTemplateRegions,
+    totalInventory: tamivirDashboard.totalInventory ?? 0,
+    utilization: tamivirDashboard.utilization ?? 78,
+    policyRiskByRegion: {
+      National: {
+        grade: "높음 (High Risk)",
+        score: 92,
+        causes: [
+          { label: "감염병 수요 급증", score: 92 },
+          { label: "수요예측 상향", score: 86 },
+          { label: "권역별 재고 불균형", score: 78 },
+        ],
+      },
+    },
+    transferableQuantityByRegion: {
+      National: 800_000,
+    },
+    recommendationEvaluations: [
+      {
+        scenarioId: "S3 통합대응",
+        recommended: true,
+        executionPeriod: "2026-11-16~2026-12-15 긴급 생산·순차 입고",
+        xai: {
+          conditions: [
+            "MES 증산 생산능력 및 품질 승인 확인",
+            "ERP 원료·완제품 조달 일정 확정",
+            "WMS 부족 권역 우선 재배분",
+          ],
+        },
+      },
+    ],
+  };
+  const cefazolinDashboard: any = isTamivir
+    ? tamivirTemplateDashboard
+    : cefazolinDashboardSource;
+  const cefazolinScenarioComparison: any[] = isTamivir
+    ? tamivirScenarios
+    : cefazolinScenarioComparisonSource;
+  const cefazolinScenarioRecommendation: any = isTamivir
+    ? { recommendedScenarioId: "S3_통합대응" }
+    : cefazolinScenarioRecommendationSource;
+  const cefazolinDetectionContext: any = isTamivir
+    ? {
+        caseId: "TAMI-DEMAND-20261115-01",
+        detectedAt: tamivirDashboard.date,
+        directSignal: "감염병 수요 급증",
+        directSignalScore: 92,
+        eventId: "EVT-FLU-20261115",
+        supplyFulfillmentPct: null,
+        source: "수요예측·역학 신호·ERP/MES/WMS 통합 분석",
+        evidenceNote: "인플루엔자 유행지수 상승 · 전국 수요예측 상향",
+      }
+    : cefazolinDetectionContextSource;
+  const cefazolinWorkflowRunMeta: any = isTamivir
+    ? {
+        runId: "SCM-TAMI-20261115-001",
+        latestSnapshotDate: tamivirDashboard.date,
+      }
+    : cefazolinWorkflowRunMetaSource;
+  const cefazolinDecisionEvidence: any = isTamivir
+    ? {
+        rules: [
+          "RULE-DEMAND-SURGE-001",
+          "RULE-REGION-SHORTAGE-001",
+          "RULE-PRODUCTION-UP-001",
+          "RULE-TRANSFER-001",
+          "RULE-SERVICE-LEVEL-001",
+        ],
+      }
+    : cefazolinDecisionEvidenceSource;
+  const cefazolinWorkflowEffect: any = isTamivir
+    ? {
+        serviceRateBefore: 45.1,
+        serviceRateAfter: 98.5,
+        minimumRegionalServiceRateBefore: 4.2,
+        minimumRegionalServiceRateAfter: 94.0,
+        unmetDemandBefore: 1_556_256,
+        unmetDemandAfter: 42_555,
+        shortageWeeksBefore: 16,
+        shortageWeeksAfter: 1,
+        procurementCostDeltaKrw: 3_100_000_000,
+      }
+    : cefazolinWorkflowEffectSource;
+  const cefazolinVirtualExecutionActions: any[] = isTamivir
+    ? [
+        {
+          id: "TAMI-ERP-001",
+          actionType: "원료 긴급발주",
+          title: "항바이러스제 원료 긴급 발주",
+          source: "우선 공급사",
+          target: "타미비어 생산공장",
+          quantity: 1_100_000,
+          unit: "완제품 환산단위",
+          ruleId: "RULE-DEMAND-SURGE-001",
+          basis: "감염병 수요 급증 예측과 목표재고 부족량 기준",
+        },
+        {
+          id: "TAMI-MES-001",
+          actionType: "생산계획 재산정",
+          title: "타미비어 긴급 증산계획 반영",
+          source: "승인 생산계획",
+          target: "MES 생산계획",
+          quantity: null,
+          unit: "계획",
+          ruleId: "RULE-PRODUCTION-UP-001",
+          basis: "서비스율 98.5% 확보 목표",
+        },
+        {
+          id: "TAMI-WMS-001",
+          actionType: "재고이동",
+          title: "부족 권역 우선 재배분",
+          source: "전국 CDC 가용재고",
+          target: "부족 권역 8개",
+          quantity: 800_000,
+          unit: "완제품 환산단위",
+          ruleId: "RULE-TRANSFER-001",
+          basis: "권역별 목표재고 충족률 우선순위",
+        },
+      ]
+    : cefazolinVirtualExecutionActionsSource;
+  const tamivirWorkflowContent = [
+    ["ERP·MES·WMS·수요 데이터 확인", "타미비어 전국 8개 권역 데이터 수집 완료"],
+    ["통합·품질 검사", "필수 재고·수요·생산 데이터 검증 완료"],
+    ["감염병 수요 급증 탐지", "인플루엔자 유행지수와 수요예측 상향 신호 탐지"],
+    ["Case 영향 분석", "목표재고 부족 1,556,256 EA · 부족권역 8개"],
+    ["S1~S3 시뮬레이션", "무대응·내부대응·통합대응 3개 실행안 비교"],
+    ["대응안 실행가능성 검증", "ERP·MES·WMS 실행 조건과 서비스율 검증"],
+    ["최종 권고안 선정·근거", "S3 통합대응 · 예상 서비스율 98.5%"],
+    ["담당자 검토·승인", "긴급 증산·품질승인·권역 재배분 조건 확인"],
+    ["실행지시 준비", "ERP·MES·WMS 타미비어 실행지시 생성"],
+    ["계획 KPI 확인", "미충족 수요 42,555 EA · 부족기간 1주"],
+  ];
+  const cefazolinWorkflowSteps: any[] = isTamivir
+    ? cefazolinWorkflowStepsSource.map((step, index) => ({
+        ...step,
+        id: step.id.replace("FLOW", "TAMI-FLOW"),
+        title: tamivirWorkflowContent[index]?.[0] ?? step.title,
+        shortTitle: tamivirWorkflowContent[index]?.[0] ?? step.shortTitle,
+        dataAsOf: tamivirDashboard.date,
+        evidence: [tamivirWorkflowContent[index]?.[1] ?? "타미비어 시나리오 데이터"],
+        warnings: [],
+      }))
+    : cefazolinWorkflowStepsSource;
+  const finishedUnit = isTamivir ? "EA" : "VIAL";
+  const procurementUnit = isTamivir ? "EA" : "API";
   const [tab, setTab] = useState<TabKey>("impact");
   const [showWorkflow, setShowWorkflow] = useState(false);
   const [hitlStatus, setHitlStatus] = useState<HitlStatus>("pending");
@@ -1005,7 +1306,9 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const [checklist, setChecklist] = useState<Record<ChecklistKey, boolean>>(initialChecklist);
   const [lastUpdatedAt, setLastUpdatedAt] = useState(cefazolinWorkflowRunMeta.latestSnapshotDate);
 
-  if (product.key !== "세파졸린") return <ProductNotConnected product={product} />;
+  if (product.key !== "세파졸린" && product.key !== "타미비어") {
+    return <ProductNotConnected product={product} />;
+  }
 
   const national = cefazolinDashboard.regions.National;
   const nationalPolicyRisk = cefazolinDashboard.policyRiskByRegion.National;
@@ -1034,11 +1337,21 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const affectedRegionNames = shortageRegions.map((region) =>
     region.region.split("_").slice(1).join("_"),
   );
-  const regionChartData = regions.map((region) => {
+  const tamivirIntegrationRegions = Object.values(tamivirDashboard.regions).filter(
+    (region) => region.id !== "National",
+  );
+  const regionChartData = (isTamivir ? tamivirIntegrationRegions : regions).map((region) => {
     const name = region.region.split("_").slice(1).join("_");
     const ratio = region.stock_ratio;
-    const color =
-      region.riskLevel === "danger"
+    const color = isTamivir
+      ? ratio < 1
+        ? "#ef4444"
+        : ratio < 3
+          ? "#22c55e"
+          : ratio < 10
+            ? "#eab308"
+            : "#f97316"
+      : region.riskLevel === "danger"
         ? "#ef4444"
         : region.riskLevel === "warning"
           ? "#f59e0b"
@@ -1048,24 +1361,29 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       name,
       ratio,
       color,
-      label: `${ratio.toFixed(0)}%`,
+      label: isTamivir ? `${ratio.toFixed(1)}배` : `${ratio.toFixed(0)}%`,
     };
   });
+  const tamivirSevereRegionCount = tamivirIntegrationRegions.filter(
+    (region) => region.stock_ratio >= 10,
+  ).length;
 
   const propagationStages = [
     {
-      label: "공급 이행 저하",
+      label: isTamivir ? "감염병 수요 급증" : "공급 이행 저하",
       value:
         cefazolinDetectionContext.supplyFulfillmentPct !== null
           ? `${cefazolinDetectionContext.supplyFulfillmentPct.toFixed(1)}%`
           : `${directSupplyCause?.score ?? 0}/100`,
       note: cefazolinDetectionContext.eventId
-        ? `${cefazolinDetectionContext.eventId} 공급 신호`
-        : "ERP 공급 신호",
+        ? `${cefazolinDetectionContext.eventId} ${isTamivir ? "수요" : "공급"} 신호`
+        : isTamivir
+          ? "수요예측 신호"
+          : "ERP 공급 신호",
       tone: "danger" as const,
     },
     {
-      label: "재고 압박",
+      label: isTamivir ? "목표재고 부족" : "재고 압박",
       value: `${national.stock_ratio.toFixed(1)}%`,
       note: "목표재고 충족률",
       tone: "warning" as const,
@@ -1094,19 +1412,19 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const approvalChecklistItems: Array<{ key: ChecklistKey; label: string; detail: string }> = [
     {
       key: "cost",
-      label: "증분 조달비 확인",
+      label: isTamivir ? "긴급 증산비 확인" : "증분 조달비 확인",
       detail: `S1 대비 ${fmtKrw(cefazolinWorkflowEffect.procurementCostDeltaKrw)} 증가분 및 예산 범위 확인`,
     },
     {
       key: "supplier",
-      label: "공급사 입고 일정 확인",
-      detail: recommendedEvaluation?.executionPeriod ?? "긴급조달 입고 일정 확인",
+      label: isTamivir ? "긴급 생산 일정 확인" : "공급사 입고 일정 확인",
+      detail: recommendedEvaluation?.executionPeriod ?? (isTamivir ? "긴급 생산 일정 확인" : "긴급조달 입고 일정 확인"),
     },
     { key: "quality", label: "MES 품질 승인 전제 확인", detail: qualityCondition },
     {
       key: "transfer",
       label: "권역 재배분 가능량 확인",
-      detail: `${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산 · 과잉권역 ${excessRegions.length}개`,
+      detail: `${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} ${finishedUnit} · ${isTamivir ? "재배분 대상" : "과잉"}권역 ${excessRegions.length}개`,
     },
   ];
   const checklistComplete = approvalChecklistItems.every((item) => checklist[item.key]);
@@ -1125,7 +1443,28 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     task: string;
     quantity: string;
     rationale: string;
-  }> = [
+  }> = isTamivir
+    ? [
+        {
+          system: "ERP",
+          task: "항바이러스제 원료 및 완제품 긴급 발주",
+          quantity: "1,100,000 EA",
+          rationale: "감염병 수요 급증 예측과 전국 목표재고 부족량 기준 긴급 조달",
+        },
+        {
+          system: "MES",
+          task: "타미비어 긴급 증산계획 재산정",
+          quantity: "가동률 상향",
+          rationale: "서비스율 98.5% 확보를 위한 생산라인 증산 및 품질승인 일정 반영",
+        },
+        {
+          system: "WMS",
+          task: "CDC 가용재고를 부족 권역에 우선 재배분",
+          quantity: "800,000 EA",
+          rationale: "권역별 목표재고 충족률과 수요 급증 위험도를 기준으로 순차 배분",
+        },
+      ]
+    : [
     {
       system: "ERP",
       task: "공급사 S2, S3 원료 추가 발주",
@@ -1144,7 +1483,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       quantity: "11,287 VIAL 환산",
       rationale: "전국 권역 최소 안전재고율 100% 이상 확보 및 권역 간 재고 불균형 해소 (11,287 VIAL)",
     },
-  ];
+      ];
 
   const approve = () => {
     if (!approvalReady) return;
@@ -1195,17 +1534,17 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   : "권고안 검토"}
             </Pill>
             <span className="font-data text-[10px] text-on-surface-variant">
-              CEFA-SUPPLY-20261028-01
+              {cefazolinDetectionContext.caseId}
             </span>
             <span className="rounded-full border border-outline-variant bg-surface-container-low px-2 py-0.5 text-[9px] font-bold text-on-surface-variant">
               SANDBOX · SYNTHETIC DATA
             </span>
           </div>
           <h2 className="font-display text-headline-md text-on-surface">
-            세파졸린 의사결정 실행
+            {product.name} 의사결정 실행
           </h2>
           <p className="mt-xs text-sm text-on-surface-variant">
-            수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
+            {isTamivir ? "감염병 수요 급증 탐지" : "수급 이상 탐지"} · Case 영향 분석 · 데이터 기준{" "}
             {cefazolinWorkflowRunMeta.latestSnapshotDate}
           </p>
 
@@ -1242,7 +1581,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         <div className="flex h-[636px] min-h-[636px] max-h-[636px] flex-none flex-col gap-md overflow-hidden">
           <Section
             title="Case 탐지 요약"
-            subtitle="직접 공급 신호와 수급 위험 신호를 결합해 의사결정 Case로 전환"
+            subtitle={isTamivir ? "감염병·수요예측 신호와 권역별 재고 위험을 결합해 의사결정 Case로 전환" : "직접 공급 신호와 수급 위험 신호를 결합해 의사결정 Case로 전환"}
             action={<Pill tone="danger">{nationalPolicyRisk.grade}</Pill>}
             className="shrink-0"
             bodyClassName="p-sm"
@@ -1268,7 +1607,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 </p>
               </div>
               <div className="rounded-lg border border-error/20 bg-error-container/15 px-2 py-1.5">
-                <p className="text-[10px] font-bold text-on-surface-variant">직접 공급 신호</p>
+                <p className="text-[10px] font-bold text-on-surface-variant">{isTamivir ? "직접 수요 신호" : "직접 공급 신호"}</p>
                 <p className="mt-1 text-[13px] font-bold text-on-surface">
                   {cefazolinDetectionContext.directSignal}
                 </p>
@@ -1297,8 +1636,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             <Metric
               dense
               label="현재 재고"
-              value={`${fmt(cefazolinDashboard.totalInventory ?? 0)} VIAL 환산`}
-              note={`목표 ${fmt(national.target_stock)} VIAL 환산`}
+              value={`${fmt(cefazolinDashboard.totalInventory ?? 0)} ${finishedUnit}`}
+              note={`목표 ${fmt(national.target_stock)} ${finishedUnit}`}
               icon="inventory_2"
               tone="danger"
             />
@@ -1313,7 +1652,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             <Metric
               dense
               label="목표재고 부족분"
-              value={`${fmt(targetStockGap)} VIAL 환산`}
+              value={`${fmt(targetStockGap)} ${finishedUnit}`}
               note="전국 목표재고 대비 현재 부족량"
               icon="inventory"
               tone="warning"
@@ -1325,7 +1664,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             <div className="col-span-5 flex min-h-0">
               <Section
                 title="원인 분석 및 위험 전파 경로"
-                subtitle="직접 공급 신호 → 재고 압박 → 권역 부족 → 서비스 위험"
+                subtitle={isTamivir ? "감염병 수요 급증 → 목표재고 부족 → 권역 부족 → 서비스 위험" : "직접 공급 신호 → 재고 압박 → 권역 부족 → 서비스 위험"}
                 className="flex min-h-0 flex-1 flex-col"
                 bodyClassName="flex min-h-0 flex-1 flex-col gap-2 p-sm"
               >
@@ -1353,7 +1692,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
                 <div className="flex items-center justify-between gap-2 rounded-lg border border-error/20 bg-error-container/15 px-2 py-1">
                   <div className="min-w-0">
-                    <p className="text-[9px] font-bold text-error">직접 공급 신호</p>
+                    <p className="text-[9px] font-bold text-error">{isTamivir ? "직접 수요 신호" : "직접 공급 신호"}</p>
                     <p className="truncate text-[11px] font-bold text-on-surface">
                       {cefazolinDetectionContext.directSignal} ·{" "}
                       <span className="font-normal text-on-surface-variant">
@@ -1387,8 +1726,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
             <div className="col-span-7 flex min-h-0">
               <Section
-                title="권역별 목표재고 충족률"
-                subtitle="현재 재고 ÷ 목표 재고 · 100% 기준선 대비"
+                title={isTamivir ? "권역별 재고 비율" : "권역별 목표재고 충족률"}
+                subtitle={isTamivir ? "데이터 통합과 동일한 현재 재고 ÷ 기준 재고 배수" : "현재 재고 ÷ 목표 재고 · 100% 기준선 대비"}
                 className="flex min-h-0 flex-1 flex-col"
                 bodyClassName="flex min-h-0 flex-1 flex-col gap-1 p-sm"
                 action={
@@ -1403,22 +1742,22 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               >
                 <div className="flex flex-wrap items-center gap-2 text-[9px] font-bold text-on-surface-variant">
                   <span className="flex items-center gap-1">
-                    <i className="h-2 w-2 rounded-sm bg-error" /> 부족 (&lt;100%)
+                    <i className="h-2 w-2 rounded-sm bg-error" /> {isTamivir ? "부족 (<1.0배)" : "부족 (<100%)"}
                   </span>
                   <span className="flex items-center gap-1">
-                    <i className="h-2 w-2 rounded-sm bg-green-500" /> 적정
+                    <i className="h-2 w-2 rounded-sm bg-green-500" /> {isTamivir ? "적정 (1.0~3.0배)" : "적정"}
                   </span>
                   <span className="flex items-center gap-1">
-                    <i className="h-2 w-2 rounded-sm bg-[#f59e0b]" /> 과잉
+                    <i className="h-2 w-2 rounded-sm bg-[#f59e0b]" /> {isTamivir ? "과잉 (3.0~10.0배) · 심각한 과잉 (10.0배 이상)" : "과잉"}
                   </span>
-                  <span className="ml-auto">🔴 위험 권역 {shortageRegions.length}개</span>
+                  <span className="ml-auto">🔴 {isTamivir ? `심각한 과잉 권역 ${tamivirSevereRegionCount}개` : `위험 권역 ${shortageRegions.length}개`}</span>
                 </div>
                 <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
                     <BarChart
                       width={760}
                       height={260}
                       data={regionChartData}
-                      margin={{ top: 10, right: 8, left: -18, bottom: 12 }}
+                      margin={{ top: isTamivir ? 24 : 10, right: isTamivir ? 82 : 8, left: -18, bottom: 12 }}
                       barCategoryGap="22%"
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
@@ -1431,22 +1770,35 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                       />
                       <YAxis
                         tick={{ fontSize: 9 }}
-                        domain={[0, 150]}
-                        ticks={[0, 50, 100, 150]}
+                        domain={isTamivir ? [0.5, 35] : [0, 150]}
+                        ticks={isTamivir ? [0.5, 1, 3, 10, 30] : [0, 50, 100, 150]}
+                        scale={isTamivir ? "log" : "auto"}
                         axisLine={false}
                         tickLine={false}
-                        unit="%"
+                        unit={isTamivir ? "배" : "%"}
                       />
                       <Tooltip
                         contentStyle={{ fontSize: 11, borderRadius: 8 }}
-                        formatter={(value: number) => [`${value.toFixed(1)}%`, "충족률"]}
+                        formatter={(value: number) => [isTamivir ? `${value.toFixed(1)}배` : `${value.toFixed(1)}%`, isTamivir ? "재고 비율" : "충족률"]}
                       />
                       <ReferenceLine
-                        y={100}
+                        y={isTamivir ? 1 : 100}
                         stroke="#ef4444"
                         strokeDasharray="5 4"
-                        label={{ value: "목표 100%", position: "insideTopRight", fontSize: 9 }}
+                        label={{ value: isTamivir ? "1.0배 부족 기준" : "목표 100%", position: isTamivir ? "right" : "insideTopRight", fontSize: 9 }}
                       />
+                      {isTamivir ? (
+                        <ReferenceLine
+                          y={10}
+                          stroke="#f97316"
+                          strokeDasharray="5 4"
+                          label={{
+                            value: "10배 심각 과잉",
+                            position: "right",
+                            fontSize: 9,
+                          }}
+                        />
+                      ) : null}
                       <Bar dataKey="ratio" radius={[4, 4, 0, 0]} isAnimationActive={false}>
                         <LabelList
                           dataKey="label"
@@ -1488,15 +1840,15 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             <Metric
               dense
               label="미충족 수요"
-              value={`${fmt(recommendedScenario.totalUnmetDemand)} VIAL`}
-              note={`S1 ${fmt(baselineScenario.totalUnmetDemand)} VIAL`}
+              value={`${fmt(recommendedScenario.totalUnmetDemand)} ${finishedUnit}`}
+              note={`S1 ${fmt(baselineScenario.totalUnmetDemand)} ${finishedUnit}`}
               icon="production_quantity_limits"
               tone="success"
             />
             <Metric
               dense
-              label="긴급조달"
-              value={`${fmt(recommendedScenario.emergencyProcurementQuantity)} API`}
+              label={isTamivir ? "긴급 생산" : "긴급조달"}
+              value={`${fmt(recommendedScenario.emergencyProcurementQuantity)} ${procurementUnit}`}
               note="S3 실행 조건"
               icon="shopping_cart"
               tone="warning"
@@ -1580,7 +1932,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         <dd className="whitespace-nowrap font-data font-bold">
                           {fmt(scenario.totalUnmetDemand)}
                           <span className="ml-1 text-[9px] font-normal text-on-surface-variant">
-                            VIAL
+                            {finishedUnit}
                           </span>
                         </dd>
                       </div>
@@ -1615,7 +1967,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   <Pill tone="success">물량 확인</Pill>
                 </div>
                 <p className="mt-1 font-data text-sm font-bold">
-                  {fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL
+                  {fmt(cefazolinDashboard.transferableQuantityByRegion.National)} {finishedUnit}
                 </p>
                 <p className="text-[10px] text-on-surface-variant">
                   과잉권역 {excessRegions.length}개 · 부족권역 {shortageRegions.length}개
@@ -1632,21 +1984,21 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   가동률 {cefazolinDashboard.utilization?.toFixed(1) ?? "-"}%
                 </p>
                 <p className="text-[10px] leading-4 text-on-surface-variant">
-                  추가 원료 입고 일정 및 품질재검사 일정 조정
+                  {isTamivir ? "긴급 증산 일정 및 품질검사·출하승인 일정 조정" : "추가 원료 입고 일정 및 품질재검사 일정 조정"}
                 </p>
               </div>
               <div className="rounded-xl border border-outline-variant px-2 py-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-on-surface-variant">
-                    ERP 긴급조달
+                    {isTamivir ? "ERP 긴급 발주" : "ERP 긴급조달"}
                   </span>
                   <Pill tone="warning">일정 확인</Pill>
                 </div>
                 <p className="mt-1 font-data text-sm font-bold">
-                  {fmt(recommendedScenario.emergencyProcurementQuantity)} API
+                  {fmt(recommendedScenario.emergencyProcurementQuantity)} {procurementUnit}
                 </p>
                 <p className="truncate text-[10px] text-on-surface-variant">
-                  {recommendedEvaluation?.executionPeriod ?? "공급사 입고 일정 확인"}
+                  {recommendedEvaluation?.executionPeriod ?? (isTamivir ? "긴급 생산·입고 일정 확인" : "공급사 입고 일정 확인")}
                 </p>
               </div>
               <div className="rounded-xl border border-outline-variant px-2 py-1.5">
@@ -1661,11 +2013,11 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 <ul className="mt-1 space-y-0.5 text-[10px] leading-4 text-on-surface">
                   <li className="flex gap-1">
                     <span className="text-red-600">•</span>
-                    <span>공급사 입고 일정 확보</span>
+                    <span>{isTamivir ? "원료·완제품 긴급 발주 일정 확보" : "공급사 입고 일정 확보"}</span>
                   </li>
                   <li className="flex gap-1">
                     <span className="text-red-600">•</span>
-                    <span>입고 원료 품질검사 및 생산투입 승인</span>
+                    <span>{isTamivir ? "MES 증산 능력 및 품질·출하 승인" : "입고 원료 품질검사 및 생산투입 승인"}</span>
                   </li>
                   <li className="flex gap-1">
                     <span className="text-red-600">※</span>
@@ -1731,7 +2083,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 <div className="rounded-xl bg-surface-container-low p-sm">
                   <p className="text-[10px] text-on-surface-variant">미충족</p>
                   <p className="mt-1 font-data text-lg font-bold">
-                    {fmt(recommendedScenario.totalUnmetDemand)} VIAL 환산
+                    {fmt(recommendedScenario.totalUnmetDemand)} {finishedUnit}
                   </p>
                 </div>
                 <div className="rounded-xl bg-surface-container-low p-sm">
@@ -1946,8 +2298,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             />
             <Metric
               label="잔여 미충족"
-              value={`${fmt(cefazolinWorkflowEffect.unmetDemandAfter)} VIAL 환산`}
-              note={`S1 ${fmt(cefazolinWorkflowEffect.unmetDemandBefore)} VIAL 환산`}
+              value={`${fmt(cefazolinWorkflowEffect.unmetDemandAfter)} ${finishedUnit}`}
+              note={`S1 ${fmt(cefazolinWorkflowEffect.unmetDemandBefore)} ${finishedUnit}`}
               icon="inventory"
               tone="success"
             />
@@ -2007,7 +2359,11 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                       <td className="px-sm py-xs text-right font-data">
                         {action.quantity === null
                           ? "재산정"
-                          : `${fmt(action.quantity)} ${actionUnit(action.unit)}`}
+                          : `${fmt(action.quantity)} ${
+                              isTamivir && action.unit === "완제품 환산단위"
+                                ? "EA"
+                                : actionUnit(action.unit)
+                            }`}
                       </td>
                       <td className="px-sm py-xs">
                         <Pill
@@ -2054,7 +2410,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     cefazolinWorkflowEffect.unmetDemandBefore -
                       cefazolinWorkflowEffect.unmetDemandAfter,
                   )}{" "}
-                  VIAL 환산
+                  {finishedUnit}
                 </p>
               </div>
               <div className="rounded-xl border border-outline-variant p-md">
@@ -2161,9 +2517,6 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 export function CefazolinDecisionExecutionView({ product }: { product: Product }) {
   if (product.key === "리피로우" && lipilouDashboard) {
     return <ProductDecisionExecution product={product} dashboard={lipilouDashboard} />;
-  }
-  if (product.key === "타미비어") {
-    return <ProductDecisionExecution product={product} dashboard={tamivirDashboard} />;
   }
   return <CefazolinOnlyDecisionExecutionView product={product} />;
 }
