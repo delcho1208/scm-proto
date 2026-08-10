@@ -17,9 +17,9 @@
       "regions_stock": [
         {
           "region": "Zone1_서울",
-          "current_stock": 71424,
+          "current_stock": 51840,
           "target_stock": 38400,
-          "stock_ratio": 186.0,
+          "stock_ratio": 135.0,
           "status": "과잉",
           "color_status": "green"
         },
@@ -49,17 +49,17 @@
         },
         {
           "region": "Zone5_광주/전라",
-          "current_stock": 8349,
+          "current_stock": 7349,
           "target_stock": 6900,
-          "stock_ratio": 121.0,
+          "stock_ratio": 106.5,
           "status": "적정",
           "color_status": "green"
         },
         {
           "region": "Zone6_대구/경북",
-          "current_stock": 14762,
+          "current_stock": 13762,
           "target_stock": 12200,
-          "stock_ratio": 121.0,
+          "stock_ratio": 112.8,
           "status": "적정",
           "color_status": "green"
         },
@@ -87,9 +87,9 @@
       "map_monitoring": [
         {
           "region": "Zone1_서울",
-          "current_stock": 68883,
+          "current_stock": 51840,
           "target_stock": 38400,
-          "stock_ratio": 179.4,
+          "stock_ratio": 135.0,
           "status": "NORMAL",
           "map_color": "green",
           "animate_transition": false
@@ -179,8 +179,8 @@
           "expected_after_transfer": {
             "from_region": {
               "region": "Zone1_서울",
-              "stock_after": 67883,
-              "stock_ratio_after": 176.8,
+              "stock_after": 50840,
+              "stock_ratio_after": 132.3,
               "status_after": "과잉"
             },
             "to_region": {

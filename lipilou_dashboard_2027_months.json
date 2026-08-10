@@ -8,6 +8,7 @@
   "months": [
     {
       "month": "2026-11",
+      "status": "적정",
       "regions_stock": [
         {
           "region": "Zone1_서울",
@@ -19,17 +20,17 @@
         },
         {
           "region": "Zone2_경기/인천",
-          "current_stock": 75659,
+          "current_stock": 56666,
           "target_stock": 54600,
-          "stock_ratio": 138.5,
-          "status": "과잉",
+          "stock_ratio": 103.8,
+          "status": "적정",
           "color_status": "green"
         },
         {
           "region": "Zone3_강원",
-          "current_stock": 7512,
+          "current_stock": 6623,
           "target_stock": 6400,
-          "stock_ratio": 117.0,
+          "stock_ratio": 103.5,
           "status": "적정",
           "color_status": "green"
         },
@@ -59,9 +60,9 @@
         },
         {
           "region": "Zone7_부울경",
-          "current_stock": 16361,
+          "current_stock": 14455,
           "target_stock": 13400,
-          "stock_ratio": 122.1,
+          "stock_ratio": 107.9,
           "status": "적정",
           "color_status": "green"
         },
@@ -77,6 +78,7 @@
     },
     {
       "month": "2026-12",
+      "status": "적정",
       "regions_stock": [
         {
           "region": "Zone1_서울",
@@ -146,6 +148,7 @@
     },
     {
       "month": "2027-01",
+      "status": "적정",
       "regions_stock": [
         {
           "region": "Zone1_서울",
