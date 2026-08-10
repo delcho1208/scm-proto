@@ -1605,7 +1605,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const national = cefazolinDashboard.regions.National;
   const nationalPolicyRisk = cefazolinDashboard.policyRiskByRegion.National;
   const riskCauses = [...nationalPolicyRisk.causes].sort((a, b) => b.score - a.score);
-  const regions = Object.values(cefazolinDashboard.regions).filter(
+  const regions = (Object.values(cefazolinDashboard.regions) as DashboardRegion[]).filter(
     (region) => region.id !== "National",
   );
   const shortageRegions = regions.filter((region) => region.riskLevel === "danger");
