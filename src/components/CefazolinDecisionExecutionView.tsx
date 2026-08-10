@@ -1684,23 +1684,23 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               <table className="w-full table-fixed text-left text-[12px]">
                 <thead className="bg-surface-container-low text-[10px] uppercase text-on-surface-variant">
                   <tr>
-                    <th className="w-[72px] px-sm py-1">시스템</th>
-                    <th className="px-sm py-1">작업</th>
-                    <th className="w-[140px] px-sm py-1 text-right">수량·기준</th>
-                    <th className="px-sm py-1">추천 근거 / 산출 기준</th>
+                    <th className="w-[64px] px-sm py-0.5">시스템</th>
+                    <th className="w-[520px] px-sm py-0.5">작업</th>
+                    <th className="w-[120px] px-sm py-0.5 text-right">수량·기준</th>
+                    <th className="px-sm py-0.5">추천 근거 / 산출 기준</th>
                   </tr>
                 </thead>
                 <tbody>
                   {consolidatedExecutionRows.map((row) => (
                     <tr key={row.system} className="border-t border-outline-variant/40">
-                      <td className="px-sm py-1 align-top">
+                      <td className="px-sm py-[3px] align-top">
                         <Pill tone="primary">{row.system}</Pill>
                       </td>
-                      <td className="px-sm py-1 align-top font-bold">{row.task}</td>
-                      <td className="px-sm py-1 align-top text-right font-data font-bold">
+                      <td className="px-sm py-[3px] align-top font-bold">{row.task}</td>
+                      <td className="px-sm py-[3px] align-top text-right font-data font-bold">
                         {row.quantity}
                       </td>
-                      <td className="px-sm py-1 align-top text-[11px] leading-4 text-on-surface-variant">
+                      <td className="px-sm py-[3px] align-top text-[10px] leading-tight text-on-surface-variant">
                         {row.rationale}
                       </td>
                     </tr>
