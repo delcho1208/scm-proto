@@ -1120,21 +1120,29 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     system: actionSystem(action.actionType),
   }));
 
-  const consolidatedExecutionRows: Array<{ system: string; task: string; quantity: string }> = [
+  const consolidatedExecutionRows: Array<{
+    system: string;
+    task: string;
+    quantity: string;
+    rationale: string;
+  }> = [
     {
       system: "ERP",
       task: "공급사 S2, S3 원료 추가 발주",
-      quantity: `${fmt(recommendedScenario.emergencyProcurementQuantity)} API 환산`,
+      quantity: "414,079 API 환산",
+      rationale: "2026-06-02 ~ 2026-11-24 긴급 원료 입고 24회 계획 (414,079 API)",
     },
     {
       system: "MES",
       task: "추가 원료 기준 생산계획 재산정",
       quantity: "계획 재산정",
+      rationale: "전국 MES 가동률 87.0% 유지 및 추가 원료 투입 생산재산정",
     },
     {
       system: "WMS",
-      task: `과잉권역 ${excessRegions.length}개 재고를 부족권역 ${shortageRegions.length}개로 재배분`,
-      quantity: `${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산`,
+      task: "과잉권역 2개 (호남, 부산/울산/경남권) → 부족권역 3개 (서울, 수도권, 대구/경북권) 재배분",
+      quantity: "11,287 VIAL 환산",
+      rationale: "전국 권역 최소 안전재고율 100% 이상 확보 및 권역 간 재고 불균형 해소 (11,287 VIAL)",
     },
   ];
 
@@ -1644,24 +1652,25 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               <div className="rounded-xl border border-outline-variant px-2 py-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-on-surface-variant">
-                    제약·주의사항
+                    주요 선행조건
                   </span>
                   <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">
                     주의
                   </span>
                 </div>
                 <ul className="mt-1 space-y-0.5 text-[10px] leading-4 text-on-surface">
-                  {(
-                    recommendedEvaluation?.xai.constraints ?? [
-                      "S1 대비 조달비 증가",
-                      "공급사 입고 일정과 품질 승인 완료를 전제로 한 시뮬레이션 결과",
-                    ]
-                  ).map((constraint) => (
-                    <li key={constraint} className="flex gap-1">
-                      <span className="text-red-600">•</span>
-                      <span>{constraint}</span>
-                    </li>
-                  ))}
+                  <li className="flex gap-1">
+                    <span className="text-red-600">•</span>
+                    <span>공급사 입고 일정 확보</span>
+                  </li>
+                  <li className="flex gap-1">
+                    <span className="text-red-600">•</span>
+                    <span>입고 원료 품질검사 및 생산투입 승인</span>
+                  </li>
+                  <li className="flex gap-1">
+                    <span className="text-red-600">※</span>
+                    <span>상기 조건 충족을 전제로 한 시뮬레이션 결과</span>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -1678,17 +1687,23 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     <th className="px-sm py-1">시스템</th>
                     <th className="px-sm py-1">작업</th>
                     <th className="px-sm py-1 text-right">수량·기준</th>
+                    <th className="px-sm py-1">추천 근거 / 산출 기준</th>
                   </tr>
                 </thead>
                 <tbody>
                   {consolidatedExecutionRows.map((row) => (
                     <tr key={row.system} className="border-t border-outline-variant/40">
-                      <td className="px-sm py-1">
+                      <td className="px-sm py-0.5">
                         <Pill tone="primary">{row.system}</Pill>
                       </td>
-                      <td className="px-sm py-1 font-bold">{row.task}</td>
-                      <td className="px-sm py-1 text-right font-data font-bold">
+                      <td className="px-sm py-0.5 text-[11px] font-bold leading-tight">
+                        {row.task}
+                      </td>
+                      <td className="px-sm py-0.5 text-right font-data font-bold">
                         {row.quantity}
+                      </td>
+                      <td className="px-sm py-0.5 text-[10px] leading-tight text-on-surface-variant">
+                        {row.rationale}
                       </td>
                     </tr>
                   ))}
