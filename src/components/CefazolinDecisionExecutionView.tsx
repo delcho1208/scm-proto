@@ -1195,13 +1195,17 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               SANDBOX · SYNTHETIC DATA
             </span>
           </div>
-          <h2 className="font-display text-headline-md text-on-surface">
+          <h2
+            className={`font-display text-on-surface ${tab === "response" ? "text-[22px] font-bold" : "text-headline-md"}`}
+          >
             세파졸린 의사결정 실행
           </h2>
-          <p className="mt-xs text-sm text-on-surface-variant">
-            수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
-            {cefazolinWorkflowRunMeta.latestSnapshotDate}
-          </p>
+          {tab === "response" ? null : (
+            <p className="mt-xs text-sm text-on-surface-variant">
+              수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
+              {cefazolinWorkflowRunMeta.latestSnapshotDate}
+            </p>
+          )}
 
         </div>
         <button
