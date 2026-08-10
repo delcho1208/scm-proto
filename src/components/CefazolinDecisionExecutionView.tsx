@@ -1120,21 +1120,30 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     system: actionSystem(action.actionType),
   }));
 
-  const consolidatedExecutionRows: Array<{ system: string; task: string; quantity: string }> = [
+  const consolidatedExecutionRows: Array<{
+    system: string;
+    task: string;
+    quantity: string;
+    rationale: string;
+  }> = [
     {
       system: "ERP",
       task: "공급사 S2, S3 원료 추가 발주",
       quantity: `${fmt(recommendedScenario.emergencyProcurementQuantity)} API 환산`,
+      rationale: "2026-06-02 ~ 2026-11-24 긴급 원료 입고 24회 계획 (414,079 API)",
     },
     {
       system: "MES",
       task: "추가 원료 기준 생산계획 재산정",
       quantity: "계획 재산정",
+      rationale: "전국 MES 가동률 87.0% 유지 및 추가 원료 투입 생산재산정",
     },
     {
       system: "WMS",
-      task: `과잉권역 ${excessRegions.length}개 재고를 부족권역 ${shortageRegions.length}개로 재배분`,
+      task: "과잉권역 2개 (호남, 부산/울산/경남권) → 부족권역 3개 (서울, 수도권, 대구/경북권) 재배분",
       quantity: `${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산`,
+      rationale:
+        "전국 권역 최소 안전재고율 100% 이상 확보 및 권역 간 재고 불균형 해소 (11,287 VIAL)",
     },
   ];
 
@@ -1164,7 +1173,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
   return (
     <div
-      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-[912px] min-h-[912px] max-h-[912px] overflow-hidden pb-12" : tab === "response" ? "h-[992px] min-h-[992px] max-h-[992px] overflow-hidden pb-12" : "pb-16"}`}
+      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" || tab === "response" ? "h-[912px] min-h-[912px] max-h-[912px] overflow-hidden pb-12" : "pb-16"}`}
     >
       <div className="flex items-end justify-between gap-lg py-lg">
 
@@ -1672,23 +1681,31 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   {recommendedScenario.displayId} 실행계획
                 </p>
               </div>
-              <table className="w-full text-left text-[12px]">
+              <table className="w-full table-fixed text-left text-[12px]">
                 <thead className="bg-surface-container-low text-[10px] uppercase text-on-surface-variant">
                   <tr>
-                    <th className="px-sm py-1">시스템</th>
-                    <th className="px-sm py-1">작업</th>
-                    <th className="px-sm py-1 text-right">수량·기준</th>
+                    <th className="w-[56px] px-sm py-[1px]">시스템</th>
+                    <th className="w-[500px] px-sm py-[1px]">작업</th>
+                    <th className="w-[150px] whitespace-nowrap px-sm py-[1px] text-right">수량·기준</th>
+                    <th className="px-sm py-[1px]">추천 근거 / 산출 기준</th>
                   </tr>
                 </thead>
                 <tbody>
                   {consolidatedExecutionRows.map((row) => (
                     <tr key={row.system} className="border-t border-outline-variant/40">
-                      <td className="px-sm py-1">
-                        <Pill tone="primary">{row.system}</Pill>
+                      <td className="px-sm py-[1px] align-top">
+                        <span className="inline-flex items-center rounded-full border border-scm-primary/20 bg-primary-container/40 px-2 py-0.5 text-[10px] font-bold text-scm-primary">
+                          {row.system}
+                        </span>
                       </td>
-                      <td className="px-sm py-1 font-bold">{row.task}</td>
-                      <td className="px-sm py-1 text-right font-data font-bold">
+                      <td className="px-sm py-[1px] align-top text-[11px] font-bold leading-tight">
+                        {row.task}
+                      </td>
+                      <td className="whitespace-nowrap px-sm py-[1px] align-top text-right font-data text-[11px] font-bold">
                         {row.quantity}
+                      </td>
+                      <td className="px-sm py-[1px] align-top text-[10px] leading-[1.1] text-on-surface-variant">
+                        {row.rationale}
                       </td>
                     </tr>
                   ))}
