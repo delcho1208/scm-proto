@@ -444,16 +444,16 @@ function StandardDashboardView({ product }: { product: Product }) {
         timeline.totalInventory);
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
+  const panelInventory =
+    scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
   const forecastInventory =
-    lipilouGraphRegion?.current_stock_box ??
-    tamivirForecastRegion?.currentStock ??
-    displayedTotalInventory;
+    product.key === "리피로우"
+      ? panelInventory
+      : (tamivirForecastRegion?.currentStock ?? displayedTotalInventory);
   const forecastUtilization =
     lipilouGraphRegion?.operating_rate_pct ??
     tamivirForecastRegion?.operationRate ??
     displayedUtilization;
-  const panelInventory =
-    scenarioRegion?.current_stock ?? timelineRegion?.inventory ?? displayedTotalInventory;
   const riskText =
     regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
   const nationalRiskText =
