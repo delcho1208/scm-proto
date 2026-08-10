@@ -1120,21 +1120,30 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     system: actionSystem(action.actionType),
   }));
 
-  const consolidatedExecutionRows: Array<{ system: string; task: string; quantity: string }> = [
+  const consolidatedExecutionRows: Array<{
+    system: string;
+    task: string;
+    quantity: string;
+    rationale: string;
+  }> = [
     {
       system: "ERP",
       task: "공급사 S2, S3 원료 추가 발주",
       quantity: `${fmt(recommendedScenario.emergencyProcurementQuantity)} API 환산`,
+      rationale: "2026-06-02 ~ 2026-11-24 긴급 원료 입고 24회 계획 (414,079 API)",
     },
     {
       system: "MES",
       task: "추가 원료 기준 생산계획 재산정",
       quantity: "계획 재산정",
+      rationale: "전국 MES 가동률 87.0% 유지 및 추가 원료 투입 생산재산정",
     },
     {
       system: "WMS",
-      task: `과잉권역 ${excessRegions.length}개 재고를 부족권역 ${shortageRegions.length}개로 재배분`,
+      task: "과잉권역 2개 (호남, 부산/울산/경남권) → 부족권역 3개 (서울, 수도권, 대구/경북권) 재배분",
       quantity: `${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산`,
+      rationale:
+        "전국 권역 최소 안전재고율 100% 이상 확보 및 권역 간 재고 불균형 해소 (11,287 VIAL)",
     },
   ];
 
