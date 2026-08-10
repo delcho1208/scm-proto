@@ -1684,23 +1684,23 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               <table className="w-full table-fixed text-left text-[12px]">
                 <thead className="bg-surface-container-low text-[10px] uppercase text-on-surface-variant">
                   <tr>
-                    <th className="w-[56px] px-sm py-[2px]">시스템</th>
-                    <th className="w-[500px] px-sm py-[2px]">작업</th>
-                    <th className="w-[150px] whitespace-nowrap px-sm py-[2px] text-right">수량·기준</th>
-                    <th className="px-sm py-[2px]">추천 근거 / 산출 기준</th>
+                    <th className="w-[56px] px-sm py-[1px]">시스템</th>
+                    <th className="w-[500px] px-sm py-[1px]">작업</th>
+                    <th className="w-[150px] whitespace-nowrap px-sm py-[1px] text-right">수량·기준</th>
+                    <th className="px-sm py-[1px]">추천 근거 / 산출 기준</th>
                   </tr>
                 </thead>
                 <tbody>
                   {consolidatedExecutionRows.map((row) => (
                     <tr key={row.system} className="border-t border-outline-variant/40">
-                      <td className="px-sm py-[2px] align-top">
+                      <td className="px-sm py-[1px] align-top">
                         <Pill tone="primary">{row.system}</Pill>
                       </td>
-                      <td className="px-sm py-[2px] align-top font-bold">{row.task}</td>
-                      <td className="whitespace-nowrap px-sm py-[2px] align-top text-right font-data font-bold">
+                      <td className="px-sm py-[1px] align-top font-bold">{row.task}</td>
+                      <td className="whitespace-nowrap px-sm py-[1px] align-top text-right font-data font-bold">
                         {row.quantity}
                       </td>
-                      <td className="px-sm py-[2px] align-top text-[10px] leading-[1.2] text-on-surface-variant">
+                      <td className="px-sm py-[1px] align-top text-[10px] leading-[1.1] text-on-surface-variant">
                         {row.rationale}
                       </td>
                     </tr>
