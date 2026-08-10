@@ -1544,19 +1544,23 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         </Pill>
                       )}
                     </div>
-                    <div className="mt-1.5 rounded-lg bg-surface-container-low px-2 py-1">
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="text-[10px] text-on-surface-variant">서비스율</span>
-                        <strong className="font-data text-xs">
-                          {scenario.serviceRatePct.toFixed(1)}%
-                        </strong>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <span className="text-[10px] text-on-surface-variant">서비스율</span>
+                      <strong className="font-data text-xs">
+                        {scenario.serviceRatePct.toFixed(1)}%
+                      </strong>
+                      <div className="min-w-0 flex-1">
+                        <SignalBar
+                          value={scenario.serviceRatePct}
+                          tone={
+                            recommended
+                              ? "success"
+                              : scenario.constraintPassed
+                                ? "primary"
+                                : "danger"
+                          }
+                        />
                       </div>
-                      <SignalBar
-                        value={scenario.serviceRatePct}
-                        tone={
-                          recommended ? "success" : scenario.constraintPassed ? "primary" : "danger"
-                        }
-                      />
                     </div>
                     <dl className="mt-1.5 grid grid-cols-4 gap-xs text-[11px]">
                       <div className="rounded-lg bg-surface-container-low px-2 py-1">
