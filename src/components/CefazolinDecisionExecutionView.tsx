@@ -1450,61 +1450,24 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const holdReady = reviewer.trim().length > 0 && reviewNote.trim().length > 0;
   const workflow = getCefazolinWorkflowRunState({ hitlStatus, executionStatus, lastUpdatedAt });
   const activeStep = Math.max(1, workflow.currentStep);
+  const approvalLocked = hitlStatus === "approved";
+  const completedWorkflowStepCount =
+    executionStatus === "executed" ? cefazolinWorkflowSteps.length : workflow.completedSteps.length;
 
   const executionRows = cefazolinVirtualExecutionActions.map((action) => ({
     ...action,
     system: actionSystem(action.actionType),
   }));
-
-  const consolidatedExecutionRows: Array<{
-    system: string;
-    task: string;
-    quantity: string;
-    rationale: string;
-  }> = isTamivir
-    ? [
-        {
-          system: "ERP",
-          task: "수도권·영남권 신규 발주 보류",
-          quantity: "800,000 EA 대상",
-          rationale: "전국 재고 비율 14.1배와 Dead Stock 1,189,992 EA 기준",
-        },
-        {
-          system: "MES",
-          task: "수도권·영남권 핀셋 생산 감축",
-          quantity: "535,207 EA 감축",
-          rationale: "적용 후 예상 재고 745,570 EA · 비용 18~22% 절감",
-        },
-        {
-          system: "WMS",
-          task: "잉여재고 중앙 CDC 이송 준비",
-          quantity: "800,000 EA",
-          rationale: "수도권·영남권 창고 포화 해소와 장기체화 재고 분리 보관",
-        },
-      ]
-    : [
-    {
-      system: "ERP",
-      task: "공급사 S2, S3 원료 추가 발주",
-      quantity: "414,079 API 환산",
-      rationale: "2026-06-02 ~ 2026-11-24 긴급 원료 입고 24회 계획 (414,079 API)",
-    },
-    {
-      system: "MES",
-      task: "추가 원료 기준 생산계획 재산정",
-      quantity: "계획 재산정",
-      rationale: "전국 MES 가동률 87.0% 유지 및 추가 원료 투입 생산재산정",
-    },
-    {
-      system: "WMS",
-      task: "과잉권역 2개 (호남, 부산/울산/경남권) → 부족권역 3개 (서울, 수도권, 대구/경북권) 재배분",
-      quantity: "11,287 VIAL 환산",
-      rationale: "전국 권역 최소 안전재고율 100% 이상 확보 및 권역 간 재고 불균형 해소 (11,287 VIAL)",
-    },
-      ];
+  const affectedRegionImprovementRows = (isTamivir ? excessRegions : shortageRegions).map(
+    (region) => ({
+      id: region.id,
+      name: region.region.split("_").slice(1).join("_"),
+      currentValue: region.stock_ratio,
+    }),
+  );
 
   const approve = () => {
-    if (!approvalReady) return;
+    if (approvalLocked || !approvalReady) return;
     const now = new Date().toISOString();
     setHitlStatus("approved");
     setExecutionStatus("ready");
@@ -1513,7 +1476,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   };
 
   const hold = () => {
-    if (!holdReady) return;
+    if (approvalLocked || !holdReady) return;
     const now = new Date().toISOString();
     setHitlStatus("held");
     setExecutionStatus("locked");
@@ -1522,9 +1485,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
   const execute = () => {
     if (hitlStatus !== "approved" || executionStatus !== "ready") return;
-    const now = new Date().toISOString();
     setExecutionStatus("executed");
-    setLastUpdatedAt(now);
+    setLastUpdatedAt(cefazolinWorkflowRunMeta.latestSnapshotDate);
   };
 
   return (
@@ -1574,7 +1536,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         >
           <Icon name="account_tree" className="text-[18px] text-scm-primary" />
           10단계 상세
-          <Pill tone="primary">{workflow.completedSteps.length}/10</Pill>
+          <Pill tone="primary">{completedWorkflowStepCount}/10</Pill>
         </button>
       </div>
 
@@ -2072,19 +2034,21 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {consolidatedExecutionRows.map((row) => (
-                    <tr key={row.system} className="border-t border-outline-variant/40">
+                  {executionRows.map((row) => (
+                    <tr key={row.id} className="border-t border-outline-variant/40">
                       <td className="px-sm py-0.5">
                         <Pill tone="primary">{row.system}</Pill>
                       </td>
                       <td className="px-sm py-0.5 text-[11px] font-bold leading-tight">
-                        {row.task}
+                        {row.title}
                       </td>
                       <td className="px-sm py-0.5 text-right font-data font-bold">
-                        {row.quantity}
+                        {row.quantity == null
+                          ? "계획 재산정"
+                          : `${fmt(row.quantity)} ${row.unit}`}
                       </td>
                       <td className="px-sm py-0.5 text-[10px] leading-tight text-on-surface-variant">
-                        {row.rationale}
+                        {row.basis}
                       </td>
                     </tr>
                   ))}
@@ -2133,11 +2097,12 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 {approvalChecklistItems.map((item) => (
                   <label
                     key={item.key}
-                    className="flex cursor-pointer items-start gap-sm rounded-xl border border-outline-variant p-sm hover:border-scm-primary/40"
+                    className={`flex items-start gap-sm rounded-xl border border-outline-variant p-sm ${approvalLocked ? "cursor-default bg-surface-container-low/40" : "cursor-pointer hover:border-scm-primary/40"}`}
                   >
                     <input
                       type="checkbox"
                       checked={checklist[item.key]}
+                      disabled={approvalLocked}
                       onChange={(event) =>
                         setChecklist((current) => ({
                           ...current,
@@ -2174,6 +2139,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </span>
                   <input
                     value={reviewer}
+                    disabled={approvalLocked}
                     onChange={(event) => setReviewer(event.target.value)}
                     placeholder="성명 입력"
                     className="w-full rounded-xl border border-outline-variant bg-white px-3 py-2 text-sm outline-none focus:border-scm-primary"
@@ -2185,6 +2151,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </span>
                   <select
                     value={reviewerRole}
+                    disabled={approvalLocked}
                     onChange={(event) => setReviewerRole(event.target.value)}
                     className="w-full rounded-xl border border-outline-variant bg-white px-3 py-2 text-sm outline-none focus:border-scm-primary"
                   >
@@ -2200,6 +2167,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </span>
                   <textarea
                     value={reviewNote}
+                    disabled={approvalLocked}
                     onChange={(event) => setReviewNote(event.target.value)}
                     rows={4}
                     placeholder="조건·예외사항 입력"
@@ -2210,7 +2178,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   <button
                     type="button"
                     onClick={hold}
-                    disabled={!holdReady}
+                    disabled={approvalLocked || !holdReady}
                     className="flex-1 rounded-xl border border-[#ffd591] bg-[#fff7e6] px-sm py-2.5 text-xs font-bold text-[#ad6800] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     보완 요청
@@ -2218,7 +2186,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   <button
                     type="button"
                     onClick={approve}
-                    disabled={!approvalReady}
+                    disabled={approvalLocked || !approvalReady}
                     className="flex-1 rounded-xl bg-scm-primary px-sm py-2.5 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     최종 승인
@@ -2418,44 +2386,53 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             </div>
           </Section>
 
-          <Section title="계획 대비 효과" subtitle="S1 기준 대비 추천 시나리오의 계획 KPI">
-            <div className="grid grid-cols-4 gap-sm">
-              <div className="rounded-xl border border-outline-variant p-md">
-                <p className="text-[10px] font-bold text-on-surface-variant">{isTamivir ? "재고 정상화율" : "서비스율 변화"}</p>
-                <p className="mt-2 font-data text-xl font-bold text-green-700">
+          {executionStatus === "executed" ? (
+            <Section
+              title="영향권역 개선"
+              subtitle={
+                isTamivir
+                  ? `현재 과잉권역 ${affectedRegionImprovementRows.length}개 · ${recommendedScenario.displayId} 적용 후 예상 재고 ${fmt(recommendedScenario.projectedInventory)} EA`
+                  : `현재 부족권역 ${affectedRegionImprovementRows.length}개 · ${recommendedScenario.displayId} 최소 권역 서비스율 ${recommendedScenario.minimumRegionalServiceRatePct.toFixed(1)}%`
+              }
+            >
+              <div className="grid grid-cols-3 gap-sm">
+                {affectedRegionImprovementRows.map((region) => (
+                  <div
+                    key={region.id}
+                    className="rounded-xl border border-outline-variant bg-white p-sm"
+                  >
+                    <div className="flex items-center justify-between gap-sm">
+                      <span className="text-xs font-bold text-on-surface">{region.name}</span>
+                      <Pill tone="danger">{isTamivir ? "현재 과잉" : "현재 부족"}</Pill>
+                    </div>
+                    <div className="mt-sm flex items-stretch gap-xs">
+                      <div className="min-w-0 flex-1 rounded-lg bg-error-container/20 px-sm py-xs">
+                        <p className="text-[9px] text-on-surface-variant">{isTamivir ? "현재 재고 비율" : "현재 목표재고 충족률"}</p>
+                        <p className="mt-1 font-data text-lg font-bold text-error">
+                          {region.currentValue.toFixed(1)}{isTamivir ? "배" : "%"}
+                        </p>
+                      </div>
+                      <span className="flex items-center justify-center text-scm-primary">
+                        <Icon name="arrow_forward" className="text-[18px]" />
+                      </span>
+                      <div className="min-w-0 flex-1 rounded-lg bg-green-50 px-sm py-xs">
+                        <p className="text-[9px] text-green-700">{recommendedScenario.displayId} 계획 판정</p>
+                        <p className="mt-1 text-sm font-bold text-green-700">{isTamivir ? "재고 정상화 진행" : "서비스 정상화"}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-sm flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface-container-low px-sm py-xs text-[10px] text-on-surface-variant">
+                <span>
                   {isTamivir
-                    ? `${baselineScenario.serviceRatePct.toFixed(1)}% → ${recommendedScenario.serviceRatePct.toFixed(1)}%`
-                    : `+${(cefazolinWorkflowEffect.serviceRateAfter - cefazolinWorkflowEffect.serviceRateBefore).toFixed(1)}%p`}
-                </p>
+                    ? `근거 · 예상 재고 ${fmt(recommendedScenario.projectedInventory)} EA · 잔여 과잉 ${fmt(recommendedScenario.excessInventory)} EA · 비용 ${recommendedScenario.costEffect}`
+                    : `근거 · 최저 권역 서비스율 ${recommendedScenario.minimumRegionalServiceRatePct.toFixed(1)}% · 미충족 ${fmt(recommendedScenario.totalUnmetDemand)} ${finishedUnit} · 부족기간 ${recommendedScenario.shortageWeeks}주`}
+                </span>
+                <span>※ 사후 권역별 재고 수치는 원천 데이터 미제공으로 임의 산출하지 않음</span>
               </div>
-              <div className="rounded-xl border border-outline-variant p-md">
-                <p className="text-[10px] font-bold text-on-surface-variant">{isTamivir ? "과잉재고 감소" : "미충족 수요 변화"}</p>
-                <p className="mt-2 font-data text-xl font-bold text-green-700">
-                  -
-                  {fmt(
-                    isTamivir
-                      ? baselineScenario.excessInventory - recommendedScenario.excessInventory
-                      : cefazolinWorkflowEffect.unmetDemandBefore - cefazolinWorkflowEffect.unmetDemandAfter,
-                  )}{" "}
-                  {finishedUnit}
-                </p>
-              </div>
-              <div className="rounded-xl border border-outline-variant p-md">
-                <p className="text-[10px] font-bold text-on-surface-variant">{isTamivir ? "실행 가능성" : "최저 권역 서비스율"}</p>
-                <p className="mt-2 font-data text-xl font-bold">
-                  {isTamivir ? recommendedScenario.feasibilityPct.toFixed(1) : cefazolinWorkflowEffect.minimumRegionalServiceRateAfter.toFixed(1)}%
-                </p>
-              </div>
-              <div className="rounded-xl border border-outline-variant p-md">
-                <p className="text-[10px] font-bold text-on-surface-variant">최근 전송 시각</p>
-                <p className="mt-2 font-data text-sm font-bold">
-                  {executionStatus === "executed"
-                    ? new Date(lastUpdatedAt).toLocaleString("ko-KR")
-                    : "-"}
-                </p>
-              </div>
-            </div>
-          </Section>
+            </Section>
+          ) : null}
         </div>
       ) : null}
 
@@ -2486,7 +2463,10 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             </header>
             <div className="space-y-xs p-md">
               {cefazolinWorkflowSteps.map((step) => {
-                const status = workflow.stepStatuses[step.order];
+                const status =
+                  step.order === 10 && executionStatus === "executed"
+                    ? "verified"
+                    : workflow.stepStatuses[step.order];
                 const label =
                   status === "verified"
                     ? "완료"
