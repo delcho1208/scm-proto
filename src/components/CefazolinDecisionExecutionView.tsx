@@ -1715,8 +1715,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       ) : null}
 
       {tab === "approval" ? (
-        <div className="grid auto-rows-fr grid-cols-12 items-stretch gap-md">
-          <div className="col-span-7 flex min-h-0 self-stretch flex-col gap-md">
+        <div className="grid grid-cols-12 gap-md">
+          <div className="col-span-7 space-y-md">
             <Section
               title="승인 대상"
               action={<Pill tone="success">{recommendedScenario.displayId}</Pill>}
@@ -1747,11 +1747,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               </div>
             </Section>
 
-            <Section
-              title="승인 조건"
-              subtitle="추천안 실행 전 필수 확인 항목"
-              className="flex-1"
-            >
+            <Section title="승인 조건" subtitle="추천안 실행 전 필수 확인 항목">
               <div className="space-y-xs">
                 {approvalChecklistItems.map((item) => (
                   <label
@@ -1788,8 +1784,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             </Section>
           </div>
 
-          <div className="col-span-5 flex min-h-0 self-stretch flex-col gap-md">
-            <Section title="승인 기록" className="flex-1">
+          <div className="col-span-5 space-y-md">
+            <Section title="승인 기록">
               <div className="space-y-sm">
                 <label className="block">
                   <span className="mb-1 block text-[10px] font-bold text-on-surface-variant">
