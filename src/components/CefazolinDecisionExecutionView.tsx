@@ -1464,6 +1464,37 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       currentValue: region.stock_ratio,
     }),
   );
+  const responseExecutionRows = isTamivir
+    ? executionRows
+    : (() => {
+        const procurementRows = executionRows.filter((row) => row.system === "ERP");
+        const productionRow = executionRows.find((row) => row.system === "MES");
+        const transferRows = executionRows.filter((row) => row.system === "WMS");
+        const rows: any[] = [];
+
+        if (procurementRows.length > 0) {
+          rows.push({
+            id: "CEFA-ERP-CONSOLIDATED",
+            system: "ERP",
+            title: `공급사 ${procurementRows.map((row) => row.source.replace("공급사 ", "")).join(", ")} 원료 추가 발주`,
+            quantity: recommendedScenario.emergencyProcurementQuantity,
+            unit: "API 환산단위",
+            basis: procurementRows.map((row) => row.basis).join(" · "),
+          });
+        }
+        if (productionRow) rows.push(productionRow);
+        if (transferRows.length > 0) {
+          rows.push({
+            id: "CEFA-WMS-CONSOLIDATED",
+            system: "WMS",
+            title: `과잉 권역 ${transferRows.length}개 재고를 부족 권역 ${shortageRegions.length}개로 재배분`,
+            quantity: transferRows.reduce((sum, row) => sum + (row.quantity ?? 0), 0),
+            unit: "완제품 환산단위",
+            basis: `${transferRows.map((row) => row.source).join(" · ")} 출고 · 권역 최소 목표재고 확보`,
+          });
+        }
+        return rows;
+      })();
 
   const approve = () => {
     if (approvalLocked || !approvalReady) return;
@@ -2035,7 +2066,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {executionRows.map((row) => (
+                  {responseExecutionRows.map((row) => (
                     <tr key={row.id} className="border-t border-outline-variant/40">
                       <td className="px-sm py-0.5">
                         <Pill tone="primary">{row.system}</Pill>
