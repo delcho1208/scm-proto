@@ -1381,7 +1381,6 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const tamivirSevereRegionCount = tamivirIntegrationRegions.filter(
     (region) => region.stock_ratio >= 10,
   ).length;
-
   const propagationStages = [
     {
       label: isTamivir ? "수요 급감" : "공급 이행 저하",
@@ -1725,7 +1724,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     <i className="h-2 w-2 rounded-sm bg-error" /> {isTamivir ? "부족 (<1.0배)" : "부족 (<100%)"}
                   </span>
                   <span className="flex items-center gap-1">
-                    <i className="h-2 w-2 rounded-sm bg-green-500" /> {isTamivir ? "적정 (1.0~3.0배)" : "적정"}
+                    <i className="h-2 w-2 rounded-sm bg-green-500" /> {isTamivir ? "적정 (1.0~3.0배)" : "적정 (100~120%)"}
                   </span>
                   <span className="flex items-center gap-1">
                     <i className="h-2 w-2 rounded-sm bg-[#eab308]" />
@@ -1736,10 +1735,16 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         심각한 과잉 (10.0배 이상)
                       </>
                     ) : (
-                      "과잉"
+                      <>
+                        과잉 (&gt;120~170%)
+                        <i className="ml-1 h-2 w-2 rounded-full bg-[#f97316]" />
+                        심각한 과잉 (&gt;170%)
+                      </>
                     )}
                   </span>
-                  <span className="ml-auto">🔴 {isTamivir ? `심각한 과잉 권역 ${tamivirSevereRegionCount}개` : `위험 권역 ${shortageRegions.length}개`}</span>
+                  <span className="ml-auto">
+                    🔴 {isTamivir ? `심각한 과잉 권역 ${tamivirSevereRegionCount}개` : `위험 권역 ${shortageRegions.length}개`}
+                  </span>
                 </div>
                 <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
                     <BarChart
