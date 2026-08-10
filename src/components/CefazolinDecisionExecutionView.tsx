@@ -1120,6 +1120,24 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     system: actionSystem(action.actionType),
   }));
 
+  const consolidatedExecutionRows: Array<{ system: string; task: string; quantity: string }> = [
+    {
+      system: "ERP",
+      task: "공급사 S2, S3 원료 추가 발주",
+      quantity: `${fmt(recommendedScenario.emergencyProcurementQuantity)} API 환산`,
+    },
+    {
+      system: "MES",
+      task: "추가 원료 기준 생산계획 재산정",
+      quantity: "계획 재산정",
+    },
+    {
+      system: "WMS",
+      task: `과잉권역 ${excessRegions.length}개 재고를 부족권역 ${shortageRegions.length}개로 재배분`,
+      quantity: `${fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL 환산`,
+    },
+  ];
+
   const approve = () => {
     if (!approvalReady) return;
     const now = new Date().toISOString();
