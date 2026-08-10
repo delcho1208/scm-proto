@@ -1652,24 +1652,25 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               <div className="rounded-xl border border-outline-variant px-2 py-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-on-surface-variant">
-                    제약·주의사항
+                    주요 선행조건
                   </span>
                   <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">
                     주의
                   </span>
                 </div>
                 <ul className="mt-1 space-y-0.5 text-[10px] leading-4 text-on-surface">
-                  {(
-                    recommendedEvaluation?.xai.constraints ?? [
-                      "S1 대비 조달비 증가",
-                      "공급사 입고 일정과 품질 승인 완료를 전제로 한 시뮬레이션 결과",
-                    ]
-                  ).map((constraint) => (
-                    <li key={constraint} className="flex gap-1">
-                      <span className="text-red-600">•</span>
-                      <span>{constraint}</span>
-                    </li>
-                  ))}
+                  <li className="flex gap-1">
+                    <span className="text-red-600">•</span>
+                    <span>공급사 입고 일정 확보</span>
+                  </li>
+                  <li className="flex gap-1">
+                    <span className="text-red-600">•</span>
+                    <span>입고 원료 품질검사 및 생산투입 승인</span>
+                  </li>
+                  <li className="flex gap-1">
+                    <span className="text-red-600">※</span>
+                    <span>상기 조건 충족을 전제로 한 시뮬레이션 결과</span>
+                  </li>
                 </ul>
               </div>
             </div>
