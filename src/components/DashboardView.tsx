@@ -283,11 +283,7 @@ function StandardDashboardView({ product }: { product: Product }) {
               : (tamivirForecastRegion?.forecast ?? 0),
           ).toLocaleString("ko-KR")
         : product.annualDemand;
-  const forecastYoy = lipilouGraphRegion
-    ? `${lipilouGraphRegion.yoy_pct >= 0 ? "+" : ""}${lipilouGraphRegion.yoy_pct}% YoY`
-    : tamivirForecastRegion
-      ? `${tamivirForecastRegion.yoy >= 0 ? "+" : ""}${tamivirForecastRegion.yoy.toFixed(1)}% YoY`
-      : product.yoyGrowth;
+  const forecastYoy = "기준수요 8~10월 · 향후예측 11~1월";
   const isCurrentTimeline = timelineKey === "PRES";
   const lipilouMonthlyForecast =
     product.key === "리피로우" ? lipilouMonthlyForecastByTimelineKey[timelineKey] : undefined;
@@ -624,9 +620,9 @@ function StandardDashboardView({ product }: { product: Product }) {
                 </span>
                 <span className="mb-1 text-on-surface-variant">BOX</span>
               </div>
-              <div className="mt-2 flex items-center gap-xs font-bold text-scm-primary">
-                <Icon name="trending_up" className="text-[16px]" />
-                <span className="text-sm">{forecastYoy}</span>
+              <div className="mt-2 flex items-center gap-xs font-medium text-on-surface-variant/80">
+                <Icon name="history" className="text-[14px]" />
+                <span className="text-[11px] leading-tight">{forecastYoy}</span>
               </div>
             </div>
             <div className="mt-sm flex h-[170px] shrink-0 flex-col justify-between rounded-xl border border-outline-variant/30 bg-surface-container-low p-sm">
