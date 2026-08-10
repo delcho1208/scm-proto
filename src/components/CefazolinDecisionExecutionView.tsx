@@ -1715,8 +1715,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       ) : null}
 
       {tab === "approval" ? (
-        <div className="grid grid-cols-12 gap-md">
-          <div className="col-span-7 space-y-md">
+        <div className="grid auto-rows-fr grid-cols-12 items-stretch gap-md">
+          <div className="col-span-7 flex min-h-0 self-stretch flex-col gap-md">
             <Section
               title="승인 대상"
               action={<Pill tone="success">{recommendedScenario.displayId}</Pill>}
@@ -1747,7 +1747,11 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               </div>
             </Section>
 
-            <Section title="승인 조건" subtitle="추천안 실행 전 필수 확인 항목">
+            <Section
+              title="승인 조건"
+              subtitle="추천안 실행 전 필수 확인 항목"
+              className="flex-1"
+            >
               <div className="space-y-xs">
                 {approvalChecklistItems.map((item) => (
                   <label
@@ -1784,8 +1788,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             </Section>
           </div>
 
-          <div className="col-span-5 space-y-md">
-            <Section title="승인 기록">
+          <div className="col-span-5 flex min-h-0 self-stretch flex-col gap-md">
+            <Section title="승인 기록" className="flex-1">
               <div className="space-y-sm">
                 <label className="block">
                   <span className="mb-1 block text-[10px] font-bold text-on-surface-variant">
@@ -1843,16 +1847,32 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     최종 승인
                   </button>
                 </div>
-                {!approvalReady ? (
-                  <p className="text-[10px] text-on-surface-variant">
-                    최종 승인: 승인자 입력과 필수 검토 4건 완료가 필요합니다.
+                <div className="h-9 space-y-1" aria-live="polite">
+                  <p
+                    className={`text-[10px] font-medium ${
+                      approvalReady ? "text-green-700" : "text-red-600"
+                    }`}
+                  >
+                    <span className="mr-1" aria-hidden="true">
+                      {approvalReady ? "✓" : "*"}
+                    </span>
+                    {approvalReady
+                      ? "최종 승인: 승인 조건이 모두 충족되었습니다."
+                      : "최종 승인: 승인자 입력과 필수 검토 4건 완료가 필요합니다."}
                   </p>
-                ) : null}
-                {!holdReady ? (
-                  <p className="text-[10px] text-on-surface-variant">
-                    보완 요청: 승인자와 검토 의견을 입력해야 합니다.
+                  <p
+                    className={`text-[10px] font-medium ${
+                      holdReady ? "text-green-700" : "text-red-600"
+                    }`}
+                  >
+                    <span className="mr-1" aria-hidden="true">
+                      {holdReady ? "✓" : "*"}
+                    </span>
+                    {holdReady
+                      ? "보완 요청: 승인자와 검토 의견이 입력되었습니다."
+                      : "보완 요청: 승인자와 검토 의견을 입력해야 합니다."}
                   </p>
-                ) : null}
+                </div>
               </div>
             </Section>
             <Section title="추적 정보">
