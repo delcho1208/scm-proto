@@ -71,6 +71,7 @@ function getSimulationStockMeta(productKey: string, regionId: string): { ratio: 
   const upperNormal = 120;
   if (ratio < 100) return { ratio, valueLabel: `${ratio}%`, status: "danger", label: "부족", description: "안전재고 미달", critical: false };
   if (ratio <= upperNormal) return { ratio, valueLabel: `${ratio}%`, status: "safe", label: "적정", description: "정상 운영", critical: false };
+  if (ratio > 170) return { ratio, valueLabel: `${ratio}%`, status: "critical", label: "심각한 과잉", description: "재고 감축 Trigger 발생", critical: true };
   return { ratio, valueLabel: `${ratio}%`, status: "warning", label: "과잉", description: "재고 과다", critical: false };
 }
 
@@ -221,7 +222,8 @@ function DataIntegrationView({ product }: { product: Product }) {
                 </> : <>
                   <span className="danger"><i /> 부족 (&lt;100%)</span>
                   <span className="safe"><i /> 적정 (100~120%)</span>
-                  <span className="warning"><i /> 과잉 (&gt;120%{product.key === "리피로우" ? "~170%" : ""})</span>
+                  <span className="warning"><i /> 과잉 (&gt;120~170%)</span>
+                  <span className="critical"><i /> 심각한 과잉 (&gt;170%)</span>
                 </>}
               </div>
             </div>
