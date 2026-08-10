@@ -6,7 +6,6 @@ import {
   Cell,
   LabelList,
   ReferenceLine,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -1147,7 +1146,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
   return (
     <div
-      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-screen max-h-screen min-h-0 overflow-hidden pb-12" : "pb-16"}`}
+      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-[880px] min-h-[880px] max-h-[880px] overflow-hidden pb-12" : "pb-16"}`}
     >
       <div
         className={`flex items-end justify-between gap-lg ${tab === "impact" ? "shrink-0 py-1" : "py-lg"}`}
@@ -1220,7 +1219,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
 
       {tab === "impact" ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-sm overflow-hidden">
+        <div className="flex h-[664px] min-h-[664px] max-h-[664px] flex-none flex-col gap-sm overflow-hidden">
           <Section
             title="Case 탐지 요약"
             subtitle="직접 공급 신호와 수급 위험 신호를 결합해 의사결정 Case로 전환"
@@ -1394,11 +1393,12 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </span>
                   <span className="ml-auto">🔴 위험 권역 {shortageRegions.length}개</span>
                 </div>
-                <div className="min-h-0 flex-1">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
                     <BarChart
+                      width={760}
+                      height={236}
                       data={regionChartData}
-                      margin={{ top: 14, right: 8, left: -18, bottom: 0 }}
+                      margin={{ top: 10, right: 8, left: -18, bottom: 12 }}
                       barCategoryGap="22%"
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
@@ -1411,7 +1411,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                       />
                       <YAxis
                         tick={{ fontSize: 9 }}
-                        domain={[0, 140]}
+                        domain={[0, 150]}
+                        ticks={[0, 50, 100, 150]}
                         axisLine={false}
                         tickLine={false}
                         unit="%"
@@ -1437,7 +1438,6 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         ))}
                       </Bar>
                     </BarChart>
-                  </ResponsiveContainer>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {regionChartData

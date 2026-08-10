@@ -51,6 +51,18 @@ export function getLipilouGraphRegion(regionId: string): LipilouGraphRegion | nu
   return graphRegionKey ? (regionByKey.get(graphRegionKey) ?? null) : null;
 }
 
+export function getLipilouHistoricalTrendFactor(
+  regionId: string,
+  timelineKey: "26M08" | "26M09",
+): number {
+  const region = getLipilouGraphRegion(regionId);
+  if (!region) return 1;
+  const actualTrend = region.monthly_trend.slice(0, 3).map((point) => point.value_box);
+  const octoberValue = actualTrend[2] ?? actualTrend.at(-1) ?? 1;
+  const historicalValue = actualTrend[timelineKey === "26M08" ? 0 : 1] ?? octoberValue;
+  return octoberValue > 0 ? historicalValue / octoberValue : 1;
+}
+
 function toPath(points: GraphPoint[]) {
   return points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x},${point.y}`).join(" ");
 }

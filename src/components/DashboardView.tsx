@@ -12,7 +12,11 @@ import {
 import { cefazolinDashboard } from "@/data/cefazolin-dashboard";
 import { cefazolinWorkflowSteps } from "@/data/cefazolin-ai-workflow";
 import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
-import { createLipilouGraph, getLipilouGraphRegion } from "@/data/lipilou-graph";
+import {
+  createLipilouGraph,
+  getLipilouGraphRegion,
+  getLipilouHistoricalTrendFactor,
+} from "@/data/lipilou-graph";
 import { timelineData, timelineKeys, type TimelineKey } from "@/data/timeline";
 import { Icon } from "@/components/ScmShell";
 import { CefazolinDashboardView } from "@/components/CefazolinDashboardView";
@@ -344,11 +348,34 @@ function StandardDashboardView({ product }: { product: Product }) {
       : [];
   });
   const getScenarioRegion = (id: string) => {
-    const baseRegion = isCurrentTimeline
+    let baseRegion = isCurrentTimeline
       ? scenario?.regions[id]
       : (timelineProjectedRegions?.[id] ??
         lipilouMonthlyForecast?.regions[id] ??
         tamivirMonthlyForecast?.regions[id]);
+    if (
+      product.key === "리피로우" &&
+      (timelineKey === "26M08" || timelineKey === "26M09") &&
+      scenario?.regions[id]
+    ) {
+      const currentRegion = scenario.regions[id];
+      const trendFactor = getLipilouHistoricalTrendFactor(id, timelineKey);
+      const currentStock = Math.round(currentRegion.current_stock * trendFactor);
+      const stockRatio = currentRegion.target_stock > 0
+        ? (currentStock / currentRegion.target_stock) * 100
+        : 0;
+      const riskLevel: RiskLevel =
+        stockRatio < 100 ? "danger" : stockRatio > 120 ? "warning" : "safe";
+      baseRegion = {
+        ...currentRegion,
+        current_stock: currentStock,
+        stock_ratio: Math.round(stockRatio * 10) / 10,
+        stockRatioLabel: `${stockRatio.toFixed(1)}%`,
+        status: riskLevel === "danger" ? "부족" : riskLevel === "warning" ? "과잉" : "적정",
+        riskLevel,
+        riskText: riskLevel === "danger" ? "부족" : riskLevel === "warning" ? "과잉" : "적정",
+      };
+    }
     if (!baseRegion || !isRecommendationApplied) return baseRegion;
     const exactProjectedRegion =
       timelineProjectedRegions?.[id] ?? appliedProjectedRecommendation?.projectedRegions?.[id];
@@ -434,14 +461,21 @@ function StandardDashboardView({ product }: { product: Product }) {
   const forecastRiskText =
     forecastRiskLevel === "danger" ? "부족" : forecastRiskLevel === "warning" ? "과잉" : "적정";
 
+  const lipilouHistoricalTotal =
+    product.key === "리피로우" && (timelineKey === "26M08" || timelineKey === "26M09")
+      ? Math.round(
+          (scenario?.totalInventory ?? 0) *
+            getLipilouHistoricalTrendFactor("National", timelineKey),
+        )
+      : undefined;
   const displayedTotalInventory = appliedProjectedRecommendation
     ? (timelineProjectedTotalInventory ?? appliedProjectedRecommendation.projectedTotalInventory!)
     : appliedCefazolinScenario
       ? Math.max(0, (cefazolinDashboard.totalInventory ?? 0) + cefazolinScenarioInventoryDelta)
-      : ((isCurrentTimeline
+      : (lipilouHistoricalTotal ?? ((isCurrentTimeline
           ? scenario?.totalInventory
           : (lipilouMonthlyForecast?.totalInventory ?? tamivirMonthlyForecast?.totalInventory)) ??
-        timeline.totalInventory);
+        timeline.totalInventory));
   const displayedUtilization =
     (isCurrentTimeline ? scenario?.utilization : undefined) ?? timeline.utilization;
   const panelInventory =
