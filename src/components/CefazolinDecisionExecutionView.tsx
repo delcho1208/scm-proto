@@ -1164,11 +1164,9 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
   return (
     <div
-      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" || tab === "response" ? "h-[912px] min-h-[912px] max-h-[912px] overflow-hidden pb-12" : "pb-16"}`}
+      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-[912px] min-h-[912px] max-h-[912px] overflow-hidden pb-12" : tab === "response" ? "h-[992px] min-h-[992px] max-h-[992px] overflow-hidden pb-12" : "pb-16"}`}
     >
-      <div
-        className={`flex items-end justify-between gap-lg ${tab === "response" ? "py-1" : "py-lg"}`}
-      >
+      <div className="flex items-end justify-between gap-lg py-lg">
 
         <div>
           <div className="mb-xs flex items-center gap-2">
@@ -1195,17 +1193,13 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               SANDBOX · SYNTHETIC DATA
             </span>
           </div>
-          <h2
-            className={`font-display text-on-surface ${tab === "response" ? "text-[22px] font-bold" : "text-headline-md"}`}
-          >
+          <h2 className="font-display text-headline-md text-on-surface">
             세파졸린 의사결정 실행
           </h2>
-          {tab === "response" ? null : (
-            <p className="mt-xs text-sm text-on-surface-variant">
-              수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
-              {cefazolinWorkflowRunMeta.latestSnapshotDate}
-            </p>
-          )}
+          <p className="mt-xs text-sm text-on-surface-variant">
+            수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
+            {cefazolinWorkflowRunMeta.latestSnapshotDate}
+          </p>
 
         </div>
         <button
