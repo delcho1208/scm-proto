@@ -98,7 +98,7 @@ function simulationScenarioTitle(productKey: Product["key"], index: number, fall
   if (/^S\d+\s/.test(fallback)) return fallback;
   const titles: Partial<Record<Product["key"], string[]>> = {
     리피로우: ["재고 이관", "타 생산라인 물량 추가"],
-    타미비어: ["신규 발주 보류", "잉여재고 CDC 이송"],
+    타미비어: ["현행유지", "핀셋 감축", "CDC 이송"],
   };
   return `S${index + 1} ${titles[productKey]?.[index] ?? fallback}`;
 }

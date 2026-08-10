@@ -496,40 +496,66 @@ export const tamivirDashboard: ProductDashboardScenario = {
     value: `현재 ${tamivirLatest.summary.current_stock.toLocaleString()}EA · AI 목표 ${tamivirLatest.summary.ai_target.toLocaleString()}EA`,
     detail: demandXai?.description ?? `전국 재고가 AI 목표의 ${tamivirLatest.summary.ratio.toFixed(1)}배로 예측되었습니다.`,
   },
-  recommendations: tamivirLatest.ai_solutions.map((recommendation) => ({
-    id: `TAMIVIR-${recommendation.id}`,
-    title: recommendation.title.replace(/^[①②③④⑤]\s*/, ""),
-    description: `${recommendation.description}${recommendation.supplyImpact ? ` · 공급 영향: ${recommendation.supplyImpact}` : ""}`,
-    transferAmount: recommendation.transferAmount,
-    costReduction: recommendation.costReduction,
-    feasibility: recommendation.feasibility,
-    executionPeriod: recommendation.executionPeriod,
-    supplyImpact: recommendation.supplyImpact,
-    xai: {
-      summary: recommendation.xai.summary,
-      evidence: recommendation.xai.reason,
-      limitation: recommendation.xai.constraint,
+  recommendations: [
+    {
+      id: "TAMIVIR-S1-STATUS-QUO",
+      title: "현행 발주·생산계획 유지",
+      description: `추가 조치 없이 현재 재고 ${tamivirLatest.summary.current_stock.toLocaleString()}EA와 기존 생산계획을 유지합니다.`,
+      transferAmount: 0,
+      costReduction: "절감 없음",
+      feasibility: 100,
+      executionPeriod: "현행 유지",
+      supplyImpact: `과잉재고 ${tamivirLatest.summary.dead_stock_quantity.toLocaleString()}EA 지속`,
+      xai: {
+        summary: "비교 기준 시나리오로, 수요 급감에도 발주·생산계획을 변경하지 않습니다.",
+        evidence: [
+          `현재 재고 ${tamivirLatest.summary.current_stock.toLocaleString()}EA`,
+          `AI 목표 ${tamivirLatest.summary.ai_target.toLocaleString()}EA`,
+          `재고 비율 ${tamivirLatest.summary.ratio.toFixed(1)}배`,
+        ],
+        limitation: "과잉재고와 장기체화 위험이 해소되지 않습니다.",
+      },
+      projectedTotalInventory: tamivirLatest.summary.current_stock,
+      projectedStatus: tamivirLatest.summary.status,
+      affectedRegions: tamivirLatestRegions.map((region) => toRegionId(region.region)),
+      projectedRegions: normalizeRegions(tamivirLatestRegions),
+      approvalButtonText: "현행유지 비교",
     },
-    projectedTotalInventory: recommendation.after_apply.current_stock,
-    projectedStatus: recommendation.after_apply.status,
-    affectedRegions: recommendation.after_apply.map_monitoring.map((region) => toRegionId(region.region)),
-    projectedRegions: normalizeRegions(recommendation.after_apply.map_monitoring),
-    projectedTotalInventoryByTimelineKey: Object.fromEntries(
-      Object.entries(recommendation.after_apply.projectedTotalInventoryByMonth ?? {}).map(
-        ([month, value]) => [
-          ({ "2026.08": "26M08", "2026.09": "26M09", "2026.10": "PRES", "2026.11": "26M11", "2026.12": "26M12", "2027.01": "27M01" } as Record<string, string>)[month] ?? month,
-          value,
-        ],
+    ...tamivirLatest.ai_solutions.map((recommendation, index) => ({
+      id: index === 0 ? "TAMIVIR-S2-PINPOINT-REDUCTION" : "TAMIVIR-S3-CDC-TRANSFER",
+      title: index === 0 ? "신규 발주 보류·핀셋 감축" : "수도권·영남권 잉여재고 CDC 이송",
+      description: `${recommendation.description}${recommendation.supplyImpact ? ` · 공급 영향: ${recommendation.supplyImpact}` : ""}`,
+      transferAmount: recommendation.transferAmount,
+      costReduction: recommendation.costReduction,
+      feasibility: recommendation.feasibility,
+      executionPeriod: recommendation.executionPeriod,
+      supplyImpact: recommendation.supplyImpact,
+      xai: {
+        summary: recommendation.xai.summary,
+        evidence: recommendation.xai.reason,
+        limitation: recommendation.xai.constraint,
+      },
+      projectedTotalInventory: recommendation.after_apply.current_stock,
+      projectedStatus: recommendation.after_apply.status,
+      affectedRegions: recommendation.after_apply.map_monitoring.map((region) => toRegionId(region.region)),
+      projectedRegions: normalizeRegions(recommendation.after_apply.map_monitoring),
+      projectedTotalInventoryByTimelineKey: Object.fromEntries(
+        Object.entries(recommendation.after_apply.projectedTotalInventoryByMonth ?? {}).map(
+          ([month, value]) => [
+            ({ "2026.08": "26M08", "2026.09": "26M09", "2026.10": "PRES", "2026.11": "26M11", "2026.12": "26M12", "2027.01": "27M01" } as Record<string, string>)[month] ?? month,
+            value,
+          ],
+        ),
       ),
-    ),
-    projectedRegionsByTimelineKey: Object.fromEntries(
-      Object.entries(recommendation.after_apply.monthlyMapMonitoring ?? {}).map(
-        ([month, monthlyRegions]) => [
-          ({ "2026.08": "26M08", "2026.09": "26M09", "2026.10": "PRES", "2026.11": "26M11", "2026.12": "26M12", "2027.01": "27M01" } as Record<string, string>)[month] ?? month,
-          normalizeRegions(monthlyRegions),
-        ],
+      projectedRegionsByTimelineKey: Object.fromEntries(
+        Object.entries(recommendation.after_apply.monthlyMapMonitoring ?? {}).map(
+          ([month, monthlyRegions]) => [
+            ({ "2026.08": "26M08", "2026.09": "26M09", "2026.10": "PRES", "2026.11": "26M11", "2026.12": "26M12", "2027.01": "27M01" } as Record<string, string>)[month] ?? month,
+            normalizeRegions(monthlyRegions),
+          ],
+        ),
       ),
-    ),
-    approvalButtonText: recommendation.approval_action.initial_button_text,
-  })),
+      approvalButtonText: recommendation.approval_action.initial_button_text,
+    })),
+  ],
 };
