@@ -17,6 +17,7 @@ import {
   lipilouDashboard,
   tamivirAnnualF2aTarget,
   tamivirDashboard,
+  type DashboardRegion,
   type ProductDashboardScenario,
 } from "@/data/dashboard-scenario";
 import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
