@@ -1167,7 +1167,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" || tab === "response" ? "h-[912px] min-h-[912px] max-h-[912px] overflow-hidden pb-12" : "pb-16"}`}
     >
       <div
-        className="flex items-end justify-between gap-lg py-lg"
+        className={`flex items-end justify-between gap-lg ${tab === "response" ? "py-sm" : "py-lg"}`}
       >
 
         <div>
@@ -1461,7 +1461,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       ) : null}
 
       {tab === "response" ? (
-        <div className="flex h-[636px] min-h-[636px] max-h-[636px] flex-none flex-col gap-sm overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col gap-sm overflow-hidden">
           <div className="grid shrink-0 grid-cols-5 gap-sm">
             <Metric
               dense
