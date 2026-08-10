@@ -44,6 +44,18 @@ const riskStyles: Record<RiskLevel, { dot: string; badge: string; text: string; 
     },
   };
 
+const criticalRiskStyle = {
+  dot: "status-dot-critical",
+  badge: "bg-orange-50 border-orange-500/30",
+  text: "text-orange-700",
+  bullet: "bg-orange-500",
+};
+
+function isSevereExcess(productKey: Product["key"], ratio?: number) {
+  if (ratio == null) return false;
+  return productKey === "타미비어" && ratio >= 10;
+}
+
 type TransferRoute = {
   from: string;
   to: string;
@@ -449,7 +461,8 @@ function StandardDashboardView({ product }: { product: Product }) {
     scenarioRegion?.riskLevel ??
     timelineRegion?.status ??
     (regionId === "National" ? nationalRiskLevel : region.riskLevel);
-  const risk = riskStyles[regionRiskLevel];
+  const regionIsSevereExcess = isSevereExcess(product.key, scenarioRegion?.stock_ratio);
+  const risk = regionIsSevereExcess ? criticalRiskStyle : riskStyles[regionRiskLevel];
   const nationalRisk = riskStyles[nationalRiskLevel];
   const forecastRiskLevel: RiskLevel =
     product.key === "리피로우"
@@ -489,7 +502,9 @@ function StandardDashboardView({ product }: { product: Product }) {
     tamivirForecastRegion?.operationRate ??
     displayedUtilization;
   const riskText =
-    regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
+    regionIsSevereExcess
+      ? "심각한 과잉"
+      : regionRiskLevel === "danger" ? "부족" : regionRiskLevel === "warning" ? "과잉" : "적정";
   const nationalRiskText =
     nationalRiskLevel === "danger" ? "부족" : nationalRiskLevel === "warning" ? "과잉" : "적정";
   const regionDescription = scenarioRegion
@@ -557,11 +572,11 @@ function StandardDashboardView({ product }: { product: Product }) {
             xai: recommendation.xai,
           }))
         : [
-            { id: "fallback-1", t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
+            { id: "fallback-1", t: "경기/인천 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
             {
               id: "fallback-2",
               t: "재고 권역 재배치 최적화",
-              d: "강원/충청 → 수도권 물량 조정",
+              d: "강원/충청 → 경기/인천 물량 조정",
               routes: [
                 { from: "Gangwon", to: "Gyeonggi" },
                 { from: "Chungcheong", to: "Gyeonggi" },
@@ -920,7 +935,10 @@ function StandardDashboardView({ product }: { product: Product }) {
               )}
               {markerOrder.map((id) => {
                 const r = regions[id];
-                const markerRisk = getScenarioRegion(id)?.riskLevel ?? timeline.regions[id]?.status;
+                const markerRegion = getScenarioRegion(id);
+                const markerRisk = isSevereExcess(product.key, markerRegion?.stock_ratio)
+                  ? "critical"
+                  : markerRegion?.riskLevel ?? timeline.regions[id]?.status;
                 if (!r.box) return null;
                 return (
                   <button
@@ -993,6 +1011,9 @@ function StandardDashboardView({ product }: { product: Product }) {
               {[
                 { c: "status-dot-safe", label: "적정" },
                 { c: "status-dot-warning", label: "과잉" },
+                ...(product.key === "타미비어"
+                  ? [{ c: "status-dot-critical", label: "심각한 과잉" }]
+                  : []),
                 { c: "status-dot-danger", label: "부족" },
               ].map((l) => (
                 <div key={l.label} className="flex items-center gap-1.5">

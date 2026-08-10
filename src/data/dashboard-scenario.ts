@@ -239,15 +239,15 @@ export const lipilouDashboard: ProductDashboardScenario | null = lipilouLatest
         executionPeriod: solution.id === "SOLUTION-01" ? "2~3일" : "1~2주",
         supplyImpact:
           solution.id === "SOLUTION-01"
-            ? "제주권에 1,000 BOX를 보충해 목표재고 미달을 해소하고 서울권 안전재고는 유지"
+            ? "제주에 1,000 BOX를 보충해 목표재고 미달을 해소하고 서울 안전재고는 유지"
             : "B라인 증산으로 A라인 품질 재검사 기간의 공급 공백을 보완",
         xai: {
           summary: solution.xai_explanation ?? solution.reason,
           evidence:
             solution.id === "SOLUTION-01"
               ? [
-                  "서울권은 이관 후에도 자체 안전재고를 유지할 수 있는 유일한 권역",
-                  "제주권 부족분 1,000 BOX를 권역 간 재배치만으로 충당",
+                  "서울은 이관 후에도 자체 안전재고를 유지할 수 있는 유일한 권역",
+                  "제주 부족분 1,000 BOX를 권역 간 재배치만으로 충당",
                   "추가 생산보다 실행 기간과 비용 부담이 낮음",
                 ]
               : [
@@ -523,7 +523,7 @@ export const tamivirDashboard: ProductDashboardScenario = {
     },
     ...tamivirLatest.ai_solutions.map((recommendation, index) => ({
       id: index === 0 ? "TAMIVIR-S2-PINPOINT-REDUCTION" : "TAMIVIR-S3-CDC-TRANSFER",
-      title: index === 0 ? "신규 발주 보류·핀셋 감축" : "수도권·영남권 잉여재고 CDC 이송",
+      title: index === 0 ? "신규 발주 보류·핀셋 감축" : "경기/인천·영남권 잉여재고 CDC 이송",
       description: `${recommendation.description}${recommendation.supplyImpact ? ` · 공급 영향: ${recommendation.supplyImpact}` : ""}`,
       transferAmount: recommendation.transferAmount,
       costReduction: recommendation.costReduction,

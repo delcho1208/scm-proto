@@ -13,14 +13,14 @@ type WmsSnapshot = {
 };
 
 const wmsByRegion: Record<string, WmsSnapshot> = {
-  Seoul: { warehouse: "WH-Zone1-01", region: "Zone1_서울권", lot: "260430-리피", stock: 6478, target: 4000, inventoryStatus: "과잉", ratioPct: 161.9, incoming: 300, transferable: 338 },
-  Gyeonggi: { warehouse: "WH-Zone2-01", region: "Zone2_경기인천수도권", lot: "260430-리피", stock: 4420, target: 3000, inventoryStatus: "과잉", ratioPct: 147.3, incoming: 500, transferable: 763 },
-  Gangwon: { warehouse: "WH-Zone3-01", region: "Zone3_강원권", lot: "260430-리피", stock: 1804, target: 1200, inventoryStatus: "과잉", ratioPct: 150.3, incoming: 100, transferable: 235 },
-  Chungcheong: { warehouse: "WH-Zone4-01", region: "Zone4_대전세종충청권", lot: "260430-리피", stock: 2707, target: 1800, inventoryStatus: "과잉", ratioPct: 150.4, incoming: 0, transferable: 593 },
-  Honam: { warehouse: "WH-Zone5-01", region: "Zone5_광주전북전남권", lot: "260430-리피", stock: 2256, target: 1500, inventoryStatus: "과잉", ratioPct: 150.4, incoming: 500, transferable: 575 },
-  Daegu: { warehouse: "WH-Zone6-01", region: "Zone6_대구경북권", lot: "260430-리피", stock: 2707, target: 1800, inventoryStatus: "과잉", ratioPct: 150.4, incoming: 0, transferable: 829 },
-  Busan: { warehouse: "WH-Zone7-01", region: "Zone7_부산울산경남권", lot: "260430-리피", stock: 3761, target: 2500, inventoryStatus: "과잉", ratioPct: 150.4, incoming: 200, transferable: 337 },
-  Jeju: { warehouse: "WH-Zone8-01", region: "Zone8_제주권", lot: "260430-리피", stock: 1174, target: 1000, inventoryStatus: "적정", ratioPct: 117.4, incoming: 200, transferable: 668 },
+  Seoul: { warehouse: "WH-Zone1-01", region: "Zone1_서울", lot: "260430-리피", stock: 6478, target: 4000, inventoryStatus: "과잉", ratioPct: 161.9, incoming: 300, transferable: 338 },
+  Gyeonggi: { warehouse: "WH-Zone2-01", region: "Zone2_경기/인천", lot: "260430-리피", stock: 4420, target: 3000, inventoryStatus: "과잉", ratioPct: 147.3, incoming: 500, transferable: 763 },
+  Gangwon: { warehouse: "WH-Zone3-01", region: "Zone3_강원", lot: "260430-리피", stock: 1804, target: 1200, inventoryStatus: "과잉", ratioPct: 150.3, incoming: 100, transferable: 235 },
+  Chungcheong: { warehouse: "WH-Zone4-01", region: "Zone4_충청", lot: "260430-리피", stock: 2707, target: 1800, inventoryStatus: "과잉", ratioPct: 150.4, incoming: 0, transferable: 593 },
+  Honam: { warehouse: "WH-Zone5-01", region: "Zone5_광주/전라", lot: "260430-리피", stock: 2256, target: 1500, inventoryStatus: "과잉", ratioPct: 150.4, incoming: 500, transferable: 575 },
+  Daegu: { warehouse: "WH-Zone6-01", region: "Zone6_대구/경북", lot: "260430-리피", stock: 2707, target: 1800, inventoryStatus: "과잉", ratioPct: 150.4, incoming: 0, transferable: 829 },
+  Busan: { warehouse: "WH-Zone7-01", region: "Zone7_부울경", lot: "260430-리피", stock: 3761, target: 2500, inventoryStatus: "과잉", ratioPct: 150.4, incoming: 200, transferable: 337 },
+  Jeju: { warehouse: "WH-Zone8-01", region: "Zone8_제주", lot: "260430-리피", stock: 1174, target: 1000, inventoryStatus: "적정", ratioPct: 117.4, incoming: 200, transferable: 668 },
 };
 
 export function getLipilouIntegrationRecords(regionId: string): SystemRecord[] {

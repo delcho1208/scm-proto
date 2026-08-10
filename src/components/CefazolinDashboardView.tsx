@@ -702,10 +702,10 @@ export function CefazolinDashboardView({ product }: { product: Product }) {
               : undefined,
         }))
       : [
-          { t: "수도권 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
+          { t: "경기/인천 센터 증설 추진", d: "25년 3분기 내 물류 허브 확장" },
           {
             t: "재고 권역 재배치 최적화",
-            d: "강원/충청 → 수도권 물량 조정",
+            d: "강원/충청 → 경기/인천 물량 조정",
             routes: [
               { from: "Gangwon", to: "Gyeonggi" },
               { from: "Chungcheong", to: "Gyeonggi" },

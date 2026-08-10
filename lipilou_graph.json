@@ -80,7 +80,7 @@
       "stock_status": "과잉"
     },
     {
-      "region": "경기인천",
+      "region": "경기/인천",
       "region_key": "gyeonggi_incheon",
       "annual_demand_box": 412848,
       "yoy_pct": 5.6,
@@ -152,7 +152,7 @@
       "stock_status": "과잉"
     },
     {
-      "region": "충북충남대전세종",
+      "region": "충청",
       "region_key": "chungcheong_daejeon_sejong",
       "annual_demand_box": 48325,
       "yoy_pct": 4.4,
@@ -188,7 +188,7 @@
       "stock_status": "과잉"
     },
     {
-      "region": "전북광주전남광주",
+      "region": "광주/전라",
       "region_key": "jeolla_gwangju",
       "annual_demand_box": 57553,
       "yoy_pct": 3.9,

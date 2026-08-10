@@ -11,14 +11,14 @@ type WmsSnapshot = {
 };
 
 const wmsByRegion: Record<string, WmsSnapshot> = {
-  Seoul: { warehouse: "WH-Zone1-01", region: "Zone1_서울권", stock: 48627, safetyStock: 70968, incoming: 300, transferable: 930, f2aTarget: 709684 },
-  Gyeonggi: { warehouse: "WH-Zone2-01", region: "Zone2_경기인천수도권", stock: 101494, safetyStock: 142760, incoming: 500, transferable: 350, f2aTarget: 1427607 },
-  Gangwon: { warehouse: "WH-Zone3-01", region: "Zone3_강원권", stock: 12198, safetyStock: 15225, incoming: 100, transferable: 650, f2aTarget: 152259 },
-  Chungcheong: { warehouse: "WH-Zone4-01", region: "Zone4_대전세종충청권", stock: 32546, safetyStock: 41946, incoming: 200, transferable: 743, f2aTarget: 419468 },
-  Honam: { warehouse: "WH-Zone5-01", region: "Zone5_광주전북전남권", stock: 28924, safetyStock: 30065, incoming: 200, transferable: 908, f2aTarget: 300655 },
-  Daegu: { warehouse: "WH-Zone6-01", region: "Zone6_대구경북권", stock: 23245, safetyStock: 24976, incoming: 200, transferable: 741, f2aTarget: 249766 },
-  Busan: { warehouse: "WH-Zone7-01", region: "Zone7_부산울산경남권", stock: 29544, safetyStock: 37971, incoming: 300, transferable: 519, f2aTarget: 379710 },
-  Jeju: { warehouse: "WH-Zone8-01", region: "Zone8_제주권", stock: 3743, safetyStock: 4129, incoming: 100, transferable: 538, f2aTarget: 41290 },
+  Seoul: { warehouse: "WH-Zone1-01", region: "Zone1_서울", stock: 48627, safetyStock: 70968, incoming: 300, transferable: 930, f2aTarget: 709684 },
+  Gyeonggi: { warehouse: "WH-Zone2-01", region: "Zone2_경기/인천", stock: 101494, safetyStock: 142760, incoming: 500, transferable: 350, f2aTarget: 1427607 },
+  Gangwon: { warehouse: "WH-Zone3-01", region: "Zone3_강원", stock: 12198, safetyStock: 15225, incoming: 100, transferable: 650, f2aTarget: 152259 },
+  Chungcheong: { warehouse: "WH-Zone4-01", region: "Zone4_충청", stock: 32546, safetyStock: 41946, incoming: 200, transferable: 743, f2aTarget: 419468 },
+  Honam: { warehouse: "WH-Zone5-01", region: "Zone5_광주/전라", stock: 28924, safetyStock: 30065, incoming: 200, transferable: 908, f2aTarget: 300655 },
+  Daegu: { warehouse: "WH-Zone6-01", region: "Zone6_대구/경북", stock: 23245, safetyStock: 24976, incoming: 200, transferable: 741, f2aTarget: 249766 },
+  Busan: { warehouse: "WH-Zone7-01", region: "Zone7_부울경", stock: 29544, safetyStock: 37971, incoming: 300, transferable: 519, f2aTarget: 379710 },
+  Jeju: { warehouse: "WH-Zone8-01", region: "Zone8_제주", stock: 3743, safetyStock: 4129, incoming: 100, transferable: 538, f2aTarget: 41290 },
 };
 
 export function getTamivirIntegrationRecords(regionId: string): SystemRecord[] {

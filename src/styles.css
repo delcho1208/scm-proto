@@ -910,7 +910,10 @@
 .warehouse-photo-legend .danger i { background:#dc2626; }
 .warehouse-photo-legend .warning i { background:#eab308; }
 .warehouse-photo-legend .safe i { background:#16a34a; }
-.warehouse-photo-legend .critical i { background:#f97316; animation:warehouseCriticalPulse 1.35s ease-in-out infinite; }
+.warehouse-photo-legend .critical i {
+  background:#f97316;
+  animation:warehouseCriticalPulse 1.35s ease-in-out infinite;
+}
 @media (prefers-reduced-motion: reduce) {
   .twin-live-dot,
   .block-label .status-dot {
@@ -1087,6 +1090,10 @@
   background-color: var(--scm-warn);
   box-shadow: 0 0 8px rgba(250, 173, 20, 0.4);
 }
+.status-dot-critical {
+  background-color: #f97316;
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.45);
+}
 .status-dot-danger {
   background-color: var(--scm-danger);
   box-shadow: 0 0 8px rgba(255, 77, 79, 0.4);
@@ -1230,6 +1237,12 @@
   color: #ad6800;
   border: 1px solid rgba(250, 173, 20, 0.55);
   background: rgba(255, 251, 230, 0.96);
+}
+.region-marker.risk-critical .region-marker-label {
+  color: #c2410c;
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  background: rgba(255, 247, 237, 0.97);
+  animation: warehouseCriticalPulse 1.35s ease-in-out infinite;
 }
 .region-marker.risk-danger .region-marker-label {
   color: #cf1322;

@@ -16,7 +16,7 @@
       },
       "regions_stock": [
         {
-          "region": "Zone1_서울권",
+          "region": "Zone1_서울",
           "current_stock": 7304,
           "target_stock": 4000,
           "stock_ratio": 182.6,
@@ -24,7 +24,7 @@
           "color_status": "green"
         },
         {
-          "region": "Zone2_경기인천수도권",
+          "region": "Zone2_경기/인천",
           "current_stock": 4115,
           "target_stock": 3000,
           "stock_ratio": 137.2,
@@ -32,7 +32,7 @@
           "color_status": "green"
         },
         {
-          "region": "Zone3_강원권",
+          "region": "Zone3_강원",
           "current_stock": 1397,
           "target_stock": 1200,
           "stock_ratio": 116.4,
@@ -40,7 +40,7 @@
           "color_status": "yellow"
         },
         {
-          "region": "Zone4_대전세종충청권",
+          "region": "Zone4_충청",
           "current_stock": 2247,
           "target_stock": 1800,
           "stock_ratio": 124.8,
@@ -48,7 +48,7 @@
           "color_status": "green"
         },
         {
-          "region": "Zone5_광주전북전남권",
+          "region": "Zone5_광주/전라",
           "current_stock": 1872,
           "target_stock": 1500,
           "stock_ratio": 124.8,
@@ -56,7 +56,7 @@
           "color_status": "green"
         },
         {
-          "region": "Zone6_대구경북권",
+          "region": "Zone6_대구/경북",
           "current_stock": 2247,
           "target_stock": 1800,
           "stock_ratio": 124.8,
@@ -64,7 +64,7 @@
           "color_status": "green"
         },
         {
-          "region": "Zone7_부산울산경남권",
+          "region": "Zone7_부울경",
           "current_stock": 3746,
           "target_stock": 2500,
           "stock_ratio": 149.8,
@@ -72,7 +72,7 @@
           "color_status": "green"
         },
         {
-          "region": "Zone8_제주권",
+          "region": "Zone8_제주",
           "current_stock": 1133,
           "target_stock": 1000,
           "stock_ratio": 113.3,
@@ -86,7 +86,7 @@
       "scene_name": "AI 재고 이관 추천 및 XAI 근거 제시",
       "map_monitoring": [
         {
-          "region": "Zone1_서울권",
+          "region": "Zone1_서울",
           "current_stock": 4024,
           "target_stock": 4000,
           "stock_ratio": 100.6,
@@ -95,7 +95,7 @@
           "animate_transition": true
         },
         {
-          "region": "Zone2_경기인천수도권",
+          "region": "Zone2_경기/인천",
           "current_stock": 3696,
           "target_stock": 3000,
           "stock_ratio": 123.2,
@@ -104,7 +104,7 @@
           "animate_transition": false
         },
         {
-          "region": "Zone3_강원권",
+          "region": "Zone3_강원",
           "current_stock": 1274,
           "target_stock": 1200,
           "stock_ratio": 106.2,
@@ -113,7 +113,7 @@
           "animate_transition": false
         },
         {
-          "region": "Zone4_대전세종충청권",
+          "region": "Zone4_충청",
           "current_stock": 2049,
           "target_stock": 1800,
           "stock_ratio": 113.8,
@@ -122,7 +122,7 @@
           "animate_transition": false
         },
         {
-          "region": "Zone5_광주전북전남권",
+          "region": "Zone5_광주/전라",
           "current_stock": 1707,
           "target_stock": 1500,
           "stock_ratio": 113.8,
@@ -131,7 +131,7 @@
           "animate_transition": false
         },
         {
-          "region": "Zone6_대구경북권",
+          "region": "Zone6_대구/경북",
           "current_stock": 2049,
           "target_stock": 1800,
           "stock_ratio": 113.8,
@@ -140,7 +140,7 @@
           "animate_transition": false
         },
         {
-          "region": "Zone7_부산울산경남권",
+          "region": "Zone7_부울경",
           "current_stock": 3418,
           "target_stock": 2500,
           "stock_ratio": 136.7,
@@ -149,7 +149,7 @@
           "animate_transition": false
         },
         {
-          "region": "Zone8_제주권",
+          "region": "Zone8_제주",
           "current_stock": 1820,
           "target_stock": 1000,
           "stock_ratio": 182.0,
@@ -159,11 +159,11 @@
         }
       ],
       "ai_recommendation_card": {
-        "title": "**Zone7_부산울산경남권(여유 137%) → Zone1_서울권(101%) 재고 이관 추천 1,000EA",
+        "title": "**Zone7_부울경(여유 137%) → Zone1_서울(101%) 재고 이관 추천 1,000EA",
         "transfer_amount": 1000,
-        "from_region": "Zone7_부산울산경남권",
-        "to_region": "Zone1_서울권",
-        "xai_explanation": "8개 권역 중 이관 후에도 자기 안전재고를 지킬 수 있는 권역이 Zone7_부산울산경남권뿐이라 선택됨",
+        "from_region": "Zone7_부울경",
+        "to_region": "Zone1_서울",
+        "xai_explanation": "8개 권역 중 이관 후에도 자기 안전재고를 지킬 수 있는 권역이 Zone7_부울경뿐이라 선택됨",
         "approval_action": {
           "initial_button_text": "실행 계획 적용",
           "approved_button_text": "승인완료 ✓ (공급관리책임자, 2026-03-10)",
@@ -182,13 +182,13 @@
           "id": 2,
           "timestamp": "2026-03-10 08:30",
           "type": "WARNING",
-          "message": "수도권(Zone1_서울권) 재고율 기준치 이하 감소 감지 (101%)"
+          "message": "경기/인천(Zone1_서울) 재고율 기준치 이하 감소 감지 (101%)"
         },
         {
           "id": 3,
           "timestamp": "2026-03-10 09:00",
           "type": "AI_RECOMMEND",
-          "message": "AI 분석 완료: Zone7_부산울산경남권 → Zone1_서울권 1,000EA 이관 제안"
+          "message": "AI 분석 완료: Zone7_부울경 → Zone1_서울 1,000EA 이관 제안"
         },
         {
           "id": 4,

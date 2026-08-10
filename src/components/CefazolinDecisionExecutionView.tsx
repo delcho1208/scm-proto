@@ -1139,7 +1139,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     {
       id: "S3_통합대응",
       displayId: "S3 CDC 이송",
-      response: "수도권·영남권 잉여재고 이송",
+      response: "경기/인천·영남권 잉여재고 이송",
       baseline: false,
       comparisonTarget: true,
       constraintPassed: true,
@@ -1182,7 +1182,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         executionPeriod: "2~4주 내 신규 발주 보류·핀셋 감축",
         xai: {
           conditions: [
-            "MES 수도권·영남권 생산 감축 가능량 확인",
+            "MES 경기/인천·영남권 생산 감축 가능량 확인",
             "ERP 신규 발주 보류 대상 확인",
             "WMS CDC 이송 가능량과 창고 용량 확인",
           ],
@@ -1248,7 +1248,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           actionType: "원료 긴급발주",
           title: "타미비어 신규 발주 보류",
           source: "ERP 미확정 발주",
-          target: "수도권·영남권 공급계획",
+          target: "경기/인천·영남권 공급계획",
           quantity: 800_000,
           unit: "완제품 환산단위",
           ruleId: "RULE-DEMAND-SURGE-001",
@@ -1257,7 +1257,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         {
           id: "TAMI-MES-001",
           actionType: "생산계획 재산정",
-          title: "수도권·영남권 핀셋 생산 감축",
+          title: "경기/인천·영남권 핀셋 생산 감축",
           source: "AI 감축 권고안",
           target: "MES 생산계획",
           quantity: null,
@@ -1268,7 +1268,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         {
           id: "TAMI-WMS-001",
           actionType: "재고이동",
-          title: "수도권·영남권 잉여재고 CDC 이송",
+          title: "경기/인천·영남권 잉여재고 CDC 이송",
           source: "과잉 권역 창고",
           target: "중앙 CDC",
           quantity: 800_000,
@@ -1735,11 +1735,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         심각한 과잉 (10.0배 이상)
                       </>
                     ) : (
-                      <>
-                        과잉 (&gt;120~170%)
-                        <i className="ml-1 h-2 w-2 rounded-full bg-[#f97316]" />
-                        심각한 과잉 (&gt;170%)
-                      </>
+                      "과잉 (>120%)"
                     )}
                   </span>
                   <span className="ml-auto">
@@ -1980,7 +1976,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   가동률 {cefazolinDashboard.utilization?.toFixed(1) ?? "-"}%
                 </p>
                 <p className="text-[10px] leading-4 text-on-surface-variant">
-                  {isTamivir ? "수도권·영남권 핀셋 감축 일정과 생산계획 조정" : "추가 원료 입고 일정 및 품질재검사 일정 조정"}
+                  {isTamivir ? "경기/인천·영남권 핀셋 감축 일정과 생산계획 조정" : "추가 원료 입고 일정 및 품질재검사 일정 조정"}
                 </p>
               </div>
               <div className="rounded-xl border border-outline-variant px-2 py-1.5">
