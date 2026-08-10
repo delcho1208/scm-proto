@@ -283,11 +283,7 @@ function StandardDashboardView({ product }: { product: Product }) {
               : (tamivirForecastRegion?.forecast ?? 0),
           ).toLocaleString("ko-KR")
         : product.annualDemand;
-  const forecastYoy = lipilouGraphRegion
-    ? `${lipilouGraphRegion.yoy_pct >= 0 ? "+" : ""}${lipilouGraphRegion.yoy_pct}% YoY`
-    : tamivirForecastRegion
-      ? `${tamivirForecastRegion.yoy >= 0 ? "+" : ""}${tamivirForecastRegion.yoy.toFixed(1)}% YoY`
-      : product.yoyGrowth;
+  const forecastYoy = "기준수요 8~10월 · 향후예측 11~1월";
   const isCurrentTimeline = timelineKey === "PRES";
   const lipilouMonthlyForecast =
     product.key === "리피로우" ? lipilouMonthlyForecastByTimelineKey[timelineKey] : undefined;
