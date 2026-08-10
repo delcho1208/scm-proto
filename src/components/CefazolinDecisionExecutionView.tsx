@@ -1167,7 +1167,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" || tab === "response" ? "h-[912px] min-h-[912px] max-h-[912px] overflow-hidden pb-12" : "pb-16"}`}
     >
       <div
-        className={`flex items-end justify-between gap-lg ${tab === "response" ? "py-sm" : "py-lg"}`}
+        className={`flex items-end justify-between gap-lg ${tab === "response" ? "py-2" : "py-lg"}`}
       >
 
         <div>
@@ -1507,7 +1507,6 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
           <Section
             title="S1·S2·S3 대응안 비교"
-            subtitle="서비스율 · 부족기간 · 권역 서비스 · 비용 · 제약조건"
             className="shrink-0"
             bodyClassName="p-sm"
             action={
@@ -1559,7 +1558,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         }
                       />
                     </div>
-                    <dl className="mt-1.5 grid grid-cols-3 gap-xs text-[11px]">
+                    <dl className="mt-1.5 grid grid-cols-4 gap-xs text-[11px]">
                       <div className="rounded-lg bg-surface-container-low px-2 py-1">
                         <dt className="text-[10px] text-on-surface-variant">최저 권역</dt>
                         <dd className="font-data font-bold">
@@ -1579,13 +1578,13 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         <dt className="text-[10px] text-on-surface-variant">부족기간</dt>
                         <dd className="font-data font-bold">{scenario.shortageWeeks}주</dd>
                       </div>
+                      <div className="rounded-lg bg-surface-container-low px-2 py-1">
+                        <dt className="text-[10px] text-on-surface-variant">총 조달비</dt>
+                        <dd className="whitespace-nowrap font-data font-bold">
+                          {fmtKrw(scenario.totalProcurementCostKrw)}
+                        </dd>
+                      </div>
                     </dl>
-                    <div className="mt-1.5 border-t border-outline-variant/50 pt-1.5">
-                      <span className="text-[10px] text-on-surface-variant">총 조달비</span>
-                      <strong className="ml-2 font-data text-xs">
-                        {fmtKrw(scenario.totalProcurementCostKrw)}
-                      </strong>
-                    </div>
                   </article>
                 );
               })}
@@ -1594,7 +1593,6 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
           <Section
             title="실행가능성·제약조건"
-            subtitle="추천안 실행 전 재고·생산·조달·품질 조건 확인"
             className="flex min-h-0 flex-1 flex-col"
             bodyClassName="flex min-h-0 flex-1 flex-col gap-sm p-sm"
           >
@@ -1606,7 +1604,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </span>
                   <Pill tone="success">물량 확인</Pill>
                 </div>
-                <p className="mt-1 font-data text-base font-bold">
+                <p className="mt-1 font-data text-sm font-bold">
                   {fmt(cefazolinDashboard.transferableQuantityByRegion.National)} VIAL
                 </p>
                 <p className="text-[10px] text-on-surface-variant">
@@ -1620,7 +1618,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </span>
                   <Pill tone="warning">확인 필요</Pill>
                 </div>
-                <p className="mt-1 font-data text-base font-bold">
+                <p className="mt-1 font-data text-sm font-bold">
                   가동률 {cefazolinDashboard.utilization?.toFixed(1) ?? "-"}%
                 </p>
                 <p className="text-[10px] leading-4 text-on-surface-variant">
@@ -1634,7 +1632,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   </span>
                   <Pill tone="warning">일정 확인</Pill>
                 </div>
-                <p className="mt-1 font-data text-base font-bold">
+                <p className="mt-1 font-data text-sm font-bold">
                   {fmt(recommendedScenario.emergencyProcurementQuantity)} API
                 </p>
                 <p className="truncate text-[10px] text-on-surface-variant">
