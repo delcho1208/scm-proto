@@ -1146,10 +1146,10 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
   return (
     <div
-      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-[880px] min-h-[880px] max-h-[880px] overflow-hidden pb-12" : "pb-16"}`}
+      className={`dashboard-fixed-layout flex flex-1 flex-col bg-surface px-lg pt-16 ${tab === "impact" ? "h-[912px] min-h-[912px] max-h-[912px] overflow-hidden pb-12" : "pb-16"}`}
     >
       <div
-        className={`flex items-end justify-between gap-lg ${tab === "impact" ? "shrink-0 py-1" : "py-lg"}`}
+        className="flex items-end justify-between gap-lg py-lg"
       >
 
         <div>
@@ -1177,14 +1177,10 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
               SANDBOX · SYNTHETIC DATA
             </span>
           </div>
-          <h2
-            className={`font-display text-on-surface ${tab === "impact" ? "text-[22px] font-bold leading-tight" : "text-headline-md"}`}
-          >
+          <h2 className="font-display text-headline-md text-on-surface">
             세파졸린 의사결정 실행
           </h2>
-          <p
-            className={`text-on-surface-variant ${tab === "impact" ? "text-[11px]" : "mt-xs text-sm"}`}
-          >
+          <p className="mt-xs text-sm text-on-surface-variant">
             수급 이상 탐지 · Case 영향 분석 · 데이터 기준{" "}
             {cefazolinWorkflowRunMeta.latestSnapshotDate}
           </p>
@@ -1202,14 +1198,14 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       </div>
 
       <div
-        className={`shrink-0 flex items-center rounded-xl border border-outline-variant bg-white p-1 shadow-sm ${tab === "impact" ? "mb-1" : "mb-sm"}`}
+        className="mb-sm flex shrink-0 items-center rounded-xl border border-outline-variant bg-white p-1 shadow-sm"
       >
         {tabItems.map((item) => (
           <button
             key={item.key}
             type="button"
             onClick={() => setTab(item.key)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-md text-xs font-bold transition ${tab === "impact" ? "py-1.5" : "py-2.5"} ${tab === item.key ? "bg-scm-primary text-white shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-md py-2.5 text-xs font-bold transition ${tab === item.key ? "bg-scm-primary text-white shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
           >
             <Icon name={item.icon} className="text-[17px]" />
             {item.label}
@@ -1219,7 +1215,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
 
 
       {tab === "impact" ? (
-        <div className="flex h-[664px] min-h-[664px] max-h-[664px] flex-none flex-col gap-sm overflow-hidden">
+        <div className="flex h-[636px] min-h-[636px] max-h-[636px] flex-none flex-col gap-md overflow-hidden">
           <Section
             title="Case 탐지 요약"
             subtitle="직접 공급 신호와 수급 위험 신호를 결합해 의사결정 Case로 전환"
@@ -1273,7 +1269,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             </div>
           </Section>
 
-          <div className="grid shrink-0 grid-cols-3 gap-sm">
+          <div className="grid shrink-0 grid-cols-3 gap-md">
             <Metric
               dense
               label="현재 재고"
@@ -1301,7 +1297,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           </div>
 
 
-          <div className="grid min-h-0 flex-1 grid-cols-12 gap-sm">
+          <div className="grid min-h-0 flex-1 grid-cols-12 gap-md">
             <div className="col-span-5 flex min-h-0">
               <Section
                 title="원인 분석 및 위험 전파 경로"
@@ -1396,7 +1392,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
                     <BarChart
                       width={760}
-                      height={236}
+                      height={220}
                       data={regionChartData}
                       margin={{ top: 10, right: 8, left: -18, bottom: 12 }}
                       barCategoryGap="22%"
@@ -1438,18 +1434,6 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                         ))}
                       </Bar>
                     </BarChart>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {regionChartData
-                    .filter((row) => row.ratio < 100)
-                    .map((row) => (
-                      <span
-                        key={row.id}
-                        className="inline-flex items-center gap-1 rounded-full border border-error/25 bg-error-container/25 px-2 py-0.5 text-[9px] font-bold text-error"
-                      >
-                        🔴 {row.name} {row.ratio.toFixed(0)}%
-                      </span>
-                    ))}
                 </div>
               </Section>
             </div>
