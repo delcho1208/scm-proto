@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Bar,
   BarChart,
@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { Icon } from "@/components/ScmShell";
+import { useRefreshToken } from "@/data/app-signals";
 
 import type { Product } from "@/data/scm";
 import {
@@ -111,20 +112,14 @@ function fmtKrw(value: number) {
   return `${Math.round(value / 10_000).toLocaleString("ko-KR")}만 원`;
 }
 
-/**
- * 공급 안정도(%) — 제품 공통 지표.
- * 최저 권역 서비스 수준(형평성)과 잔여 공급 리스크를 절반씩 반영하고,
- * 부족 지속 주차만큼 감점하여 시나리오별 공급 안정성을 나타냅니다.
- */
-function calcSupplyStabilityPct(scenario: {
-  minimumRegionalServiceRatePct: number;
-  shortageWeeks: number;
-  riskScore?: number;
-}) {
-  const coverage = Math.max(0, Math.min(100, scenario.minimumRegionalServiceRatePct));
-  const risk = Math.max(0, Math.min(100, scenario.riskScore ?? 100 - coverage));
-  const shortagePenalty = Math.min(scenario.shortageWeeks, 10) * 1.5;
-  return Math.max(0, Math.min(100, 0.5 * coverage + 0.5 * (100 - risk) - shortagePenalty));
+function calcSupplyStabilityScore(
+  scenario: { riskScore?: number; serviceRatePct: number },
+  isTamivir: boolean,
+) {
+  const score = isTamivir
+    ? 100 - (scenario.riskScore ?? 100)
+    : scenario.serviceRatePct;
+  return Math.max(0, Math.min(100, score));
 }
 
 function Pill({
@@ -1142,6 +1137,8 @@ function ProductDecisionExecution({
 }
 
 function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
+  const refreshToken = useRefreshToken();
+  const handledRefreshToken = useRef(refreshToken);
   const isTamivir = product.key === "타미비어";
   const isLipilou = product.key === "리피로우";
   const lipilouRegions = lipilouDashboard?.regions ?? {};
@@ -1494,8 +1491,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           title: "타미비어 신규 발주 보류",
           source: "ERP 미확정 발주",
           target: "경기/인천·영남권 공급계획",
-          quantity: null,
-          unit: "계획",
+          quantity: 800_000,
+          unit: "완제품 환산단위",
           ruleId: "RULE-TAMI-ORDER-HOLD-001",
           basis: "전국 재고 1,280,777 EA · AI 목표 90,785 EA · 재고 비율 14.1배 기준",
         },
@@ -1509,6 +1506,17 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           unit: "계획",
           ruleId: "RULE-TAMI-PRODUCTION-DOWN-001",
           basis: "S2 적용 후 예상 재고 745,570 EA · 비용 18~22% 절감",
+        },
+        {
+          id: "TAMI-WMS-001",
+          actionType: "안전재고 유지",
+          title: "권역별 안전재고 적정 수준으로 유지",
+          source: "권역별 WMS 재고",
+          target: "8개 권역 안전재고",
+          quantity: 800_000,
+          unit: "완제품 환산단위",
+          ruleId: "RULE-TAMI-SAFETY-STOCK-001",
+          basis: "미래 면역학적 대비 재고 확보",
         },
       ]
     : isLipilou
@@ -1591,6 +1599,29 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const [reviewNote, setReviewNote] = useState(initialProductState.reviewNote);
   const [checklist, setChecklist] = useState<Record<ChecklistKey, boolean>>(initialProductState.checklist);
   const [lastUpdatedAt, setLastUpdatedAt] = useState(initialProductState.lastUpdatedAt);
+
+  useEffect(() => {
+    if (handledRefreshToken.current === refreshToken) return;
+    handledRefreshToken.current = refreshToken;
+
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem(executionStateStorageKey(product.key));
+      } catch {
+        // 저장소 접근이 제한되어도 현재 화면 상태 초기화는 계속 진행합니다.
+      }
+    }
+
+    setTab("impact");
+    setShowWorkflow(false);
+    setHitlStatus("pending");
+    setExecutionStatus("locked");
+    setReviewer("");
+    setReviewerRole("SCM 운영");
+    setReviewNote("");
+    setChecklist({ ...initialChecklist });
+    setLastUpdatedAt(cefazolinWorkflowRunMeta.latestSnapshotDate);
+  }, [refreshToken, product.key, cefazolinWorkflowRunMeta.latestSnapshotDate]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1805,11 +1836,19 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     cefazolinShortageGapTotal - cefazolinTransferPool,
   );
 
-  const affectedRegionImprovementRows = (isTamivir ? excessRegions : shortageRegions).map(
+  const lipilouAffectedRegionIds = new Set(lipilouRecommendation?.affectedRegions ?? []);
+  const improvementRegions = isTamivir
+    ? excessRegions
+    : isLipilou
+      ? regions.filter((region) => lipilouAffectedRegionIds.has(region.id))
+      : shortageRegions;
+  const affectedRegionImprovementRows = improvementRegions.map(
     (region) => {
       const projectedRegion = isTamivir
         ? tamivirRecommendedDashboardScenario?.projectedRegions?.[region.id]
-        : undefined;
+        : isLipilou
+          ? lipilouRecommendation?.projectedRegions?.[region.id]
+          : undefined;
 
       if (!isTamivir && !isLipilou) {
         const shortageGap = Math.max(0, region.target_stock - region.current_stock);
@@ -1840,9 +1879,12 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         id: region.id,
         name: region.region.split("_").slice(1).join("_"),
         currentValue: region.stock_ratio,
+        currentStock: region.current_stock,
         currentStatus: region.riskText,
         afterValue: projectedRegion?.stock_ratio,
+        afterStock: projectedRegion?.current_stock,
         afterStatus: projectedRegion?.status ?? projectedRegion?.riskText,
+        isTransferSource: isLipilou && region.id === lipilouRecommendation?.fromRegion,
       };
     },
   );
@@ -1866,10 +1908,16 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         }
         if (productionRow) rows.push(productionRow);
         if (transferRows.length > 0) {
+          const excessNames = excessRegions
+            .map((region) => region.region.split("_").slice(1).join("_"))
+            .join(", ");
+          const shortageNames = shortageRegions
+            .map((region) => region.region.split("_").slice(1).join("_"))
+            .join(", ");
           rows.push({
             id: "CEFA-WMS-CONSOLIDATED",
             system: "WMS",
-            title: `과잉 권역 ${transferRows.length}개 재고를 부족 권역 ${shortageRegions.length}개로 재배분`,
+            title: `과잉권역 ${excessRegions.length}개 (${excessNames}) → 부족권역 ${shortageRegions.length}개 (${shortageNames}) 재배분`,
             quantity: transferRows.reduce((sum, row) => sum + (row.quantity ?? 0), 0),
             unit: "완제품 환산단위",
             basis: `${transferRows.map((row) => row.source).join(" · ")} 출고 · 권역 최소 목표재고 확보`,
@@ -2291,6 +2339,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             <div className="grid grid-cols-3 gap-sm">
               {scenarioRows.map((scenario) => {
                 const recommended = scenario.id === recommendedScenarioId;
+                const supplyStabilityScore = calcSupplyStabilityScore(scenario, isTamivir);
                 return (
                   <article
                     key={scenario.id}
@@ -2316,23 +2365,22 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     <div className="mt-1.5 flex items-center gap-2">
                       <span className="text-[10px] text-on-surface-variant">공급 안정도</span>
                       <strong className="font-data text-xs">
-                        {calcSupplyStabilityPct(scenario).toFixed(1)}/100
+                        {supplyStabilityScore.toFixed(1)}/100
                       </strong>
                       <div className="min-w-0 flex-1">
                         <SignalBar
-                          value={calcSupplyStabilityPct(scenario)}
+                          value={supplyStabilityScore}
                           tone={
-                            calcSupplyStabilityPct(scenario) >= 90
+                            supplyStabilityScore >= 80
                               ? "success"
-                              : calcSupplyStabilityPct(scenario) >= 70
+                              : supplyStabilityScore >= 60
                                 ? "primary"
-                                : calcSupplyStabilityPct(scenario) >= 50
+                                : supplyStabilityScore >= 40
                                   ? "warning"
                                   : "danger"
                           }
                         />
                       </div>
-
                     </div>
                     <dl className="mt-1.5 grid grid-cols-4 gap-xs text-[11px]">
                       <div className="rounded-lg bg-surface-container-low px-2 py-1">
@@ -2820,7 +2868,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                 isTamivir
                   ? `현재 과잉권역 ${affectedRegionImprovementRows.length}개 · ${recommendedScenario.displayId} 적용 후 예상 재고 ${fmt(recommendedScenario.projectedInventory)} EA`
                   : isLipilou
-                    ? `현재 부족권역 ${affectedRegionImprovementRows.length}개 · ${recommendedScenario.displayId} 최소 권역 서비스율 ${recommendedScenario.minimumRegionalServiceRatePct.toFixed(1)}%`
+                    ? `이관 영향권역 ${affectedRegionImprovementRows.length}개 · 서울 재고 감소 및 제주 목표재고 회복`
                     : `현재 부족권역 ${affectedRegionImprovementRows.length}개 · ${recommendedScenario.displayId} 합성 배분계획 기준 목표재고 충족률 100.0%`
               }
             >
@@ -2832,14 +2880,14 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   >
                     <div className="flex items-center justify-between gap-sm">
                       <span className="text-xs font-bold text-on-surface">{region.name}</span>
-                      <Pill tone={isTamivir ? (region.currentValue >= 10 ? "danger" : "warning") : "danger"}>
-                        {isTamivir ? (region.currentValue >= 10 ? "심각한 과잉" : "과잉") : "현재 부족"}
+                      <Pill tone={isTamivir ? (region.currentValue >= 10 ? "danger" : "warning") : region.isTransferSource ? "primary" : "danger"}>
+                        {isTamivir ? (region.currentValue >= 10 ? "심각한 과잉" : "과잉") : region.isTransferSource ? "이관 출발" : "현재 부족"}
                       </Pill>
                     </div>
                     <div className="mt-sm flex items-stretch gap-xs">
-                      <div className="min-w-0 flex-1 rounded-lg bg-error-container/20 px-sm py-xs">
+                      <div className={`min-w-0 flex-1 rounded-lg px-sm py-xs ${region.isTransferSource ? "bg-primary-container/30" : "bg-error-container/20"}`}>
                         <p className="text-[9px] text-on-surface-variant">{isTamivir ? "현재 재고 비율" : "현재 목표재고 충족률"}</p>
-                        <p className="mt-1 font-data text-lg font-bold text-error">
+                        <p className={`mt-1 font-data text-lg font-bold ${region.isTransferSource ? "text-scm-primary" : "text-error"}`}>
                           {region.currentValue.toFixed(1)}{isTamivir ? "배" : "%"}
                         </p>
                       </div>
@@ -2848,14 +2896,14 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                       </span>
                       <div
                         className={`min-w-0 flex-1 rounded-lg px-sm py-xs ${
-                          isTamivir && region.afterStatus !== "적정"
+                          (isTamivir && region.afterStatus !== "적정") || region.isTransferSource
                             ? "bg-[#fff7e6]"
                             : "bg-green-50"
                         }`}
                       >
                         <p
                           className={`text-[9px] ${
-                            isTamivir && region.afterStatus !== "적정"
+                            (isTamivir && region.afterStatus !== "적정") || region.isTransferSource
                               ? "text-[#ad6800]"
                               : "text-green-700"
                           }`}
@@ -2884,7 +2932,16 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                             </p>
                           </>
                         ) : isLipilou ? (
-                          <p className="mt-1 text-sm font-bold text-green-700">서비스 정상화</p>
+                          <>
+                            <p className={`mt-1 font-data text-lg font-bold ${region.isTransferSource ? "text-[#ad6800]" : "text-green-700"}`}>
+                              {region.afterValue?.toFixed(1) ?? "-"}%
+                            </p>
+                            <p className={`text-[9px] font-bold ${region.isTransferSource ? "text-[#ad6800]" : "text-green-700"}`}>
+                              {region.isTransferSource
+                                ? `${fmt(Math.max(0, (region.currentStock ?? 0) - (region.afterStock ?? region.currentStock ?? 0)))} BOX 감소`
+                                : region.afterStatus ?? "적정"}
+                            </p>
+                          </>
                         ) : (
                           <>
                             <p className="mt-1 font-data text-lg font-bold text-green-700">
@@ -2910,14 +2967,14 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                   {isTamivir
                     ? `근거 · 예상 재고 ${fmt(recommendedScenario.projectedInventory)} EA · 잔여 과잉 ${fmt(recommendedScenario.excessInventory)} EA · 비용 ${recommendedScenario.costEffect}`
                     : isLipilou
-                      ? `근거 · 최저 권역 서비스율 ${recommendedScenario.minimumRegionalServiceRatePct.toFixed(1)}% · 미충족 ${fmt(recommendedScenario.totalUnmetDemand)} ${finishedUnit} · 부족기간 ${recommendedScenario.shortageWeeks}주`
+                      ? `근거 · 서울→제주 ${fmt(lipilouRecommendation?.transferAmount ?? 0)} BOX 이관 · 제주 목표재고 충족률 ${lipilouProjectedMinimumCoverage.toFixed(1)}%`
                       : `S3 전체 KPI · 최저 권역 서비스율 ${recommendedScenario.minimumRegionalServiceRatePct.toFixed(1)}% · 미충족 ${fmt(recommendedScenario.totalUnmetDemand)} ${finishedUnit} · 부족기간 ${recommendedScenario.shortageWeeks}주`}
                 </span>
                 <span>
                   {isTamivir
                     ? "※ S2 after_apply 원천 데이터 기준"
                     : isLipilou
-                      ? "※ 사후 권역별 재고 수치는 원천 데이터 미제공으로 임의 산출하지 않음"
+                      ? "※ S2 projectedRegions 원천 데이터 기준"
                       : `※ 합성 PoC 배분계획 · WMS ${fmt(cefazolinTransferPool)} VIAL + 추가생산 ${fmt(cefazolinSyntheticProductionAllocationTotal)} VIAL · 실제 확정 배분값 아님`}
                 </span>
               </div>
