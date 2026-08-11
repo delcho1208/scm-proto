@@ -26,6 +26,13 @@ const wmsByRegion: Record<string, WmsSnapshot> = {
 
 export function getLipilouIntegrationRecords(regionId: string): SystemRecord[] {
   const wms = wmsByRegion[regionId] ?? wmsByRegion.Seoul;
+  const simRegion = lipilouDashboard?.regions[regionId];
+  const stock = simRegion ? Math.round(simRegion.current_stock) : wms.stock;
+  const target = simRegion ? Math.round(simRegion.target_stock) : wms.target;
+  const ratioPct = target > 0 ? (stock / target) * 100 : wms.ratioPct;
+  const inventoryStatus = simRegion ? simRegion.riskText : wms.inventoryStatus;
+
+
 
   return [
     {
