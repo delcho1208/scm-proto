@@ -1,4 +1,5 @@
 import type { SystemRecord } from "@/data/scm";
+import { lipilouDashboard } from "@/data/dashboard-scenario";
 
 type WmsSnapshot = {
   warehouse: string;
