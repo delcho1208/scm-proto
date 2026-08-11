@@ -122,6 +122,32 @@ function calcSupplyStabilityScore(
   return Math.max(0, Math.min(100, score));
 }
 
+const TAMIVIR_TARGET_MIN_STOCK_RATIO = 1.3;
+
+// Tamivir-only supply stability score (0-100 points).
+// 60% regional inventory buffer + 20% excess reduction + 20% execution feasibility.
+function calcTamivirSupplyStabilityScore(
+  scenario: { minRegionalStockRatio?: number; excessInventory: number; feasibilityPct: number },
+  allScenarios: { excessInventory: number }[],
+) {
+  const clamp = (value: number) => Math.max(0, Math.min(100, value));
+
+  const bufferScore = clamp(
+    ((scenario.minRegionalStockRatio ?? 0) / TAMIVIR_TARGET_MIN_STOCK_RATIO) * 100,
+  );
+
+  const baselineExcess = allScenarios[0]?.excessInventory ?? scenario.excessInventory;
+  const minExcess = Math.min(...allScenarios.map((item) => item.excessInventory));
+  const excessRange = baselineExcess - minExcess;
+  const excessReductionScore =
+    excessRange > 0 ? clamp(((baselineExcess - scenario.excessInventory) / excessRange) * 100) : 0;
+
+  const feasibilityScore = clamp(scenario.feasibilityPct);
+
+  return clamp(0.6 * bufferScore + 0.2 * excessReductionScore + 0.2 * feasibilityScore);
+}
+
+
 function Pill({
   children,
   tone = "neutral",
@@ -1303,6 +1329,16 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       ];
     }),
   );
+  const tamivirScenarioMinStockRatio = (recommendationId: string) => {
+    const recommendation = tamivirDashboard.recommendations.find(
+      (item) => item.id === recommendationId,
+    );
+    const ratios = Object.values(recommendation?.projectedRegions ?? {})
+      .filter((region) => region.id !== "National")
+      .map((region) => region.stock_ratio)
+      .filter((ratio) => typeof ratio === "number");
+    return ratios.length > 0 ? Math.min(...ratios) : 0;
+  };
   const tamivirScenarios = [
     {
       id: "S1_무대응",
@@ -1321,6 +1357,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       projectedInventory: 1_280_777,
       excessInventory: 1_189_992,
       feasibilityPct: 100,
+      minRegionalStockRatio: tamivirScenarioMinStockRatio("TAMIVIR-S1-STATUS-QUO"),
       executionPeriod: "현행 유지",
       costEffect: "절감 없음",
     },
@@ -1341,6 +1378,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       projectedInventory: 745_570,
       excessInventory: 654_785,
       feasibilityPct: 94,
+      minRegionalStockRatio: tamivirScenarioMinStockRatio("TAMIVIR-S2-PINPOINT-REDUCTION"),
       executionPeriod: "2~4주",
       costEffect: "18~22% 절감",
     },
@@ -1361,6 +1399,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       projectedInventory: 480_777,
       excessInventory: 389_992,
       feasibilityPct: 89,
+      minRegionalStockRatio: tamivirScenarioMinStockRatio("TAMIVIR-S3-CDC-TRANSFER"),
       executionPeriod: "1~2주",
       costEffect: "9~12% 절감",
     },
@@ -2339,7 +2378,9 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             <div className="grid grid-cols-3 gap-sm">
               {scenarioRows.map((scenario) => {
                 const recommended = scenario.id === recommendedScenarioId;
-                const supplyStabilityScore = calcSupplyStabilityScore(scenario, isTamivir);
+                const supplyStabilityScore = isTamivir
+                  ? calcTamivirSupplyStabilityScore(scenario as any, scenarioRows as any)
+                  : calcSupplyStabilityScore(scenario, isTamivir);
                 return (
                   <article
                     key={scenario.id}
