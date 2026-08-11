@@ -59,6 +59,7 @@ export type WorkflowRunInput = {
   simulationReady: boolean;
   hitlStatus: HitlStatus;
   executionStatus: ExecutionStatus;
+  kpiConfirmed?: boolean;
   lastUpdatedAt: string;
 };
 
@@ -168,9 +169,6 @@ export function selectRecommendedScenario(scenarios: ScenarioMetrics[]): Scenari
 export function createWorkflowRunState(input: WorkflowRunInput): WorkflowRunState {
   const recommendation = input.simulationReady ? selectRecommendedScenario(input.scenarios) : null;
   const hasRecommendation = Boolean(recommendation?.recommendedScenarioId);
-  const approvedOrExecuted =
-    input.hitlStatus === "approved" || input.executionStatus === "executed";
-
   const stepStatuses: Record<number, WorkflowRuntimeStatus> = {
     1: input.dataReady ? "verified" : "review_required",
     2:
@@ -182,8 +180,8 @@ export function createWorkflowRunState(input: WorkflowRunInput): WorkflowRunStat
     3: input.analysisAvailable ? "verified" : "review_required",
     4: input.modelValidated ? "verified" : "locked",
     5: input.simulationReady ? "verified" : "locked",
-    6: hasRecommendation ? (approvedOrExecuted ? "verified" : "review_required") : "locked",
-    7: hasRecommendation ? (approvedOrExecuted ? "verified" : "available") : "locked",
+    6: hasRecommendation ? "verified" : "locked",
+    7: hasRecommendation ? "verified" : "locked",
     8:
       input.hitlStatus === "approved"
         ? "approved"
@@ -198,7 +196,11 @@ export function createWorkflowRunState(input: WorkflowRunInput): WorkflowRunStat
         : input.hitlStatus === "approved"
           ? "available"
           : "locked",
-    10: input.executionStatus === "executed" ? "available" : "locked",
+    10: input.kpiConfirmed
+      ? "verified"
+      : input.executionStatus === "executed"
+        ? "available"
+        : "locked",
   };
 
   const completedSteps = Object.entries(stepStatuses)
@@ -208,7 +210,7 @@ export function createWorkflowRunState(input: WorkflowRunInput): WorkflowRunStat
     .filter(([, status]) => status === "locked")
     .map(([step]) => Number(step));
 
-  let currentStep = 6;
+  let currentStep = 8;
   if (!input.dataReady) currentStep = 1;
   else if (!input.qualityProcessed) currentStep = 2;
   else if (!input.analysisAvailable) currentStep = 3;

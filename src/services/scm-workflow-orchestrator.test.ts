@@ -55,8 +55,8 @@ const pending = createWorkflowRunState({
   hitlStatus: "pending",
   executionStatus: "locked",
 });
-assert.deepEqual(pending.completedSteps, [1, 2, 3, 4, 5]);
-assert.equal(pending.currentStep, 6);
+assert.deepEqual(pending.completedSteps, [1, 2, 3, 4, 5, 6, 7]);
+assert.equal(pending.currentStep, 8);
 assert.equal(pending.stepStatuses[8], "approval_pending");
 assert.equal(pending.stepStatuses[9], "locked");
 
@@ -76,6 +76,17 @@ const executed = createWorkflowRunState({
 });
 assert.equal(executed.currentStep, 10);
 assert.equal(executed.stepStatuses[9], "executed");
+assert.equal(executed.stepStatuses[10], "available");
+assert.deepEqual(executed.completedSteps, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
 assert.equal(executed.feedbackStatus, "ready");
+
+const kpiConfirmed = createWorkflowRunState({
+  ...baseInput,
+  hitlStatus: "approved",
+  executionStatus: "executed",
+  kpiConfirmed: true,
+});
+assert.equal(kpiConfirmed.stepStatuses[10], "verified");
+assert.deepEqual(kpiConfirmed.completedSteps, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
 console.log("SCM workflow orchestrator tests passed");

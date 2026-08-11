@@ -8,6 +8,7 @@ import type {
 type TamivirWorkflowRunInput = {
   hitlStatus: HitlStatus;
   executionStatus: ExecutionStatus;
+  kpiConfirmed?: boolean;
   lastUpdatedAt: string;
 };
 
@@ -20,6 +21,7 @@ const TAMIVIR_RUN_ID = "SCM-TAMI-20261115-001";
 export function getTamivirWorkflowRunState({
   hitlStatus,
   executionStatus,
+  kpiConfirmed = false,
   lastUpdatedAt,
 }: TamivirWorkflowRunInput): WorkflowRunState {
   const stepStatuses: Record<number, WorkflowRuntimeStatus> = {
@@ -28,8 +30,8 @@ export function getTamivirWorkflowRunState({
     3: "verified",
     4: "verified",
     5: "verified",
-    6: "review_required",
-    7: "available",
+    6: "verified",
+    7: "verified",
     8:
       hitlStatus === "approved"
         ? "approved"
@@ -42,7 +44,7 @@ export function getTamivirWorkflowRunState({
         : hitlStatus === "approved"
           ? "available"
           : "locked",
-    10: executionStatus === "executed" ? "available" : "locked",
+    10: kpiConfirmed ? "verified" : executionStatus === "executed" ? "available" : "locked",
   };
 
   const completedSteps = Object.entries(stepStatuses)
@@ -53,7 +55,7 @@ export function getTamivirWorkflowRunState({
     .filter(([, status]) => status === "locked")
     .map(([step]) => Number(step));
 
-  let currentStep = 6;
+  let currentStep = 8;
   if (hitlStatus === "held") currentStep = 8;
   else if (hitlStatus === "approved") currentStep = 9;
   if (executionStatus === "executed") currentStep = 10;

@@ -61,6 +61,7 @@ type ProductExecutionState = {
   productId: string;
   hitlStatus: HitlStatus;
   executionStatus: ExecutionStatus;
+  kpiConfirmed: boolean;
   reviewer: string;
   reviewerRole: string;
   reviewNote: string;
@@ -77,6 +78,7 @@ function loadProductExecutionState(productKey: string, latestSnapshotDate: strin
     productId: productKey,
     hitlStatus: "pending",
     executionStatus: "locked",
+    kpiConfirmed: false,
     reviewer: "",
     reviewerRole: "SCM 운영",
     reviewNote: "",
@@ -1633,6 +1635,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const [showWorkflow, setShowWorkflow] = useState(false);
   const [hitlStatus, setHitlStatus] = useState<HitlStatus>(initialProductState.hitlStatus);
   const [executionStatus, setExecutionStatus] = useState<ExecutionStatus>(initialProductState.executionStatus);
+  const [kpiConfirmed, setKpiConfirmed] = useState(initialProductState.kpiConfirmed);
   const [reviewer, setReviewer] = useState(initialProductState.reviewer);
   const [reviewerRole, setReviewerRole] = useState(initialProductState.reviewerRole);
   const [reviewNote, setReviewNote] = useState(initialProductState.reviewNote);
@@ -1655,6 +1658,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     setShowWorkflow(false);
     setHitlStatus("pending");
     setExecutionStatus("locked");
+    setKpiConfirmed(false);
     setReviewer("");
     setReviewerRole("SCM 운영");
     setReviewNote("");
@@ -1668,6 +1672,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       productId: product.key,
       hitlStatus,
       executionStatus,
+      kpiConfirmed,
       reviewer,
       reviewerRole,
       reviewNote,
@@ -1679,7 +1684,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     } catch {
       // 저장소를 사용할 수 없는 환경에서도 화면 상태는 현재 제품 안에서 유지합니다.
     }
-  }, [product.key, hitlStatus, executionStatus, reviewer, reviewerRole, reviewNote, checklist, lastUpdatedAt]);
+  }, [product.key, hitlStatus, executionStatus, kpiConfirmed, reviewer, reviewerRole, reviewNote, checklist, lastUpdatedAt]);
 
   const national = cefazolinDashboard.regions.National;
   const nationalPolicyRisk = cefazolinDashboard.policyRiskByRegion.National;
@@ -1825,7 +1830,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const approvalReady = reviewer.trim().length > 0 && checklistComplete;
   const holdReady = reviewer.trim().length > 0 && reviewNote.trim().length > 0;
   const workflow = isTamivir
-    ? getTamivirWorkflowRunState({ hitlStatus, executionStatus, lastUpdatedAt })
+    ? getTamivirWorkflowRunState({ hitlStatus, executionStatus, kpiConfirmed, lastUpdatedAt })
     : createWorkflowRunState({
         runId: cefazolinWorkflowRunMeta.runId,
         scenarios: scenarioRows,
@@ -1836,12 +1841,12 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         simulationReady: scenarioRows.length > 0,
         hitlStatus,
         executionStatus,
+        kpiConfirmed,
         lastUpdatedAt,
       });
   const activeStep = Math.max(1, workflow.currentStep);
   const approvalLocked = hitlStatus === "approved";
-  const completedWorkflowStepCount =
-    executionStatus === "executed" ? cefazolinWorkflowSteps.length : workflow.completedSteps.length;
+  const completedWorkflowStepCount = workflow.completedSteps.length;
 
   const executionRows = cefazolinVirtualExecutionActions.map((action) => ({
     ...action,
@@ -1970,6 +1975,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     const now = new Date().toISOString();
     setHitlStatus("approved");
     setExecutionStatus("ready");
+    setKpiConfirmed(false);
     setLastUpdatedAt(now);
     setTab("execution");
   };
@@ -1979,6 +1985,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     const now = new Date().toISOString();
     setHitlStatus("held");
     setExecutionStatus("locked");
+    setKpiConfirmed(false);
     setLastUpdatedAt(now);
   };
 
@@ -1987,6 +1994,13 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     if (!executionRows.some((row) => row.productId === productId && row.id === instructionId)) return;
     if (hitlStatus !== "approved" || executionStatus !== "ready") return;
     setExecutionStatus("executed");
+    setKpiConfirmed(false);
+    setLastUpdatedAt(cefazolinWorkflowRunMeta.latestSnapshotDate);
+  };
+
+  const confirmKpi = () => {
+    if (executionStatus !== "executed" || kpiConfirmed) return;
+    setKpiConfirmed(true);
     setLastUpdatedAt(cefazolinWorkflowRunMeta.latestSnapshotDate);
   };
 
@@ -2912,6 +2926,16 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     ? `이관 영향권역 ${affectedRegionImprovementRows.length}개 · 서울 재고 감소 및 제주 목표재고 회복`
                     : `현재 부족권역 ${affectedRegionImprovementRows.length}개 · ${recommendedScenario.displayId} 합성 배분계획 기준 목표재고 충족률 100.0%`
               }
+              action={
+                <button
+                  type="button"
+                  disabled={kpiConfirmed}
+                  onClick={confirmKpi}
+                  className="rounded-lg bg-scm-primary px-3 py-2 text-[11px] font-bold text-white disabled:cursor-default disabled:bg-green-600"
+                >
+                  {kpiConfirmed ? "KPI 확인 완료" : "KPI 확인 완료하기"}
+                </button>
+              }
             >
               <div className="grid grid-cols-3 gap-sm">
                 {affectedRegionImprovementRows.map((region) => (
@@ -3051,10 +3075,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             </header>
             <div className="space-y-xs p-md">
               {cefazolinWorkflowSteps.map((step) => {
-                const status =
-                  step.order === 10 && executionStatus === "executed"
-                    ? "verified"
-                    : workflow.stepStatuses[step.order];
+                const status = workflow.stepStatuses[step.order];
                 const label =
                   status === "verified"
                     ? "완료"
