@@ -122,6 +122,32 @@ function calcSupplyStabilityScore(
   return Math.max(0, Math.min(100, score));
 }
 
+const TAMIVIR_TARGET_MIN_STOCK_RATIO = 1.3;
+
+// Tamivir-only supply stability score (0-100 points).
+// 60% regional inventory buffer + 20% excess reduction + 20% execution feasibility.
+function calcTamivirSupplyStabilityScore(
+  scenario: { minRegionalStockRatio?: number; excessInventory: number; feasibilityPct: number },
+  allScenarios: { excessInventory: number }[],
+) {
+  const clamp = (value: number) => Math.max(0, Math.min(100, value));
+
+  const bufferScore = clamp(
+    ((scenario.minRegionalStockRatio ?? 0) / TAMIVIR_TARGET_MIN_STOCK_RATIO) * 100,
+  );
+
+  const baselineExcess = allScenarios[0]?.excessInventory ?? scenario.excessInventory;
+  const minExcess = Math.min(...allScenarios.map((item) => item.excessInventory));
+  const excessRange = baselineExcess - minExcess;
+  const excessReductionScore =
+    excessRange > 0 ? clamp(((baselineExcess - scenario.excessInventory) / excessRange) * 100) : 0;
+
+  const feasibilityScore = clamp(scenario.feasibilityPct);
+
+  return clamp(0.6 * bufferScore + 0.2 * excessReductionScore + 0.2 * feasibilityScore);
+}
+
+
 function Pill({
   children,
   tone = "neutral",
