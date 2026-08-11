@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { brandLogo, products, userAvatar, type Product } from "@/data/scm";
+import { brandLogo, products, type Product } from "@/data/scm";
 import { useSelectedProductKey, setSelectedProductKey } from "@/data/product-store";
 import { triggerDataRefresh } from "@/data/app-signals";
 
@@ -152,9 +152,6 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
             >
               새로고침
             </button>
-            <div className="h-8 w-8 overflow-hidden rounded-full bg-outline-variant">
-              <img className="h-full w-full object-cover" src={userAvatar} alt="User avatar" />
-            </div>
           </div>
         </header>
 
