@@ -150,7 +150,7 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
               onClick={() => triggerDataRefresh()}
               className="cursor-pointer rounded-lg bg-scm-primary px-md py-1.5 text-white transition-opacity hover:opacity-90 active:scale-95"
             >
-              Refresh Data
+              새로고침
             </button>
             <div className="h-8 w-8 overflow-hidden rounded-full bg-outline-variant">
               <img className="h-full w-full object-cover" src={userAvatar} alt="User avatar" />
