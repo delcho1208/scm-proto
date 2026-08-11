@@ -441,7 +441,7 @@ export const cefazolinWorkflowSteps: CefazolinWorkflowStep[] = [
     order: 5,
     group: "분석·시뮬레이션",
     title: "S1~S3 시뮬레이션",
-    shortTitle: "S1~S3 시뮬레이션",
+    shortTitle: "S1~S3 시나리오 3건 연동",
     purpose: "세 가지 대응안을 서비스·부족·조달·비용 지표로 비교합니다.",
     icon: "science",
     ruleIds: ["RULE-SCENARIO-CONSTRAINT-001"],
