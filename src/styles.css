@@ -137,6 +137,16 @@
     border-color: var(--color-border);
   }
 
+  body,
+  button,
+  input,
+  select,
+  textarea,
+  th,
+  td {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -193,9 +203,9 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
 
-  --font-display: "Hanken Grotesk", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-data: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-data: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   --text-label-caps: 11px;
   --text-label-caps--line-height: 16px;
