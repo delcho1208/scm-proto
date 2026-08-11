@@ -53,7 +53,7 @@ export function getLipilouIntegrationRecords(regionId: string): SystemRecord[] {
       updatedAt: "2026-10-28",
       note: "천안공장 B라인 · 품질검사 합격 · 출하 승인 완료",
       dataType: "MES 생산·품질 실적",
-      calculationBasis: "2026-04-25 일일생산량 · 최대생산능력 42,000 · 가동률 82.6%",
+      calculationBasis: "2026-10-28 일일생산량 · 최대생산능력 42,000 · 가동률 82.6%",
     },
     {
       system: "WMS",
