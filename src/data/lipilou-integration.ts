@@ -1,4 +1,5 @@
 import type { SystemRecord } from "@/data/scm";
+import { lipilouDashboard } from "@/data/dashboard-scenario";
 
 type WmsSnapshot = {
   warehouse: string;
@@ -25,6 +26,13 @@ const wmsByRegion: Record<string, WmsSnapshot> = {
 
 export function getLipilouIntegrationRecords(regionId: string): SystemRecord[] {
   const wms = wmsByRegion[regionId] ?? wmsByRegion.Seoul;
+  const simRegion = lipilouDashboard?.regions[regionId];
+  const stock = simRegion ? Math.round(simRegion.current_stock) : wms.stock;
+  const target = simRegion ? Math.round(simRegion.target_stock) : wms.target;
+  const ratioPct = target > 0 ? (stock / target) * 100 : wms.ratioPct;
+  const inventoryStatus = simRegion ? simRegion.riskText : wms.inventoryStatus;
+
+
 
   return [
     {
@@ -51,11 +59,11 @@ export function getLipilouIntegrationRecords(regionId: string): SystemRecord[] {
       system: "WMS",
       docNo: `${wms.warehouse} / ${wms.lot}`,
       status: "동기화 완료",
-      qty: wms.stock.toLocaleString("ko-KR"),
+      qty: stock.toLocaleString("ko-KR"),
       updatedAt: "2026-10-28",
-      note: `${wms.region} · 재고 ${wms.inventoryStatus} · 입고예정 ${wms.incoming.toLocaleString("ko-KR")} BOX · 운송가능 ${wms.transferable.toLocaleString("ko-KR")} BOX`,
+      note: `${wms.region} · 재고 ${inventoryStatus} · 입고예정 ${wms.incoming.toLocaleString("ko-KR")} BOX · 운송가능 ${wms.transferable.toLocaleString("ko-KR")} BOX`,
       dataType: "WMS 일별 재고 실적",
-      calculationBasis: `2026-03-02~04-30 일별 데이터 최신값 · 목표 ${wms.target.toLocaleString("ko-KR")} BOX · 충족률 ${wms.ratioPct.toFixed(1)}%`,
+      calculationBasis: `시뮬레이션 권역별 재고 기준 · 목표 ${target.toLocaleString("ko-KR")} BOX · 충족률 ${ratioPct.toFixed(1)}%`,
     },
   ];
 }

@@ -1,4 +1,5 @@
 import type { SystemRecord } from "@/data/scm";
+import { tamivirDashboard } from "@/data/dashboard-scenario";
 
 type WmsSnapshot = {
   warehouse: string;
@@ -23,7 +24,10 @@ const wmsByRegion: Record<string, WmsSnapshot> = {
 
 export function getTamivirIntegrationRecords(regionId: string): SystemRecord[] {
   const wms = wmsByRegion[regionId] ?? wmsByRegion.Seoul;
-  const safetyCoveragePct = (wms.stock / wms.safetyStock) * 100;
+  const simRegion = tamivirDashboard?.regions[regionId];
+  const stock = simRegion ? Math.round(simRegion.current_stock) : wms.stock;
+  const safetyCoveragePct = (stock / wms.safetyStock) * 100;
+
 
   return [
     {
@@ -50,7 +54,7 @@ export function getTamivirIntegrationRecords(regionId: string): SystemRecord[] {
       system: "WMS",
       docNo: `${wms.warehouse} / 261028-L1`,
       status: "동기화 완료",
-      qty: wms.stock.toLocaleString("ko-KR"),
+      qty: stock.toLocaleString("ko-KR"),
       updatedAt: "2026-10-28",
       note: `${wms.region} · 안전재고 ${safetyCoveragePct < 100 ? "미달" : "충족"} · 입고예정 ${wms.incoming.toLocaleString("ko-KR")} BOX · 운송가능 ${wms.transferable.toLocaleString("ko-KR")} BOX · 외부충격 감지`,
       dataType: "WMS 일별 재고 실적",
