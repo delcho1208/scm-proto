@@ -137,16 +137,6 @@
     border-color: var(--color-border);
   }
 
-  body,
-  button,
-  input,
-  select,
-  textarea,
-  th,
-  td {
-    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  }
-
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -155,20 +145,20 @@
 
 /* ===== Digital Twin SCM Portal design system ===== */
 :root {
-  --scm-primary: #5a35d6;
-  --scm-primary-container: #6d4ae8;
-  --scm-on-primary-container: #ffffff;
-  --scm-on-surface: #211a32;
-  --scm-on-surface-variant: #625a72;
-  --scm-surface: #f8f6fc;
+  --scm-primary: #004ccd;
+  --scm-primary-container: #0f62fe;
+  --scm-on-primary-container: #f3f3ff;
+  --scm-on-surface: #191b24;
+  --scm-on-surface-variant: #424656;
+  --scm-surface: #faf8ff;
   --scm-surface-container-lowest: #ffffff;
-  --scm-surface-container-low: #f5f1fa;
-  --scm-surface-container: #efeaf7;
-  --scm-surface-container-high: #eae4f4;
-  --scm-surface-container-highest: #e3dbef;
-  --scm-surface-variant: #e8e1f2;
-  --scm-outline: #81788d;
-  --scm-outline-variant: #d8d0e4;
+  --scm-surface-container-low: #f2f3ff;
+  --scm-surface-container: #ecedfa;
+  --scm-surface-container-high: #e7e7f4;
+  --scm-surface-container-highest: #e1e1ee;
+  --scm-surface-variant: #e1e1ee;
+  --scm-outline: #737687;
+  --scm-outline-variant: #c3c6d8;
   --scm-error: #ba1a1a;
   --scm-error-container: #ffdad6;
   --scm-safe: #52c41a;
@@ -203,9 +193,9 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
 
-  --font-display: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-data: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display: "Hanken Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, monospace;
 
   --text-label-caps: 11px;
   --text-label-caps--line-height: 16px;
@@ -248,55 +238,6 @@
   margin: 0 auto;
 }
 
-/* ===== Modern Purple Card theme =====
- * Visual-only overrides: layout dimensions and component behavior stay unchanged.
- */
-.scm-root {
-  background:
-    radial-gradient(circle at 10% -8%, rgba(109, 74, 232, 0.12), transparent 28%),
-    radial-gradient(circle at 90% 2%, rgba(90, 53, 214, 0.07), transparent 24%),
-    var(--scm-surface);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-.font-data {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.015em;
-}
-
-.scm-root > main > header {
-  border-color: rgba(90, 53, 214, 0.13);
-  background: rgba(249, 247, 253, 0.92);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 8px 28px rgba(63, 42, 100, 0.055);
-  backdrop-filter: blur(18px) saturate(1.12);
-}
-
-.scm-root > main > footer {
-  border-color: rgba(90, 53, 214, 0.12);
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 -6px 22px rgba(63, 42, 100, 0.035);
-  backdrop-filter: blur(14px);
-}
-
-.scm-root button[class*="bg-scm-primary"] {
-  background-image: linear-gradient(135deg, #6d4ae8 0%, #5230c7 100%);
-  box-shadow: 0 5px 14px rgba(90, 53, 214, 0.18);
-}
-
-.scm-root button[class*="bg-scm-primary"]:not(:disabled):hover {
-  box-shadow: 0 7px 18px rgba(90, 53, 214, 0.24);
-}
-
-.scm-root input:focus,
-.scm-root textarea:focus,
-.scm-root select:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(90, 53, 214, 0.10);
-}
-
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-weight: normal;
@@ -318,23 +259,16 @@
 }
 
 .bento-card {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(90, 53, 214, 0.12);
-  border-radius: 16px;
-  box-shadow:
-    0 2px 8px rgba(53, 35, 88, 0.035),
-    0 10px 30px rgba(90, 53, 214, 0.055);
+  background: var(--scm-surface-container-lowest);
+  border: 1px solid var(--scm-surface-variant);
+  border-radius: 12px;
   transition:
-    transform 0.2s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 .bento-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(90, 53, 214, 0.26);
-  box-shadow:
-    0 4px 12px rgba(53, 35, 88, 0.045),
-    0 14px 34px rgba(90, 53, 214, 0.085);
+  border-color: var(--scm-primary);
+  box-shadow: 0 4px 20px rgba(0, 76, 205, 0.05);
 }
 
 @media (min-width: 1536px) {
@@ -374,7 +308,7 @@
 .timeline-chart-marker {
   stroke: var(--scm-primary);
   stroke-dasharray: 4 3;
-  filter: drop-shadow(0 0 2px rgba(90, 53, 214, 0.45));
+  filter: drop-shadow(0 0 2px rgba(0, 76, 205, 0.45));
   transition: x1 0.35s ease, x2 0.35s ease, stroke 0.35s ease;
 }
 
@@ -384,16 +318,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border: 1px solid rgba(90, 53, 214, 0.10);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 4px 14px rgba(90, 53, 214, 0.035);
+  border: 1px solid rgba(115, 118, 135, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.88);
   padding: 6px 10px;
   transition: border-color 0.25s ease, background-color 0.25s ease;
 }
 .forecast-kpi-row:hover {
-  border-color: rgba(90, 53, 214, 0.35);
-  background: rgba(90, 53, 214, 0.025);
+  border-color: rgba(0, 76, 205, 0.35);
+  background: rgba(0, 76, 205, 0.025);
 }
 .forecast-kpi-row p {
   color: var(--scm-on-surface-variant);
@@ -418,7 +351,7 @@
   justify-content: center;
   border-radius: 9px;
   color: var(--scm-primary);
-  background: rgba(90, 53, 214, 0.1);
+  background: rgba(0, 76, 205, 0.1);
 }
 .api-placeholder-icon.news {
   color: #ad6800;
@@ -1005,7 +938,7 @@
 }
 .timeline-badge.actual {
   color: var(--scm-primary);
-  background: rgba(90, 53, 214, 0.1);
+  background: rgba(0, 76, 205, 0.1);
 }
 .timeline-badge.prediction {
   color: #ad6800;
@@ -1060,7 +993,7 @@
   border: 3px solid #fff;
   border-radius: 50%;
   background: var(--scm-primary);
-  box-shadow: 0 0 0 2px rgba(90, 53, 214, 0.28), 0 2px 5px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 0 0 2px rgba(0, 76, 205, 0.28), 0 2px 5px rgba(0, 0, 0, 0.18);
 }
 .timeline-range::-moz-range-thumb {
   width: 10px;
@@ -1198,7 +1131,7 @@
   stroke-width: 1.15;
   stroke-linecap: round;
   stroke-dasharray: 3 2;
-  filter: drop-shadow(0 1px 1px rgba(90, 53, 214, 0.3));
+  filter: drop-shadow(0 1px 1px rgba(0, 76, 205, 0.3));
   animation: transfer-route-flow 1.2s linear infinite;
 }
 .transfer-route-origin {
@@ -1257,15 +1190,15 @@
   touch-action: manipulation;
 }
 .region-marker:hover {
-  background: rgba(90, 53, 214, 0.05);
-  border: 1px solid rgba(90, 53, 214, 0.3);
-  box-shadow: 0 4px 12px rgba(90, 53, 214, 0.12);
+  background: rgba(0, 76, 205, 0.05);
+  border: 1px solid rgba(0, 76, 205, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 76, 205, 0.12);
   transform: scale(1.04);
 }
 .region-marker.active {
-  background: rgba(90, 53, 214, 0.12);
+  background: rgba(0, 76, 205, 0.12);
   border: 1px solid var(--scm-primary);
-  box-shadow: 0 0 0 3px rgba(90, 53, 214, 0.12);
+  box-shadow: 0 0 0 3px rgba(0, 76, 205, 0.12);
 }
 .region-marker:focus-visible {
   outline: 2px solid var(--scm-primary);
