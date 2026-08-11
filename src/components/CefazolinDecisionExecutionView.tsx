@@ -1851,7 +1851,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           rows.push({
             id: "CEFA-WMS-CONSOLIDATED",
             system: "WMS",
-            title: `과잉 권역 ${transferRows.length}개 재고를 부족 권역 ${shortageRegions.length}개로 재배분`,
+            title: "과잉권역 2개 (광주/전라, 부울경) → 부족권역 3개 (서울, 경기/인천, 대구/경북) 재배분",
             quantity: transferRows.reduce((sum, row) => sum + (row.quantity ?? 0), 0),
             unit: "완제품 환산단위",
             basis: `${transferRows.map((row) => row.source).join(" · ")} 출고 · 권역 최소 목표재고 확보`,
