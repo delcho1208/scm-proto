@@ -2316,7 +2316,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                     <div className="mt-1.5 flex items-center gap-2">
                       <span className="text-[10px] text-on-surface-variant">공급 안정도</span>
                       <strong className="font-data text-xs">
-                        {calcSupplyStabilityPct(scenario).toFixed(1)}%
+                        {calcSupplyStabilityPct(scenario).toFixed(1)}/100
                       </strong>
                       <div className="min-w-0 flex-1">
                         <SignalBar
