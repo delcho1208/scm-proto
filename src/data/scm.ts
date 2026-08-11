@@ -276,7 +276,7 @@ export function getIntegrationRecords(regionId: string, productKey: string): Sys
         docNo: `${meta.prefix}-2026-${(1000 + (seed % 8999)).toString()}`,
         status: statuses[(seed >>> 3) % statuses.length],
         qty: (2000 + ((seed >>> 5) % 48000)).toLocaleString(),
-        updatedAt: `2026-03-${String(6 + (seed % 5)).padStart(2, "0")} ${String(8 + ((seed >>> 7) % 10)).padStart(2, "0")}:${String((seed >>> 2) % 60).padStart(2, "0")}`,
+        updatedAt: "2026-10-28",
         note: meta.notes[(seed >>> 9) % meta.notes.length],
       };
     })
