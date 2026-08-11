@@ -111,6 +111,22 @@ function fmtKrw(value: number) {
   return `${Math.round(value / 10_000).toLocaleString("ko-KR")}만 원`;
 }
 
+/**
+ * 공급 안정도(%) — 제품 공통 지표.
+ * 최저 권역 서비스 수준(형평성)과 잔여 공급 리스크를 절반씩 반영하고,
+ * 부족 지속 주차만큼 감점하여 시나리오별 공급 안정성을 나타냅니다.
+ */
+function calcSupplyStabilityPct(scenario: {
+  minimumRegionalServiceRatePct: number;
+  shortageWeeks: number;
+  riskScore?: number;
+}) {
+  const coverage = Math.max(0, Math.min(100, scenario.minimumRegionalServiceRatePct));
+  const risk = Math.max(0, Math.min(100, scenario.riskScore ?? 100 - coverage));
+  const shortagePenalty = Math.min(scenario.shortageWeeks, 10) * 1.5;
+  return Math.max(0, Math.min(100, 0.5 * coverage + 0.5 * (100 - risk) - shortagePenalty));
+}
+
 function Pill({
   children,
   tone = "neutral",
@@ -2298,28 +2314,25 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
                       )}
                     </div>
                     <div className="mt-1.5 flex items-center gap-2">
-                      <span className="text-[10px] text-on-surface-variant">{isTamivir ? "위험점수" : "서비스율"}</span>
+                      <span className="text-[10px] text-on-surface-variant">공급 안정도</span>
                       <strong className="font-data text-xs">
-                        {isTamivir ? `${scenario.riskScore}/100` : `${scenario.serviceRatePct.toFixed(1)}%`}
+                        {calcSupplyStabilityPct(scenario).toFixed(1)}%
                       </strong>
                       <div className="min-w-0 flex-1">
                         <SignalBar
-                          value={isTamivir ? scenario.riskScore : scenario.serviceRatePct}
+                          value={calcSupplyStabilityPct(scenario)}
                           tone={
-                            isTamivir
-                              ? scenario.riskScore >= 80
-                                ? "danger"
-                                : scenario.riskScore >= 50
+                            calcSupplyStabilityPct(scenario) >= 90
+                              ? "success"
+                              : calcSupplyStabilityPct(scenario) >= 70
+                                ? "primary"
+                                : calcSupplyStabilityPct(scenario) >= 50
                                   ? "warning"
-                                  : "success"
-                              : recommended
-                                ? "success"
-                                : scenario.constraintPassed
-                                  ? "primary"
                                   : "danger"
                           }
                         />
                       </div>
+
                     </div>
                     <dl className="mt-1.5 grid grid-cols-4 gap-xs text-[11px]">
                       <div className="rounded-lg bg-surface-container-low px-2 py-1">
