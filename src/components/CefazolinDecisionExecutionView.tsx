@@ -1596,23 +1596,23 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
         ]
       : cefazolinVirtualExecutionActionsSource;
   const tamivirWorkflowContent = [
-    { title: "ERP·MES·WMS·수요 데이터 확인", purpose: "타미비어 수요·재고·생산·물류 데이터를 동일 기준일로 수집합니다.", evidence: "타미비어 전국 8개 권역 데이터 수집 완료", ruleIds: ["RULE-TAMI-DATA-001"], nextAction: "통합 데이터의 누락과 기준일을 검사합니다." },
-    { title: "통합·품질 검사", purpose: "타미비어 필수 재고·수요·생산 데이터의 완전성과 정합성을 확인합니다.", evidence: "필수 재고·수요·생산 데이터 검증 완료", ruleIds: ["RULE-TAMI-QUALITY-001"], nextAction: "검증된 데이터로 수요 이상 신호를 분석합니다." },
-    { title: "인플루엔자 수요 급감 탐지", purpose: "수요예측 하향과 권역별 재고 비율을 결합해 과잉재고 위험을 탐지합니다.", evidence: "전국 재고 비율 14.1배 · 심각한 과잉 권역 3개", ruleIds: ["RULE-DEMAND-DROP-001"], nextAction: "탐지된 수요 급감이 권역 재고에 미치는 영향을 확인합니다." },
-    { title: "Case 영향 분석", purpose: "수요 급감이 재고 과잉과 권역 창고 포화 위험에 미치는 영향을 분석합니다.", evidence: "Dead Stock 1,189,992 EA · 심각한 과잉 권역 3개", ruleIds: ["RULE-TAMI-IMPACT-001"], nextAction: "동일 Case 기준으로 S1~S3 대응안을 비교합니다." },
-    { title: "S1~S3 시뮬레이션", purpose: "현행유지·핀셋 감축·CDC 이송안의 예상 재고, 잔여 과잉재고, 위험점수, 비용효과를 비교합니다.", evidence: "S1 현행유지 · S2 핀셋 감축 · S3 CDC 이송 3개 실행안 비교", ruleIds: ["RULE-TAMI-SIMULATION-001"], nextAction: "실행 가능한 대응안의 시스템별 조건을 검증합니다." },
-    { title: "대응안 실행가능성 검증", purpose: "신규 발주 보류와 경기/인천·영남권 생산 감축 가능량·일정을 검증합니다.", evidence: "ERP 발주 보류·MES 생산 감축 조건과 재고 감축 효과 검증", ruleIds: ["RULE-TAMI-FEASIBILITY-001"], nextAction: "제약을 통과한 최종 권고안을 선정합니다." },
-    { title: "최종 권고안 선정·근거", purpose: "잔여 과잉재고, 비용절감, 실행가능성을 기준으로 최종 실행안을 선정합니다.", evidence: "S2 핀셋 감축 · 비용 18~22% 절감 · 실행가능성 94%", ruleIds: ["RULE-TAMI-RECOMMEND-001"], nextAction: "발주 보류와 생산 감축 조건을 담당자가 검토합니다." },
-    { title: "담당자 검토·승인", purpose: "타미비어 실행 전 필수 운영 조건과 승인 의견을 기록합니다.", evidence: "신규 발주 보류·생산 감축·감축 후 권역 재고 수준 확인", ruleIds: ["RULE-TAMI-HITL-001"], nextAction: "승인된 실행안을 ERP·MES 지시로 변환합니다." },
-    { title: "실행지시 준비", purpose: "승인된 S2 대응안을 시스템별 실행지시로 생성합니다.", evidence: "ERP 발주 보류·MES 생산 감축 실행지시 생성", ruleIds: ["RULE-TAMI-EXECUTION-001"], nextAction: "실행지시 전송 상태와 결과를 확인합니다." },
-    { title: "계획 KPI 확인", purpose: "S1 대비 핀셋 감축안의 재고 정상화와 비용절감 효과를 확인합니다.", evidence: "예상 재고 745,570 EA · 과잉재고 654,785 EA", ruleIds: ["RULE-TAMI-EFFECT-001"], nextAction: "실제 운영실적과 계획 KPI 편차를 추적합니다." },
+    { title: "ERP·MES·WMS·수요 데이터 확인", shortTitle: "데이터 수집", purpose: "타미비어 수요·재고·생산·물류 데이터를 동일 기준일로 수집합니다.", evidence: "타미비어 전국 8개 권역 데이터 수집 완료", ruleIds: ["RULE-TAMI-DATA-001"], nextAction: "통합 데이터의 누락과 기준일을 검사합니다." },
+    { title: "데이터 통합·품질 검사", shortTitle: "통합·품질 검사", purpose: "타미비어 필수 재고·수요·생산 데이터의 완전성과 정합성을 확인합니다.", evidence: "필수 재고·수요·생산 데이터 검증 완료", ruleIds: ["RULE-TAMI-QUALITY-001"], nextAction: "검증된 데이터로 수요 이상 신호를 분석합니다." },
+    { title: "수요 이상 탐지·Case 생성", shortTitle: "위험 탐지", purpose: "수요예측 하향과 권역별 재고 비율을 결합해 과잉재고 위험을 탐지하고 Case를 생성합니다.", evidence: "전국 재고 비율 14.1배 · 심각한 과잉 권역 3개", ruleIds: ["RULE-DEMAND-DROP-001"], nextAction: "생성된 Case가 권역 재고에 미치는 영향을 확인합니다." },
+    { title: "Case 영향 분석", shortTitle: "영향 분석", purpose: "수요 급감이 재고 과잉과 권역 창고 포화 위험에 미치는 영향을 분석합니다.", evidence: "Dead Stock 1,189,992 EA · 심각한 과잉 권역 3개", ruleIds: ["RULE-TAMI-IMPACT-001"], nextAction: "동일 Case 기준으로 S1~S3 대응안을 비교합니다." },
+    { title: "S1~S3 시뮬레이션", shortTitle: "S1~S3 시뮬레이션", purpose: "현행유지·핀셋 감축·CDC 이송안의 예상 재고, 잔여 과잉재고, 공급안정도, 비용효과를 비교합니다.", evidence: "S1 현행유지 · S2 핀셋 감축 · S3 CDC 이송 3개 실행안 비교", ruleIds: ["RULE-TAMI-SIMULATION-001"], nextAction: "실행 가능한 대응안의 시스템별 조건을 검증합니다." },
+    { title: "대응안 실행가능성 검증", shortTitle: "실행가능성 검증", purpose: "신규 발주 보류와 경기/인천·영남권 생산 감축 가능량·일정을 검증합니다.", evidence: "ERP 발주 보류·MES 생산 감축 조건과 재고 감축 효과 검증", ruleIds: ["RULE-TAMI-FEASIBILITY-001"], nextAction: "제약을 통과한 최종 권고안을 선정합니다." },
+    { title: "최종 권고안 선정·근거", shortTitle: "권고안 선정", purpose: "잔여 과잉재고, 비용절감, 실행가능성을 기준으로 최종 실행안을 선정합니다.", evidence: "S2 핀셋 감축 · 비용 18~22% 절감 · 실행가능성 94%", ruleIds: ["RULE-TAMI-RECOMMEND-001"], nextAction: "발주 보류와 생산 감축 조건을 담당자가 검토합니다." },
+    { title: "담당자 검토·승인", shortTitle: "담당자 승인", purpose: "타미비어 실행 전 필수 운영 조건과 승인 의견을 기록합니다.", evidence: "신규 발주 보류·생산 감축·감축 후 권역 재고 수준 확인", ruleIds: ["RULE-TAMI-HITL-001"], nextAction: "승인된 실행안을 ERP·MES·WMS 지시로 변환합니다." },
+    { title: "실행지시 준비", shortTitle: "실행지시", purpose: "승인된 S2 대응안을 시스템별 실행지시로 생성합니다.", evidence: "ERP 발주 보류·MES 생산 감축·WMS 안전재고 유지 지시 생성", ruleIds: ["RULE-TAMI-EXECUTION-001"], nextAction: "실행지시 전송 상태와 결과를 확인합니다." },
+    { title: "계획 KPI 확인", shortTitle: "계획 KPI", purpose: "S1 대비 핀셋 감축안의 재고 정상화와 비용절감 효과를 확인합니다.", evidence: "예상 재고 745,570 EA · 과잉재고 654,785 EA", ruleIds: ["RULE-TAMI-EFFECT-001"], nextAction: "실제 운영실적과 계획 KPI 편차를 추적합니다." },
   ];
   const cefazolinWorkflowSteps: any[] = isTamivir
     ? cefazolinWorkflowStepsSource.map((step, index) => ({
         ...step,
         id: step.id.replace("FLOW", "TAMI-FLOW"),
         title: tamivirWorkflowContent[index]?.title ?? step.title,
-        shortTitle: tamivirWorkflowContent[index]?.title ?? step.shortTitle,
+        shortTitle: tamivirWorkflowContent[index]?.shortTitle ?? step.shortTitle,
         purpose: tamivirWorkflowContent[index]?.purpose ?? step.purpose,
         ruleIds: tamivirWorkflowContent[index]?.ruleIds ?? step.ruleIds,
         dataAsOf: tamivirDashboard.date,
