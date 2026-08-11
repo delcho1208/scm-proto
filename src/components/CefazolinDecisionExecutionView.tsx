@@ -17,6 +17,7 @@ import {
   lipilouDashboard,
   tamivirAnnualF2aTarget,
   tamivirDashboard,
+  type DashboardRegion,
   type ProductDashboardScenario,
 } from "@/data/dashboard-scenario";
 import { lipilouWorkflowSteps } from "@/data/lipilou-ai-workflow";
@@ -1597,7 +1598,7 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const national = cefazolinDashboard.regions.National;
   const nationalPolicyRisk = cefazolinDashboard.policyRiskByRegion.National;
   const riskCauses = [...nationalPolicyRisk.causes].sort((a, b) => b.score - a.score);
-  const regions = Object.values(cefazolinDashboard.regions).filter(
+  const regions = (Object.values(cefazolinDashboard.regions) as DashboardRegion[]).filter(
     (region) => region.id !== "National",
   );
   const shortageRegions = regions.filter((region) => region.riskLevel === "danger");
@@ -1693,12 +1694,12 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     },
   ];
   const recommendedEvaluation =
-    cefazolinDashboard.recommendationEvaluations.find((item) => item.recommended) ??
+    cefazolinDashboard.recommendationEvaluations.find((item: any) => item.recommended) ??
     cefazolinDashboard.recommendationEvaluations.find(
-      (item) => item.scenarioId === recommendedScenario.displayId,
+      (item: any) => item.scenarioId === recommendedScenario.displayId,
     );
   const qualityCondition =
-    recommendedEvaluation?.xai.conditions.find((item) => item.includes("품질")) ??
+    recommendedEvaluation?.xai.conditions.find((item: string) => item.includes("품질")) ??
     "MES 품질검사·출하승인 완료 여부 확인";
   const approvalChecklistItems: Array<{ key: ChecklistKey; label: string; detail: string }> = [
     {
