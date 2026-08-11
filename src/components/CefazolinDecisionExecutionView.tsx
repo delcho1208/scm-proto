@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Bar,
   BarChart,
@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { Icon } from "@/components/ScmShell";
+import { useRefreshToken } from "@/data/app-signals";
 
 import type { Product } from "@/data/scm";
 import {
@@ -1126,6 +1127,8 @@ function ProductDecisionExecution({
 }
 
 function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
+  const refreshToken = useRefreshToken();
+  const handledRefreshToken = useRef(refreshToken);
   const isTamivir = product.key === "타미비어";
   const isLipilou = product.key === "리피로우";
   const lipilouRegions = lipilouDashboard?.regions ?? {};
@@ -1575,6 +1578,29 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
   const [reviewNote, setReviewNote] = useState(initialProductState.reviewNote);
   const [checklist, setChecklist] = useState<Record<ChecklistKey, boolean>>(initialProductState.checklist);
   const [lastUpdatedAt, setLastUpdatedAt] = useState(initialProductState.lastUpdatedAt);
+
+  useEffect(() => {
+    if (handledRefreshToken.current === refreshToken) return;
+    handledRefreshToken.current = refreshToken;
+
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem(executionStateStorageKey(product.key));
+      } catch {
+        // 저장소 접근이 제한되어도 현재 화면 상태 초기화는 계속 진행합니다.
+      }
+    }
+
+    setTab("impact");
+    setShowWorkflow(false);
+    setHitlStatus("pending");
+    setExecutionStatus("locked");
+    setReviewer("");
+    setReviewerRole("SCM 운영");
+    setReviewNote("");
+    setChecklist({ ...initialChecklist });
+    setLastUpdatedAt(cefazolinWorkflowRunMeta.latestSnapshotDate);
+  }, [refreshToken, product.key, cefazolinWorkflowRunMeta.latestSnapshotDate]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
