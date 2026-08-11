@@ -24,7 +24,10 @@ const wmsByRegion: Record<string, WmsSnapshot> = {
 
 export function getTamivirIntegrationRecords(regionId: string): SystemRecord[] {
   const wms = wmsByRegion[regionId] ?? wmsByRegion.Seoul;
-  const safetyCoveragePct = (wms.stock / wms.safetyStock) * 100;
+  const simRegion = tamivirDashboard?.regions[regionId];
+  const stock = simRegion ? Math.round(simRegion.current_stock) : wms.stock;
+  const safetyCoveragePct = (stock / wms.safetyStock) * 100;
+
 
   return [
     {
