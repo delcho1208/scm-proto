@@ -1329,6 +1329,16 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
       ];
     }),
   );
+  const tamivirScenarioMinStockRatio = (recommendationId: string) => {
+    const recommendation = tamivirDashboard.recommendations.find(
+      (item) => item.id === recommendationId,
+    );
+    const ratios = Object.values(recommendation?.projectedRegions ?? {})
+      .filter((region) => region.id !== "National")
+      .map((region) => region.stock_ratio)
+      .filter((ratio) => typeof ratio === "number");
+    return ratios.length > 0 ? Math.min(...ratios) : 0;
+  };
   const tamivirScenarios = [
     {
       id: "S1_무대응",
