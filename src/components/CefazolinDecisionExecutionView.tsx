@@ -2378,7 +2378,9 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
             <div className="grid grid-cols-3 gap-sm">
               {scenarioRows.map((scenario) => {
                 const recommended = scenario.id === recommendedScenarioId;
-                const supplyStabilityScore = calcSupplyStabilityScore(scenario, isTamivir);
+                const supplyStabilityScore = isTamivir
+                  ? calcTamivirSupplyStabilityScore(scenario as any, scenarioRows as any)
+                  : calcSupplyStabilityScore(scenario, isTamivir);
                 return (
                   <article
                     key={scenario.id}
