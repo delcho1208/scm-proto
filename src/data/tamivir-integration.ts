@@ -48,13 +48,13 @@ export function getTamivirIntegrationRecords(regionId: string): SystemRecord[] {
     },
     {
       system: "WMS",
-      docNo: `${wms.warehouse} / 260228-L1`,
+      docNo: `${wms.warehouse} / 261028-L1`,
       status: "동기화 완료",
       qty: wms.stock.toLocaleString("ko-KR"),
-      updatedAt: "2026-02-28",
+      updatedAt: "2026-10-28",
       note: `${wms.region} · 안전재고 ${safetyCoveragePct < 100 ? "미달" : "충족"} · 입고예정 ${wms.incoming.toLocaleString("ko-KR")} BOX · 운송가능 ${wms.transferable.toLocaleString("ko-KR")} BOX · 외부충격 감지`,
       dataType: "WMS 일별 재고 실적",
-      calculationBasis: `2025-09-01~2026-02-28 일별 데이터 최신값 · 안전재고 ${wms.safetyStock.toLocaleString("ko-KR")} BOX(${safetyCoveragePct.toFixed(1)}%) · F2A 목표 ${wms.f2aTarget.toLocaleString("ko-KR")} BOX`,
+      calculationBasis: `2025-09-01~2026-10-28 일별 데이터 최신값 · 안전재고 ${wms.safetyStock.toLocaleString("ko-KR")} BOX(${safetyCoveragePct.toFixed(1)}%) · F2A 목표 ${wms.f2aTarget.toLocaleString("ko-KR")} BOX`,
     },
   ];
 }
