@@ -111,6 +111,22 @@ function fmtKrw(value: number) {
   return `${Math.round(value / 10_000).toLocaleString("ko-KR")}만 원`;
 }
 
+/**
+ * 공급 안정도(%) — 제품 공통 지표.
+ * 최저 권역 서비스 수준(형평성)과 잔여 공급 리스크를 절반씩 반영하고,
+ * 부족 지속 주차만큼 감점하여 시나리오별 공급 안정성을 나타냅니다.
+ */
+function calcSupplyStabilityPct(scenario: {
+  minimumRegionalServiceRatePct: number;
+  shortageWeeks: number;
+  riskScore?: number;
+}) {
+  const coverage = Math.max(0, Math.min(100, scenario.minimumRegionalServiceRatePct));
+  const risk = Math.max(0, Math.min(100, scenario.riskScore ?? 100 - coverage));
+  const shortagePenalty = Math.min(scenario.shortageWeeks, 10) * 1.5;
+  return Math.max(0, Math.min(100, 0.5 * coverage + 0.5 * (100 - risk) - shortagePenalty));
+}
+
 function Pill({
   children,
   tone = "neutral",
