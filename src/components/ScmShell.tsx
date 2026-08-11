@@ -152,9 +152,6 @@ export function ScmShell({ children }: { children: (product: Product) => ReactNo
             >
               새로고침
             </button>
-            <div className="h-8 w-8 overflow-hidden rounded-full bg-outline-variant">
-              <img className="h-full w-full object-cover" src={userAvatar} alt="User avatar" />
-            </div>
           </div>
         </header>
 
