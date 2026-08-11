@@ -333,7 +333,7 @@
         {
           "id": "SOLUTION-01",
           "type": "PRODUCTION_DECREASE",
-          "title": "① 경기/인천/영남권 핀셋 감축 및 신규 발주 보류 (추천)",
+          "title": "경기/인천/영남권 핀셋 감축 및 신규 발주 보류 (추천)",
           "is_final_selected": true,
           "description": "10배 Trigger 초과 권역 생산 감축",
           "transferAmount": 800000,
