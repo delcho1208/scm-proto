@@ -1694,12 +1694,12 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
     },
   ];
   const recommendedEvaluation =
-    cefazolinDashboard.recommendationEvaluations.find((item) => item.recommended) ??
+    cefazolinDashboard.recommendationEvaluations.find((item: any) => item.recommended) ??
     cefazolinDashboard.recommendationEvaluations.find(
-      (item) => item.scenarioId === recommendedScenario.displayId,
+      (item: any) => item.scenarioId === recommendedScenario.displayId,
     );
   const qualityCondition =
-    recommendedEvaluation?.xai.conditions.find((item) => item.includes("품질")) ??
+    recommendedEvaluation?.xai.conditions.find((item: string) => item.includes("품질")) ??
     "MES 품질검사·출하승인 완료 여부 확인";
   const approvalChecklistItems: Array<{ key: ChecklistKey; label: string; detail: string }> = [
     {
