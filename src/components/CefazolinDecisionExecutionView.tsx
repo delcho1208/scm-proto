@@ -1481,8 +1481,8 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           title: "타미비어 신규 발주 보류",
           source: "ERP 미확정 발주",
           target: "경기/인천·영남권 공급계획",
-          quantity: null,
-          unit: "계획",
+          quantity: 800_000,
+          unit: "완제품 환산단위",
           ruleId: "RULE-TAMI-ORDER-HOLD-001",
           basis: "전국 재고 1,280,777 EA · AI 목표 90,785 EA · 재고 비율 14.1배 기준",
         },
@@ -1496,6 +1496,17 @@ function CefazolinOnlyDecisionExecutionView({ product }: { product: Product }) {
           unit: "계획",
           ruleId: "RULE-TAMI-PRODUCTION-DOWN-001",
           basis: "S2 적용 후 예상 재고 745,570 EA · 비용 18~22% 절감",
+        },
+        {
+          id: "TAMI-WMS-001",
+          actionType: "안전재고 유지",
+          title: "권역별 안전재고 적정 수준으로 유지",
+          source: "권역별 WMS 재고",
+          target: "8개 권역 안전재고",
+          quantity: 800_000,
+          unit: "완제품 환산단위",
+          ruleId: "RULE-TAMI-SAFETY-STOCK-001",
+          basis: "미래 면역학적 대비 재고 확보",
         },
       ]
     : isLipilou
