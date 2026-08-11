@@ -28,8 +28,8 @@ export function getTamivirWorkflowRunState({
     3: "verified",
     4: "verified",
     5: "verified",
-    6: "verified",
-    7: "verified",
+    6: "review_required",
+    7: "available",
     8:
       hitlStatus === "approved"
         ? "approved"
@@ -53,7 +53,7 @@ export function getTamivirWorkflowRunState({
     .filter(([, status]) => status === "locked")
     .map(([step]) => Number(step));
 
-  let currentStep = 8;
+  let currentStep = 6;
   if (hitlStatus === "held") currentStep = 8;
   else if (hitlStatus === "approved") currentStep = 9;
   if (executionStatus === "executed") currentStep = 10;
