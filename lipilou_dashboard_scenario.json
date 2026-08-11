@@ -162,7 +162,7 @@
         {
           "id": "SOLUTION-01",
           "type": "TRANSFER",
-          "title": "① 이관 추천 (최종 적용안)",
+          "title": "이관 추천 (최종 적용안)",
           "is_final_selected": true,
           "summary": "Zone1_서울(여유 179.4%) → Zone8_제주(부족 82.5%) 재고 이관 1,000박스",
           "transfer_amount": 1000,

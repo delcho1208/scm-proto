@@ -30,7 +30,7 @@ export const lipilouWorkflowSteps: CefazolinWorkflowStep[] = [
     icon: "database",
     ruleIds: [],
     dataAsOf: latestScenario?.date ?? "",
-    evidence: [`S1~S3 시나리오 ${solutions?.length ?? 0}건 연동`, `전국 8개 권역 재고 수집`],
+    evidence: ["S1~S3 시뮬레이션", `전국 8개 권역 재고 수집`],
     warnings: [],
     nextAction: "데이터 통합·정합성 확인",
     synthetic: true,
